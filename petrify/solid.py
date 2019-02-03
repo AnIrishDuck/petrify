@@ -12,7 +12,7 @@ def perpendicular(axis):
     if axis.x == 0 and axis.y == 0:
         return Vector3(1, -1, 0)
     elif axis.z == 0:
-        return Vector3(-axis.y, -axis.x, 1)
+        return Vector3(-axis.y, axis.x, 0)
     else:
         return Vector3(axis.y, axis.x, -2 * axis.x * axis.y)
 
