@@ -1,7 +1,7 @@
 import math
 
-from stl import save_polys_to_stl_file, read_polys_from_stl_file
-from euclid import Vector2, Vector3, Matrix3, Matrix4
+from .stl import save_polys_to_stl_file, read_polys_from_stl_file
+from .euclid import Vector2, Vector3, Matrix3, Matrix4
 from csg import core, geom
 
 tau = math.pi * 2
