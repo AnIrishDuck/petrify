@@ -2,8 +2,8 @@
 Petrify
 =======
 
-.. image:: https://travis-ci.org/anirishduck/petrify.svg?branch=master
-    :target: https://travis-ci.org/anirishduck/petrify
+.. image:: https://travis-ci.org/AnIrishDuck/petrify.svg?branch=master
+    :target: https://travis-ci.org/AnIrishDuck/petrify
 
 A library for working with three-dimensional geometry. Designed for CAD / CAM
 applications.
