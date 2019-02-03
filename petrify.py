@@ -1,86 +1,23 @@
-from stl import save_polys_to_stl_file, read_polys_from_stl_file
-from csg import core, geom
-
 import math
-import os
-import subprocess
+
+from stl import save_polys_to_stl_file, read_polys_from_stl_file
+from euclid import Vector2, Vector3, Matrix3, Matrix4
+from csg import core, geom
 
 tau = math.pi * 2
 
-class Vector:
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
 
-    def positive():
-        return Vector(math.abs(self.x), math.abs(self.y), math.abs(self.z))
+def perpendicular(axis):
+    "Return a vector that is perpendicular to the given axis."
+    if axis.x == 0 and axis.y == 0:
+        return Vector3(1, -1, 0)
+    elif axis.z == 0:
+        return Vector3(-axis.y, -axis.x, 1)
+    else:
+        return Vector3(axis.y, axis.x, -2 * axis.x * axis.y)
 
-    def __add__(self, other):
-        return Vector(self.x + other.x, self.y + other.y, self.z + other.z)
-
-    def __sub__(self, other):
-        return Vector(self.x - other.x, self.y - other.y, self.z - other.z)
-
-    def __mul__(self, v):
-        return Vector(self.x * v, self.y * v, self.z * v)
-
-    def __truediv__(self, v):
-        return self * (1.0 / v)
-
-    def __rmul__(self, v):
-        return Vector(self.x * v, self.y * v, self.z * v)
-
-    def __repr__(self):
-        return "".join([str(s) for s in ["Point(", self.x, ",", self.y, ",", self.z, ")"]])
-
-    def magnitude(self):
-        "Magnitude of this vector."
-        return math.sqrt(self.dot(self))
-
-    def dot(self, other):
-        "Dot product of this vector with another vector."
-        return self.x * other.x + self.y * other.y + self.z * other.z
-
-    def angle(self, other):
-        "Angle between this vector and the other vector in radians."
-        scale = self.magnitude() * other.magnitude()
-        return math.acos(self.dot(other) / scale)
-
-    def perpendicular(self):
-        "Return a vector that is perpendicular to this one."
-        if self.x == 0 and self.y == 0:
-            return Vector(1, -1, 0)
-        elif self.z == 0:
-            return Vector(-self.y, -self.x, 1)
-        else:
-            return Vector(self.y, self.x, -2 * self.x * self.y)
-
-    def cross(self, other):
-        "Cross product of this vector with another vector."
-        return Vector(
-            self.y * other.z - self.z * other.y,
-            self.z * other.x - self.x * other.z,
-            self.x * other.y - self.y * other.x
-        )
-
-    def unit(self):
-        """
-        Returns a vector with the same direction but unit (1) magnitude.
-
-        """
-        return self / self.magnitude()
-
-    def csg(self):
-        return geom.Vector(self.x, self.y, self.z)
-
-    def vertex(self):
-        return geom.Vertex(self.csg())
-
-class PlanarPoint:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+def vertex(vector):
+    return geom.Vertex(geom.Vector(vector.x, vector.y, vector.z))
 
 class Projection:
     def __init__(self, origin, bx, by, bz):
@@ -95,7 +32,7 @@ class Projection:
         tz = dz * self.bz
 
         v = self.origin + tx + ty + tz
-        return Vector(v.x, v.y, v.z)
+        return Vector3(v.x, v.y, v.z)
 
 class Slice:
     def __init__(self, points, dz):
@@ -125,7 +62,7 @@ class Extrusion:
         polygons = [bottom] + middle + [i(top)]
 
         return [
-            geom.Polygon([v.vertex() for v in polygon])
+            geom.Polygon([vertex(v) for v in polygon])
             for polygon in polygons
         ]
 
@@ -154,12 +91,12 @@ class Node:
 
     def scale(self, scale):
         def scaled(v):
-            return Vector(v.x * scale.x, v.y * scale.y, v.z * scale.z)
+            return Vector3(v.x * scale.x, v.y * scale.y, v.z * scale.z)
         return self.transform(scaled)
 
     def translate(self, delta):
         def scaled(v):
-            return Vector(v.x + delta.x, v.y + delta.y, v.z + delta.z)
+            return Vector3(v.x + delta.x, v.y + delta.y, v.z + delta.z)
         return self.transform(scaled)
 
     def transform(self, f):
@@ -192,7 +129,7 @@ class Box(Extrusion, Node):
         self.origin = origin
         self.extent = extent = origin + size
 
-        footprint = [PlanarPoint(x, y) for x, y in [
+        footprint = [Vector2(x, y) for x, y in [
             [origin.x, origin.y],
             [origin.x, extent.y],
             [extent.x, extent.y],
@@ -202,10 +139,10 @@ class Box(Extrusion, Node):
         top = Slice(footprint, extent.z)
 
         project = Projection(
-            Vector(0, 0, 0),
-            Vector(1, 0, 0),
-            Vector(0, 1, 0),
-            Vector(0, 0, 1)
+            Vector3(0, 0, 0),
+            Vector3(1, 0, 0),
+            Vector3(0, 1, 0),
+            Vector3(0, 0, 1)
         )
         super().__init__(project, [bottom, top])
 
@@ -220,19 +157,19 @@ class Cylinder(Extrusion, Node):
 
         angles = list(tau * float(a) / segments for a in range(segments))
         footprint = [
-            PlanarPoint(math.cos(theta) * radius, math.sin(theta) * radius)
+            Vector2(math.cos(theta) * radius, math.sin(theta) * radius)
             for theta in angles
         ]
 
         bottom = Slice(footprint, 0)
         top = Slice(footprint, 1)
 
-        bx = axis.perpendicular()
+        bx = perpendicular(axis)
         by = bx.cross(axis)
         project = Projection(
             origin,
-            bx.unit(),
-            by.unit(),
+            bx.normalized(),
+            by.normalized(),
             axis
         )
         super().__init__(project, [bottom, top])
