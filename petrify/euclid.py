@@ -2205,6 +2205,10 @@ class Point3(Vector3, Geometry):
         if c:
             return c._swap()
 
+    def vector(self):
+        """ The vector formed from the origin to this point. """
+        return Vector3(self.x, self.y, self.z)
+
 class Line3:
     __slots__ = ['p', 'v']
 
@@ -2312,6 +2316,30 @@ class LineSegment3(Line3):
         self.p = self.p2
         self.v *= -1
         return self
+
+    def __eq__(self, other):
+        if isinstance(other, LineSegment3):
+            return (
+                (self.p1 == other.p1 and self.p2 == other.p2) or
+                (self.p2 == other.p1 and self.p1 == other.p2)
+            )
+        raise RuntimeError("Cannot compute on: " + repr(other))
+
+    def flipped(self):
+        return LineSegment3(self.p2, -self.v)
+
+    def endpoints(self):
+        return [self.p1, self.p2]
+
+    def has_endpoint(self, p):
+        return self.p1 == p or self.p2 == p
+
+    def touches(self, other):
+        if isinstance(other, Point3):
+            return self.has_endpoint(other)
+        if isinstance(other, LineSegment3):
+            return self.has_endpoint(other.p1) or self.has_endpoint(other.p2)
+        raise RuntimeError("Cannot compute on: " + repr(other))
 
     length = property(lambda self: abs(self.v))
 

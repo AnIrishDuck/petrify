@@ -1,7 +1,7 @@
 import math
 
 from .stl import save_polys_to_stl_file, read_polys_from_stl_file
-from .euclid import Vector2, Vector3, Matrix3, Matrix4
+from .euclid import Vector2, Point3, Vector3, Matrix3, Matrix4
 from csg import core, geom
 
 tau = math.pi * 2
@@ -69,10 +69,10 @@ class Extrusion:
         assert(len(set(len(sl.points) for sl in slices)) == 1)
         self.slices = slices
 
-        ps = self.polygons()
+        ps = self.generate_polygons()
         self.csg = core.CSG.fromPolygons(ps)
 
-    def polygons(self):
+    def generate_polygons(self):
         """ Returns all polygons from this shape. """
         bottom = self.slices[0].project(self.projection)
         top = self.slices[-1].project(self.projection)
@@ -153,10 +153,13 @@ class Node:
         ]
         return Node(core.CSG.fromPolygons(scaled))
 
+    @property
+    def polygons(self):
+        return self.csg.toPolygons()
+
     def to_stl(self, path):
         """ Save this shape to an STL-formatted file. """
-        polygons = self.csg.toPolygons()
-        save_polys_to_stl_file(polygons, path)
+        save_polys_to_stl_file(self.polygons, path)
 
 class Union(Node):
     """ Defines a union of a list of `parts` """
