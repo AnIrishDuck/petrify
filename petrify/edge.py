@@ -16,9 +16,6 @@ from .space import LineSegment, Polygon
 
 from csg import core, geom
 
-def _vs(points):
-    return [geom.Vertex(geom.Vector(p.x, p.y, p.z)) for p in points]
-
 class Chamfer(Node):
     """
     Chamfer cut geometry by creating an inset of `amount` along
@@ -26,34 +23,35 @@ class Chamfer(Node):
 
     """
     def __init__(self, solid, edge, amount):
-        polygons = [Polygon.from_pycsg(p) for p in solid.polygons]
+        polygons = solid.polygons
         faces = [p for p in polygons if p.has_edge(edge)]
         assert(len(faces) == 2)
         a, b = faces
 
+        a_normal = a.plane.normal
+        b_normal = b.plane.normal
+
         a_edge, = [l for l in a.segments() if l == edge]
         b_edge, = [l for l in b.segments() if l == edge]
 
-        assert(a.normal.angle(edge.v) == tau / 4)
-        assert(b.normal.angle(edge.v) == tau / 4)
+        assert(a_normal.angle(edge.v) == tau / 4)
+        assert(b_normal.angle(edge.v) == tau / 4)
 
-        direction_a = b.normal.rotate_around(b_edge.v, a.normal.angle(b.normal) - tau / 4)
-        direction_b = a.normal.rotate_around(a_edge.v, b.normal.angle(a.normal) - tau / 4)
+        direction_a = b_normal.rotate_around(b_edge.v, a_normal.angle(b_normal) - tau / 4)
+        direction_b = a_normal.rotate_around(a_edge.v, b_normal.angle(a_normal) - tau / 4)
         a_inset = polygon_inset(a, a_edge, -direction_a.normalized() * amount)
         b_inset = polygon_inset(b, b_edge, -direction_b.normalized() * amount)
 
-        csg = core.CSG.fromPolygons([
+        super().__init__([
             # insets
-            geom.Polygon(_vs([a_edge.p1, a_edge.p2, a_inset.p1, a_inset.p2])),
-            geom.Polygon(_vs([b_edge.p1, b_edge.p2, b_inset.p1, b_inset.p2])),
+            Polygon([a_edge.p1, a_edge.p2, a_inset.p1, a_inset.p2]),
+            Polygon([b_edge.p1, b_edge.p2, b_inset.p1, b_inset.p2]),
             # cut
-            geom.Polygon(_vs([a_inset.p2, a_inset.p1, b_inset.p2, b_inset.p1])),
+            Polygon([a_inset.p2, a_inset.p1, b_inset.p2, b_inset.p1]),
             # endcaps
-            geom.Polygon(_vs([a_inset.p1, a_edge.p2, b_inset.p2])),
-            geom.Polygon(_vs([a_edge.p1, a_inset.p2, b_inset.p1])),
+            Polygon([a_inset.p1, a_edge.p2, b_inset.p2]),
+            Polygon([a_edge.p1, a_inset.p2, b_inset.p1]),
         ])
-
-        return super().__init__(csg)
 
     @property
     def insets(self):
@@ -80,8 +78,8 @@ def polygon_inset(polygon, edge, inwards):
     before, = [l for l in segments if l.touches(edge.p1) and l != edge]
     after, = [l for l in segments if l.touches(edge.p2) and l != edge]
 
-    before_inset = edge_inset(edge.p1 - before.p1, inwards, polygon.normal)
-    after_inset = edge_inset(edge.p2 - after.p2, inwards, polygon.normal)
+    before_inset = edge_inset(edge.p1 - before.p1, inwards, polygon.plane.normal)
+    after_inset = edge_inset(edge.p2 - after.p2, inwards, polygon.plane.normal)
 
     return LineSegment(edge.p2 + after_inset, edge.p1 + before_inset)
 

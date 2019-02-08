@@ -3,7 +3,7 @@ from csg import core, geom
 
 from . import plane
 from .stl import save_polys_to_stl_file, read_polys_from_stl_file
-from .space import Point, Vector
+from .space import Point, Polygon, Vector
 
 tau = math.pi * 2
 
@@ -15,9 +15,6 @@ def perpendicular(axis):
         return Vector(-axis.y, axis.x, 0)
     else:
         return Vector(axis.y, axis.x, -2 * axis.x * axis.y)
-
-def vertex(vector):
-    return geom.Vertex(geom.Vector(vector.x, vector.y, vector.z))
 
 class Projection:
     """
@@ -37,7 +34,7 @@ class Projection:
         tz = dz * self.bz
 
         v = self.origin + tx + ty + tz
-        return Vector(v.x, v.y, v.z)
+        return Point(v.x, v.y, v.z)
 
 class Slice:
     """ A slice of two-dimensional geometry associated with a z-level. """
@@ -70,8 +67,7 @@ class Extrusion:
         assert(len(set(len(sl.points) for sl in slices)) == 1)
         self.slices = slices
 
-        ps = self.generate_polygons()
-        self.csg = core.CSG.fromPolygons(ps)
+        super().__init__(self.generate_polygons())
 
     def generate_polygons(self):
         """ Returns all polygons from this shape. """
@@ -84,10 +80,7 @@ class Extrusion:
                   for p in self.ring(a, b)]
         polygons = [bottom] + middle + [i(top)]
 
-        return [
-            geom.Polygon([vertex(v) for v in polygon])
-            for polygon in polygons
-        ]
+        return [Polygon(p) for p in polygons]
 
     def ring(self, a, b):
         """ Builds a ring from two slices. """
@@ -96,6 +89,18 @@ class Extrusion:
         lines = list(zip(bottom, top))
         return [[la[0], lb[0], lb[1], la[1]]
                  for la, lb in zip(lines, lines[1:] + [lines[0]])]
+
+def from_pycsg(_csg):
+    def from_csg_polygon(csg):
+        points = [Point(v.pos.x, v.pos.y, v.pos.z) for v in csg.vertices]
+        return Polygon(points)
+    return [from_csg_polygon(p) for p in _csg.toPolygons()]
+
+def to_pycsg(polygons):
+    def to_csg_polygon(polygon):
+        vertices = [geom.Vertex(geom.Vector(p.x, p.y, p.z)) for p in polygon.points]
+        return geom.Polygon(vertices)
+    return core.CSG.fromPolygons([to_csg_polygon(p) for p in polygons])
 
 class Node:
     """
@@ -110,17 +115,17 @@ class Node:
     >>> a - b # subtraction
 
     """
-    def __init__(self, csg):
-        self.csg = csg
+    def __init__(self, polygons):
+        self.polygons = polygons
 
     def __add__(self, other):
-        n = Node(self.csg.union(other.csg))
+        n = Node(from_pycsg(self.pycsg.union(other.pycsg)))
         n.left = self
         n.right = other
         return n
 
     def __sub__(self, other):
-        n = Node(self.csg.subtract(other.csg))
+        n = Node(from_pycsg(self.pycsg.subtract(other.pycsg)))
         n.left = self
         n.right = other
         return n
@@ -128,48 +133,44 @@ class Node:
     def scale(self, scale):
         """ Scale this geometry by the provided `scale` vector. """
         def scaled(v):
-            return Vector(v.x * scale.x, v.y * scale.y, v.z * scale.z)
+            return Point(v.x * scale.x, v.y * scale.y, v.z * scale.z)
         return self.transform(scaled)
 
     def translate(self, delta):
         """ Translate this geometry by the provided `translate` vector. """
         def scaled(v):
-            return Vector(v.x + delta.x, v.y + delta.y, v.z + delta.z)
+            return Point(v.x + delta.x, v.y + delta.y, v.z + delta.z)
         return self.transform(scaled)
 
     def rotate(self, axis, theta):
         """ Rotate this geometry around the given `axis` vector by `theta` radians. """
 
     def transform(self, f):
-        """ Map the specified function `f` across all vertices. """
-        polygons = self.csg.toPolygons()
-
-        def t(vertex):
-            v = f(vertex.pos)
-            return geom.Vertex(geom.Vector(v.x, v.y, v.z))
+        """ Map the specified function `f` across all points. """
+        polygons = self.polygons
 
         scaled = [
-            geom.Polygon([t(v) for v in polygon.vertices])
+            Polygon([f(point) for point in polygon.points])
             for polygon in polygons
         ]
-        return Node(core.CSG.fromPolygons(scaled))
+        return Node(scaled)
 
     @property
-    def polygons(self):
-        return self.csg.toPolygons()
+    def pycsg(self):
+        return to_pycsg(self.polygons)
 
     def to_stl(self, path):
         """ Save this shape to an STL-formatted file. """
-        save_polys_to_stl_file(self.polygons, path)
+        save_polys_to_stl_file(self.pycsg.toPolygons(), path)
 
 class Union(Node):
     """ Defines a union of a list of `parts` """
     def __init__(self, parts):
-        whole = parts[0].csg
+        whole = parts[0].pycsg
         for part in parts[1:]:
-            whole = whole.union(part)
+            whole = whole.union(part.pycsg)
+        super.__init__(from_pycsg(whole))
         self.parts = parts
-        self.csg = whole
 
 class Box(Extrusion, Node):
     """

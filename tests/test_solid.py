@@ -18,3 +18,17 @@ class TestUtilities(unittest.TestCase):
         _t(Vector(0, 1, 1))
 
         _t(Vector(1, 1, 1))
+
+    def test_addition(self):
+        a = solid.Box(Vector(0, 0, 0), Vector(3, 3, 1))
+        b = solid.Box(Vector(1, 1, 0.5), Vector(1, 1, 3))
+
+        combined = a + b
+        self.assertTrue(len(combined.polygons) > len(a.polygons) + len(b.polygons))
+
+    def test_subtraction(self):
+        a = solid.Box(Vector(0, 0, 0), Vector(3, 3, 1))
+        b = solid.Box(Vector(1, 1, 0.5), Vector(1, 1, 3))
+
+        combined = a - b.translate(Vector(0, 0, -0.25))
+        self.assertTrue(len(combined.polygons) > len(a.polygons) + len(b.polygons))

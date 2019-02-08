@@ -10,9 +10,6 @@ import types
 
 from .geometry import Geometry
 
-def to_euclid(csg):
-    return Point(csg.x, csg.y, csg.z)
-
 class Vector:
     """
     A three-dimensional vector supporting all corresponding built-in math
@@ -297,9 +294,9 @@ class Vector:
 class Polygon:
     """ Polygons are a linear cycle of coplanar convex points. """
 
-    def __init__(self, points, normal):
+    def __init__(self, points):
         self.points = points
-        self.normal = normal
+        self.plane = Plane(*points[0:3])
 
     def segments(self):
         paired = zip(self.points, self.points[1:] + [self.points[0]])
@@ -307,12 +304,6 @@ class Polygon:
 
     def has_edge(self, edge):
         return any(l == edge for l in self.segments())
-
-    @classmethod
-    def from_pycsg(self, csg):
-        points = [to_euclid(v.pos) for v in csg.vertices]
-        normal = to_euclid(csg.plane.normal).vector()
-        return Polygon(points, normal)
 
     def __repr__(self):
         return "Polygon({0!r}, {1!r})".format(self.points, self.normal)
@@ -1424,6 +1415,9 @@ class Plane:
 
     def _connect_plane(self, other):
         return _connect_plane_plane(other, self)
+
+    @property
+    def normal(self): return self.n
 
 # 3D Geometry
 # -------------------------------------------------------------------------

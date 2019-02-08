@@ -29,7 +29,7 @@ class TestInset(unittest.TestCase):
         ]
         normal = Vector(0, 0, 1)
         edge = LineSegment(points[1], points[2])
-        polygon = Polygon(points, normal)
+        polygon = Polygon(points)
         edge = polygon_inset(polygon, edge, inwards)
 
         self.assertEqual(edge.p1.xyz, (3.5, 2.5, 0))
@@ -45,7 +45,7 @@ class TestInset(unittest.TestCase):
         ]
         normal = Vector(0, 0, -1)
         edge = LineSegment(points[-1], points[0])
-        polygon = Polygon(points, normal)
+        polygon = Polygon(points)
         edge = polygon_inset(polygon, edge, inwards)
 
         self.assertEqual(edge.p1.xyz, (0, 0.1, 0))
