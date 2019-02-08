@@ -1,19 +1,20 @@
 import math
-
-from .stl import save_polys_to_stl_file, read_polys_from_stl_file
-from .euclid import Vector2, Point3, Vector3, Matrix3, Matrix4
 from csg import core, geom
+
+from . import plane
+from .stl import save_polys_to_stl_file, read_polys_from_stl_file
+from .space import Point, Vector
 
 tau = math.pi * 2
 
 def perpendicular(axis):
     "Return a vector that is perpendicular to the given axis."
     if axis.x == 0 and axis.y == 0:
-        return Vector3(1, -1, 0)
+        return Vector(1, -1, 0)
     elif axis.z == 0:
-        return Vector3(-axis.y, axis.x, 0)
+        return Vector(-axis.y, axis.x, 0)
     else:
-        return Vector3(axis.y, axis.x, -2 * axis.x * axis.y)
+        return Vector(axis.y, axis.x, -2 * axis.x * axis.y)
 
 def vertex(vector):
     return geom.Vertex(geom.Vector(vector.x, vector.y, vector.z))
@@ -36,7 +37,7 @@ class Projection:
         tz = dz * self.bz
 
         v = self.origin + tx + ty + tz
-        return Vector3(v.x, v.y, v.z)
+        return Vector(v.x, v.y, v.z)
 
 class Slice:
     """ A slice of two-dimensional geometry associated with a z-level. """
@@ -103,8 +104,8 @@ class Node:
     All instances of this class can be added and subtracted via the built-in
     `__add__` and `__sub__` methods:
 
-    >>> a = Box(Vector3(0, 0, 0), Vector3(1, 1, 1))
-    >>> b = Box(Vector3(0, 0, 0.5), Vector3(1, 1, 1))
+    >>> a = Box(Vector(0, 0, 0), Vector(1, 1, 1))
+    >>> b = Box(Vector(0, 0, 0.5), Vector(1, 1, 1))
     >>> a + b # union
     >>> a - b # subtraction
 
@@ -127,13 +128,13 @@ class Node:
     def scale(self, scale):
         """ Scale this geometry by the provided `scale` vector. """
         def scaled(v):
-            return Vector3(v.x * scale.x, v.y * scale.y, v.z * scale.z)
+            return Vector(v.x * scale.x, v.y * scale.y, v.z * scale.z)
         return self.transform(scaled)
 
     def translate(self, delta):
         """ Translate this geometry by the provided `translate` vector. """
         def scaled(v):
-            return Vector3(v.x + delta.x, v.y + delta.y, v.z + delta.z)
+            return Vector(v.x + delta.x, v.y + delta.y, v.z + delta.z)
         return self.transform(scaled)
 
     def rotate(self, axis, theta):
@@ -181,7 +182,7 @@ class Box(Extrusion, Node):
         self.origin = origin
         self.extent = extent = origin + size
 
-        footprint = [Vector2(x, y) for x, y in [
+        footprint = [plane.Point(x, y) for x, y in [
             [origin.x, origin.y],
             [origin.x, extent.y],
             [extent.x, extent.y],
@@ -191,10 +192,10 @@ class Box(Extrusion, Node):
         top = Slice(footprint, extent.z)
 
         project = Projection(
-            Vector3(0, 0, 0),
-            Vector3(1, 0, 0),
-            Vector3(0, 1, 0),
-            Vector3(0, 0, 1)
+            Vector(0, 0, 0),
+            Vector(1, 0, 0),
+            Vector(0, 1, 0),
+            Vector(0, 0, 1)
         )
         super().__init__(project, [bottom, top])
 
@@ -218,7 +219,7 @@ class Cylinder(Extrusion, Node):
 
         angles = list(tau * float(a) / segments for a in range(segments))
         footprint = [
-            Vector2(math.cos(theta) * radius, math.sin(theta) * radius)
+            plane.Point(math.cos(theta) * radius, math.sin(theta) * radius)
             for theta in angles
         ]
 

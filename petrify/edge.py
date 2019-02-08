@@ -10,10 +10,9 @@ object properties are unchanged:
 Vector(1, 1, 1)
 
 """
-from .euclid import Point3, LineSegment3
 from .solver import solve_matrix
 from .solid import tau, Node
-from .three import Polygon
+from .space import LineSegment, Polygon
 
 from csg import core, geom
 
@@ -84,7 +83,7 @@ def polygon_inset(polygon, edge, inwards):
     before_inset = edge_inset(edge.p1 - before.p1, inwards, polygon.normal)
     after_inset = edge_inset(edge.p2 - after.p2, inwards, polygon.normal)
 
-    return LineSegment3(edge.p2 + after_inset, edge.p1 + before_inset)
+    return LineSegment(edge.p2 + after_inset, edge.p1 + before_inset)
 
 def edge_inset(edge, inwards, normal):
     lateral = inwards.cross(normal)
