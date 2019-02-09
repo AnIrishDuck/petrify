@@ -317,7 +317,7 @@ class Polygon:
         return any(l == edge for l in self.segments())
 
     def __repr__(self):
-        return "Polygon({0!r}, {1!r})".format(self.points, self.normal)
+        return "Polygon({0!r})".format(self.points)
 
 # a b c d
 # e f g h
