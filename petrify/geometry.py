@@ -1,6 +1,8 @@
 # Geometry
 # Much maths thanks to Paul Bourke, http://astronomy.swin.edu.au/~pbourke
 # ---------------------------------------------------------------------------
+import math
+tau = math.pi * 2
 
 class Geometry:
     def _connect_unimplemented(self, other):

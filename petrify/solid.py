@@ -3,9 +3,8 @@ from csg import core, geom
 
 from . import plane
 from .stl import save_polys_to_stl_file, read_polys_from_stl_file
-from .space import Point, Polygon, Vector
-
-tau = math.pi * 2
+from .space import Point, Polygon, Quaternion, Vector
+from .geometry import tau
 
 def perpendicular(axis):
     "Return a vector that is perpendicular to the given axis."
@@ -142,8 +141,12 @@ class Node:
             return Point(v.x + delta.x, v.y + delta.y, v.z + delta.z)
         return self.transform(scaled)
 
-    def rotate(self, axis, theta):
+    def rotate_around(self, theta, axis):
         """ Rotate this geometry around the given `axis` vector by `theta` radians. """
+        rotation = Quaternion.rotate_axis(theta, axis)
+        def rotated(v):
+            return Point(*(rotation * v).xyz)
+        return self.transform(rotated)
 
     def transform(self, f):
         """ Map the specified function `f` across all points. """

@@ -8,7 +8,7 @@ import math
 import operator
 import types
 
-from .geometry import Geometry
+from .geometry import Geometry, tau
 
 class Vector:
     """
@@ -291,6 +291,17 @@ class Vector:
         n = other.normalized()
         return self.dot(n)*n
 
+    class Basis:
+        @property
+        def x(self): return Vector(1, 0, 0)
+
+        @property
+        def y(self): return Vector(0, 1, 0)
+
+        @property
+        def z(self): return Vector(0, 0, 1)
+    basis = Basis()
+
 class Polygon:
     """ Polygons are a linear cycle of coplanar convex points. """
 
@@ -520,35 +531,23 @@ class Matrix:
         return self
 
     def scale(self, x, y, z):
-        self *= Matrix.new_scale(x, y, z)
+        self *= Matrix.scale(x, y, z)
         return self
 
     def translate(self, x, y, z):
-        self *= Matrix.new_translate(x, y, z)
-        return self
-
-    def rotatex(self, angle):
-        self *= Matrix.new_rotatex(angle)
-        return self
-
-    def rotatey(self, angle):
-        self *= Matrix.new_rotatey(angle)
-        return self
-
-    def rotatez(self, angle):
-        self *= Matrix.new_rotatez(angle)
+        self *= Matrix.translate(x, y, z)
         return self
 
     def rotate_axis(self, angle, axis):
-        self *= Matrix.new_rotate_axis(angle, axis)
+        self *= Matrix.rotate_axis(angle, axis)
         return self
 
     def rotate_euler(self, heading, attitude, bank):
-        self *= Matrix.new_rotate_euler(heading, attitude, bank)
+        self *= Matrix.rotate_euler(heading, attitude, bank)
         return self
 
     def rotate_triple_axis(self, x, y, z):
-        self *= Matrix.new_rotate_triple_axis(x, y, z)
+        self *= Matrix.rotate_triple_axis(x, y, z)
         return self
 
     def transpose(self):
@@ -567,64 +566,35 @@ class Matrix:
         return M
 
     # Static constructors
+    @classmethod
     def new(cls, *values):
         M = cls()
         M[:] = values
         return M
-    new = classmethod(new)
 
-    def new_identity(cls):
+    @classmethod
+    def identity(cls):
         self = cls()
         return self
-    new_identity = classmethod(new_identity)
 
-    def new_scale(cls, x, y, z):
+    @classmethod
+    def scale(cls, x, y, z):
         self = cls()
         self.a = x
         self.f = y
         self.k = z
         return self
-    new_scale = classmethod(new_scale)
 
-    def new_translate(cls, x, y, z):
+    @classmethod
+    def translate(cls, x, y, z):
         self = cls()
         self.d = x
         self.h = y
         self.l = z
         return self
-    new_translate = classmethod(new_translate)
 
-    def new_rotatex(cls, angle):
-        self = cls()
-        s = math.sin(angle)
-        c = math.cos(angle)
-        self.f = self.k = c
-        self.g = -s
-        self.j = s
-        return self
-    new_rotatex = classmethod(new_rotatex)
-
-    def new_rotatey(cls, angle):
-        self = cls()
-        s = math.sin(angle)
-        c = math.cos(angle)
-        self.a = self.k = c
-        self.c = s
-        self.i = -s
-        return self
-    new_rotatey = classmethod(new_rotatey)
-
-    def new_rotatez(cls, angle):
-        self = cls()
-        s = math.sin(angle)
-        c = math.cos(angle)
-        self.a = self.f = c
-        self.b = -s
-        self.e = s
-        return self
-    new_rotatez = classmethod(new_rotatez)
-
-    def new_rotate_axis(cls, angle, axis):
+    @classmethod
+    def rotate_axis(cls, angle, axis):
         assert(isinstance(axis, Vector))
         vector = axis.normalized()
         x = vector.x
@@ -647,9 +617,9 @@ class Matrix:
         self.j = y * z * c1 + x * s
         self.k = z * z * c1 + c
         return self
-    new_rotate_axis = classmethod(new_rotate_axis)
 
-    def new_rotate_euler(cls, heading, attitude, bank):
+    @classmethod
+    def rotate_euler(cls, heading, attitude, bank):
         # from http://www.euclideanspace.com/
         ch = math.cos(heading)
         sh = math.sin(heading)
@@ -669,9 +639,9 @@ class Matrix:
         self.j = sh * sa * cb + ch * sb
         self.k = -sh * sa * sb + ch * cb
         return self
-    new_rotate_euler = classmethod(new_rotate_euler)
 
-    def new_rotate_triple_axis(cls, x, y, z):
+    @classmethod
+    def rotate_triple_axis(cls, x, y, z):
       m = cls()
 
       m.a, m.b, m.c = x.x, y.x, z.x
@@ -679,20 +649,20 @@ class Matrix:
       m.i, m.j, m.k = x.z, y.z, z.z
 
       return m
-    new_rotate_triple_axis = classmethod(new_rotate_triple_axis)
 
-    def new_look_at(cls, eye, at, up):
+    @classmethod
+    def look_at(cls, eye, at, up):
       z = (eye - at).normalized()
       x = up.cross(z).normalized()
       y = z.cross(x)
 
-      m = cls.new_rotate_triple_axis(x, y, z)
+      m = cls.rotate_triple_axis(x, y, z)
       m.transpose()
       m.d, m.h, m.l = -x.dot(eye), -y.dot(eye), -z.dot(eye)
       return m
-    new_look_at = classmethod(new_look_at)
 
-    def new_perspective(cls, fov_y, aspect, near, far):
+    @classmethod
+    def perspective(cls, fov_y, aspect, near, far):
         # from the gluPerspective man page
         f = 1 / math.tan(fov_y / 2)
         self = cls()
@@ -704,7 +674,6 @@ class Matrix:
         self.o = -1
         self.p = 0
         return self
-    new_perspective = classmethod(new_perspective)
 
     def determinant(self):
         return ((self.a * self.f - self.e * self.b)
@@ -795,9 +764,20 @@ class Matrix:
 
         return Quaternion(w, x, y, z)
 
-
-
 class Quaternion:
+    """
+    Quaternions are composable representations of three-dimensional rotation
+    operations.
+
+    Multiplication can be performed on `Vector` instances to get the transformed
+    vector or point:
+
+    >>> r = Quaternion.rotate_axis(tau / 4, Vector.basis.x)
+    >>> r * Vector(0, 1, 0)
+    Vector(1, 0, 0)
+
+    """
+
     # All methods and naming conventions based off
     # http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions
 
@@ -913,15 +893,15 @@ class Quaternion:
         return self
 
     def rotate_axis(self, angle, axis):
-        self *= Quaternion.new_rotate_axis(angle, axis)
+        self *= Quaternion.rotate_axis(angle, axis)
         return self
 
     def rotate_euler(self, heading, attitude, bank):
-        self *= Quaternion.new_rotate_euler(heading, attitude, bank)
+        self *= Quaternion.rotate_euler(heading, attitude, bank)
         return self
 
     def rotate_matrix(self, m):
-        self *= Quaternion.new_rotate_matrix(m)
+        self *= Quaternion.rotate_matrix(m)
         return self
 
     def conjugated(self):
@@ -1007,11 +987,12 @@ class Quaternion:
         return M
 
     # Static constructors
-    def new_identity(cls):
+    @classmethod
+    def identity(cls):
         return cls()
-    new_identity = classmethod(new_identity)
 
-    def new_rotate_axis(cls, angle, axis):
+    @classmethod
+    def rotate_axis(cls, angle, axis):
         assert(isinstance(axis, Vector))
         axis = axis.normalized()
         s = math.sin(angle / 2)
@@ -1021,9 +1002,9 @@ class Quaternion:
         Q.y = axis.y * s
         Q.z = axis.z * s
         return Q
-    new_rotate_axis = classmethod(new_rotate_axis)
 
-    def new_rotate_euler(cls, heading, attitude, bank):
+    @classmethod
+    def rotate_euler(cls, heading, attitude, bank):
         Q = cls()
         c1 = math.cos(heading / 2)
         s1 = math.sin(heading / 2)
@@ -1037,9 +1018,9 @@ class Quaternion:
         Q.y = s1 * c2 * c3 + c1 * s2 * s3
         Q.z = c1 * s2 * c3 - s1 * c2 * s3
         return Q
-    new_rotate_euler = classmethod(new_rotate_euler)
 
-    def new_rotate_matrix(cls, m):
+    @classmethod
+    def rotate_matrix(cls, m):
       if m[0*4 + 0] + m[1*4 + 1] + m[2*4 + 2] > 0.00000001:
         t = m[0*4 + 0] + m[1*4 + 1] + m[2*4 + 2] + 1.0
         s = 0.5/math.sqrt(t)
@@ -1083,9 +1064,9 @@ class Quaternion:
           (m[1*4 + 2] + m[2*4 + 1])*s,
           s*t
           )
-    new_rotate_matrix = classmethod(new_rotate_matrix)
 
-    def new_interpolate(cls, q1, q2, t):
+    @classmethod
+    def interpolate(cls, q1, q2, t):
         assert isinstance(q1, Quaternion) and isinstance(q2, Quaternion)
         Q = cls()
 
@@ -1120,7 +1101,6 @@ class Quaternion:
         Q.y = q1.y * ratio1 + q2.y * ratio2
         Q.z = q1.z * ratio1 + q2.z * ratio2
         return Q
-    new_interpolate = classmethod(new_interpolate)
 
 class Point(Vector, Geometry):
     def __repr__(self):
