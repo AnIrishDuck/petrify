@@ -332,7 +332,9 @@ class Matrix:
     __slots__ = list('abcdefghijklmnop')
 
     def __init__(self):
-        self.identity()
+        self.a = self.f = self.k = self.p = 1.
+        self.b = self.c = self.d = self.e = self.g = self.h = \
+        self.i = self.j = self.l = self.m = self.n = self.o = 0
 
     def __copy__(self):
         M = Matrix()
@@ -355,7 +357,6 @@ class Matrix:
         return M
 
     copy = __copy__
-
 
     def __repr__(self):
         return ('Matrix([% 8.2f % 8.2f % 8.2f % 8.2f\n'  \
@@ -523,32 +524,6 @@ class Matrix:
             P.y /= w
             P.z /= w
         return P
-
-    def identity(self):
-        self.a = self.f = self.k = self.p = 1.
-        self.b = self.c = self.d = self.e = self.g = self.h = \
-        self.i = self.j = self.l = self.m = self.n = self.o = 0
-        return self
-
-    def scale(self, x, y, z):
-        self *= Matrix.scale(x, y, z)
-        return self
-
-    def translate(self, x, y, z):
-        self *= Matrix.translate(x, y, z)
-        return self
-
-    def rotate_axis(self, angle, axis):
-        self *= Matrix.rotate_axis(angle, axis)
-        return self
-
-    def rotate_euler(self, heading, attitude, bank):
-        self *= Matrix.rotate_euler(heading, attitude, bank)
-        return self
-
-    def rotate_triple_axis(self, x, y, z):
-        self *= Matrix.rotate_triple_axis(x, y, z)
-        return self
 
     def transpose(self):
         (self.a, self.e, self.i, self.m,
