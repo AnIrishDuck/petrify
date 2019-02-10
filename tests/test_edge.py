@@ -1,5 +1,5 @@
 import unittest
-from petrify.edge import Chamfer, edge_inset, polygon_inset
+from petrify.edge import Chamfer, EdgeChamfer, edge_inset, polygon_inset
 from petrify.solid import Box, Vector, Point
 from petrify.space import LineSegment, Polygon
 
@@ -55,13 +55,39 @@ class TestInset(unittest.TestCase):
         cube = Box(Vector(0, 0, 0), Vector(1, 1, 1))
         edge = LineSegment(Point(0, 0, 0), Point(1, 0, 0))
 
-        def to_euclid(v):
-            return Vector(v.x, v.y, v.z)
-
-        chamfer = Chamfer(cube, edge, 0.1)
-        polygons = [*chamfer.insets, *chamfer.endcaps]
-        normals = [to_euclid(p.plane.normal) for p in cube.polygons]
+        chamfer = EdgeChamfer(cube.polygons, edge, 0.1)
+        polygons = [*chamfer.insets(), chamfer.start_cap(), chamfer.end_cap()]
+        normals = [p.plane.normal for p in cube.polygons]
 
         for p in polygons:
-            normal = to_euclid(p.plane.normal)
+            normal = p.plane.normal
             self.assertIn(normal, normals)
+
+    def assertValidPoints(self, solid):
+        for polygon in solid.polygons:
+            for p in polygon.points:
+                self.assertIn(round(p.x, 2), [0, 1, 0.1, 0.9])
+                self.assertIn(round(p.y, 2), [0, 1, 0.1, 0.9])
+                self.assertIn(round(p.z, 2), [0, 1, 0.1, 0.9])
+
+    def test_partial_chamfer(self):
+        cube = Box(Vector(0, 0, 0), Vector(1, 1, 1))
+        edges = [
+            LineSegment(Point(0, 0, 0), Point(1, 0, 0)),
+            LineSegment(Point(1, 0, 0), Point(1, 1, 0))
+        ]
+
+        chamfer = Chamfer(cube, edges, 0.1)
+        self.assertValidPoints(cube - chamfer)
+
+    def test_full_chamfer(self):
+        cube = Box(Vector(0, 0, 0), Vector(1, 1, 1))
+        edges = [
+            LineSegment(Point(0, 0, 0), Point(1, 0, 0)),
+            LineSegment(Point(1, 0, 0), Point(1, 1, 0)),
+            LineSegment(Point(1, 1, 0), Point(0, 1, 0)),
+            LineSegment(Point(0, 1, 0), Point(0, 0, 0))
+        ]
+
+        chamfer = Chamfer(cube, edges, 0.1)
+        self.assertValidPoints(cube - chamfer)

@@ -11,19 +11,30 @@ Vector(1, 1, 1)
 
 """
 from .solver import solve_matrix
-from .solid import tau, Node
+from .solid import tau, Node, Union
 from .space import LineSegment, Polygon
 
 from csg import core, geom
 
-class Chamfer(Node):
+class Chamfer(Union):
     """
-    Chamfer cut geometry by creating an inset of `amount` along
-    both polygons formed by `edge` on a `solid`.
+    Chamfer geometry formed by creating an inset of `amount` along
+    the pairs of polygons formed by `edges` on a `solid`.
+
+    The starting point of each `edge` must equal the endpoint of the prior edge
+    (and, by induction, the endpoint of each `edge` must be the start of the
+    next edge).
 
     """
-    def __init__(self, solid, edge, amount):
+    def __init__(self, solid, edges, amount):
         polygons = solid.polygons
+        for before, e in zip(edges, edges[1:]):
+            assert(before.p2 == e.p1)
+        chamfers = [EdgeChamfer(polygons, edge, amount) for edge in edges]
+        super().__init__(chamfers)
+
+class EdgeChamfer(Node):
+    def __init__(self, polygons, edge, amount):
         faces = [p for p in polygons if p.has_edge(edge)]
         assert(len(faces) == 2)
         a, b = faces
@@ -46,24 +57,25 @@ class Chamfer(Node):
             # insets
             Polygon([a_edge.p1, a_edge.p2, a_inset.p1, a_inset.p2]),
             Polygon([b_edge.p1, b_edge.p2, b_inset.p1, b_inset.p2]),
-            # cut
+            # diagonal
             Polygon([a_inset.p2, a_inset.p1, b_inset.p2, b_inset.p1]),
-            # endcaps
-            Polygon([a_inset.p1, a_edge.p2, b_inset.p2]),
+            # start cap
             Polygon([a_edge.p1, a_inset.p2, b_inset.p1]),
+            # end cap
+            Polygon([a_inset.p1, a_edge.p2, b_inset.p2])
         ])
 
-    @property
     def insets(self):
         return self.polygons[0:2]
 
-    @property
-    def cut(self):
-        return self.polygon[2]
+    def diagonal(self):
+        return self.polygons[2]
 
-    @property
-    def endcaps(self):
-        return self.polygons[3:]
+    def start_cap(self):
+        return self.polygons[3]
+
+    def end_cap(self):
+        return self.polygons[4]
 
 def polygon_inset(polygon, edge, inwards):
     """

@@ -167,7 +167,7 @@ class Union(Node):
         whole = parts[0].pycsg
         for part in parts[1:]:
             whole = whole.union(part.pycsg)
-        super.__init__(from_pycsg(whole))
+        super().__init__(from_pycsg(whole))
         self.parts = parts
 
 class Box(Extrusion, Node):
