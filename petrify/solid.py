@@ -3,7 +3,7 @@ from csg import core, geom
 
 from . import plane
 from .stl import save_polys_to_stl_file, read_polys_from_stl_file
-from .space import Point, Polygon, Quaternion, Vector
+from .space import Matrix, Point, Polygon, Vector
 from .geometry import tau
 
 def perpendicular(axis):
@@ -131,32 +131,15 @@ class Node:
 
     def scale(self, scale):
         """ Scale this geometry by the provided `scale` vector. """
-        def scaled(v):
-            return Point(v.x * scale.x, v.y * scale.y, v.z * scale.z)
-        return self.transform(scaled)
+        return Transformed(self, Matrix.scale(*scale.xyz))
 
     def translate(self, delta):
         """ Translate this geometry by the provided `translate` vector. """
-        def scaled(v):
-            return Point(v.x + delta.x, v.y + delta.y, v.z + delta.z)
-        return self.transform(scaled)
+        return Transformed(self, Matrix.translate(*delta.xyz))
 
     def rotate_around(self, theta, axis):
         """ Rotate this geometry around the given `axis` vector by `theta` radians. """
-        rotation = Quaternion.rotate_axis(theta, axis)
-        def rotated(v):
-            return Point(*(rotation * v).xyz)
-        return self.transform(rotated)
-
-    def transform(self, f):
-        """ Map the specified function `f` across all points. """
-        polygons = self.polygons
-
-        scaled = [
-            Polygon([f(point) for point in polygon.points])
-            for polygon in polygons
-        ]
-        return Node(scaled)
+        return Transformed(self, Matrix.rotate_axis(theta, axis))
 
     @property
     def pycsg(self):
@@ -165,6 +148,18 @@ class Node:
     def to_stl(self, path):
         """ Save this shape to an STL-formatted file. """
         save_polys_to_stl_file(self.pycsg.toPolygons(), path)
+
+class Transformed(Node):
+    """ Geometry that has had a matrix transform applied to it. """
+    def __init__(self, prior, matrix):
+        self.prior = prior
+        self.matrix = matrix
+
+        polygons = [
+            Polygon([matrix * point for point in polygon.points])
+            for polygon in prior.polygons
+        ]
+        super().__init__(polygons)
 
 class Union(Node):
     """ Defines a union of a list of `parts` """
