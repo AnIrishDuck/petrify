@@ -16,10 +16,15 @@ class Vector:
     operators:
 
     >>> Vector(1, 2, 3) + Vector(2, 2, 2)
+    Vector(3, 4, 5)
     >>> Vector(1, 2, 3) - Vector(2, 2, 2)
-    >>> Vector(1, 1, 1) * 5
-    >>> Vector(1, 1, 1) / 5
+    Vector(-1, 0, 1)
+    >>> Vector(1, 0, 1) * 5
+    Vector(5, 0, 5)
+    >>> Vector(1, 0, 1) / 5
+    Vector(0.2, 0, 0.2)
     >>> Vector(1, 1, 1) == Vector(1, 1, 1)
+    True
 
     In addition to many other specialized vector operations.
 
@@ -233,6 +238,7 @@ class Vector:
         return self
 
     def normalized(self):
+        """ Returns a vector with the same direction but unit (1) length. """
         d = self.magnitude()
         if d:
             return Vector(self.x / d,
@@ -241,18 +247,26 @@ class Vector:
         return self.copy()
 
     def dot(self, other):
+        """ The dot product of this vector and the `other`. """
         assert isinstance(other, Vector)
         return self.x * other.x + \
                self.y * other.y + \
                self.z * other.z
 
     def cross(self, other):
+        """ The cross product of this vector and the `other`. """
         assert isinstance(other, Vector)
         return Vector(self.y * other.z - self.z * other.y,
                        -self.x * other.z + self.z * other.x,
                        self.x * other.y - self.y * other.x)
 
     def reflect(self, normal):
+        """
+        Reflect this vector across a plane with the given `normal`
+
+        .. note::
+            Assumes the given `normal` has unit (1) length.
+        """
         # assume normal is normalized
         assert isinstance(normal, Vector)
         d = 2 * (self.x * normal.x + self.y * normal.y + self.z * normal.z)
@@ -262,7 +276,7 @@ class Vector:
 
     def rotate_around(self, axis, theta):
         """
-        Return a new vector rotated around axis through angle theta. Right hand
+        Return a new vector rotated around `axis` by angle `theta`. Right hand
         rule applies.
 
         """
@@ -303,17 +317,19 @@ class Vector:
     basis = Basis()
 
 class Polygon:
-    """ Polygons are a linear cycle of coplanar convex points. """
+    """ A linear cycle of coplanar convex points. """
 
     def __init__(self, points):
         self.points = points
         self.plane = Plane(*points[0:3])
 
     def segments(self):
+        """ Returns all line segments composing this polygon's edges. """
         paired = zip(self.points, self.points[1:] + [self.points[0]])
         return [LineSegment(a, b) for a, b in paired]
 
     def has_edge(self, edge):
+        """ Returns true if this polygon contains the given `edge`. """
         return any(l == edge for l in self.segments())
 
     def __repr__(self):
@@ -700,9 +716,9 @@ class Matrix:
         """
         Returns a quaternion representing the rotation part of the matrix.
 
-        Taken from:
-        http://web.archive.org/web/20041029003853/http://www.j3d.org/matrix_faq/matrfaq_latest.html#Q55
         """
+        # Taken from:
+        # http://web.archive.org/web/20041029003853/http://www.j3d.org/matrix_faq/matrfaq_latest.html#Q55
         trace = self.a + self.f + self.k
 
         if trace > 0.00000001: #avoid dividing by zero
@@ -776,7 +792,7 @@ class Quaternion:
     copy = __copy__
 
     def __repr__(self):
-        return 'Quaternion(real=%.2f, imag=<%.2f, %.2f, %.2f>)' % \
+        return 'Quaternion(%.2f, %.2f, %.2f, %.2f)' % \
             (self.w, self.x, self.y, self.z)
 
     def __mul__(self, other):
@@ -1078,16 +1094,30 @@ class Quaternion:
         return Q
 
 class Point(Vector, Geometry):
+    """
+    A close cousin of :py:class:`petrify.space.Vector`, used to represent a
+    point instead of a transform.
+
+    """
     def __repr__(self):
         return 'Point(%.2f, %.2f, %.2f)' % (self.x, self.y, self.z)
 
     def intersect(self, other):
+        """
+        Returns whether the point lies within the given `other` sphere:
+
+        """
         return other._intersect_point3(self)
 
     def _intersect_sphere(self, other):
         return _intersect_point3_sphere(self, other)
 
     def connect(self, other):
+        """
+        Find the shortest line segment connecting this object to the `other`
+        object.
+
+        """
         return other._connect_point3(self)
 
     def _connect_point3(self, other):
@@ -1115,6 +1145,13 @@ class Point(Vector, Geometry):
         return Vector(self.x, self.y, self.z)
 
 class Line:
+    """
+    An infinite line:
+
+    >>> Line(Point(0, 0, 0), Vector(1, 1, 1))
+    >>> Line(Point(0, 0, 0), Point(1, 1, 1))
+
+    """
     __slots__ = ['p', 'v']
 
     def __init__(self, *args):
@@ -1152,7 +1189,7 @@ class Line:
     copy = __copy__
 
     def __repr__(self):
-        return 'Line(<%.2f, %.2f, %.2f> + u<%.2f, %.2f, %.2f>)' % \
+        return 'Line(Point(%.2f, %.2f, %.2f), Vector(%.2f, %.2f, %.2f))' % \
             (self.p.x, self.p.y, self.p.z, self.v.x, self.v.y, self.v.z)
 
     p1 = property(lambda self: self.p)
@@ -1168,6 +1205,15 @@ class Line:
         return True
 
     def intersect(self, other):
+        """
+        Find the point where this line intersects the `other` plane or sphere:
+
+        >>> l = Line(Point(0, 0, 0), Vector(1, 1, 1))
+        >>> p = Plane(Vector(0, 0, 1), 2)
+        >>> a.intersect(b)
+        Point(2, 2, 2)
+
+        """
         return other._intersect_line3(self)
 
     def _intersect_sphere(self, other):
@@ -1177,6 +1223,11 @@ class Line:
         return _intersect_line3_plane(self, other)
 
     def connect(self, other):
+        """
+        Find the shortest line segment connecting this object to the `other`
+        object.
+
+        """
         return other._connect_line3(self)
 
     def _connect_point3(self, other):
@@ -1194,8 +1245,13 @@ class Line:
             return c
 
 class Ray(Line):
+    """
+    A :py:class:`Line` with a fixed origin that continues indefinitely in the given
+    direction.
+
+    """
     def __repr__(self):
-        return 'Ray(<%.2f, %.2f, %.2f> + u<%.2f, %.2f, %.2f>)' % \
+        return 'Ray(Point(%.2f, %.2f, %.2f), Vector(%.2f, %.2f, %.2f))' % \
             (self.p.x, self.p.y, self.p.z, self.v.x, self.v.y, self.v.z)
 
     def _u_in(self, u):
@@ -1203,7 +1259,7 @@ class Ray(Line):
 
 class LineSegment(Line):
     def __repr__(self):
-        return 'LineSegment(<%.2f, %.2f, %.2f> to <%.2f, %.2f, %.2f>)' % \
+        return 'LineSegment(Point(%.2f, %.2f, %.2f), Point(%.2f, %.2f, %.2f))' % \
             (self.p.x, self.p.y, self.p.z,
              self.p.x + self.v.x, self.p.y + self.v.y, self.p.z + self.v.z)
 
@@ -1249,10 +1305,16 @@ class LineSegment(Line):
     length = property(lambda self: abs(self.v))
 
 class Sphere:
+    """
+    A perfect sphere with the provided `center` and `radius`:
+
+    >>> Sphere(Point(0, 0, 0), 1)
+
+    """
     __slots__ = ['c', 'r']
 
     def __init__(self, center, radius):
-        assert isinstance(center, Vector) and type(radius) == float
+        assert isinstance(center, Point) and type(radius) == float
         self.c = center.copy()
         self.r = radius
 
@@ -1269,6 +1331,10 @@ class Sphere:
         self.c = t * self.c
 
     def intersect(self, other):
+        """
+        Checks whether the `other` point lies within this sphere.
+
+        """
         return other._intersect_sphere(self)
 
     def _intersect_point3(self, other):
@@ -1278,6 +1344,11 @@ class Sphere:
         return _intersect_line3_sphere(other, self)
 
     def connect(self, other):
+        """
+        Find the shortest line segment connecting this object to the `other`
+        object.
+
+        """
         return other._connect_sphere(self)
 
     def _connect_point3(self, other):
@@ -1297,6 +1368,16 @@ class Sphere:
             return c
 
 class Plane:
+    """
+    A three-dimensional plane.
+
+    Can be constructed with three coplanar points or a normal and solution
+    scalar:
+
+    >>> Plane(Point(0, 0, 0), Point(1, 0, 0), Point(0, 1, 0))
+    Plane(Vector(0, 0, 1), 0)
+
+    """
     # n.p = k, where n is normal, p is point on plane, k is constant scalar
     __slots__ = ['n', 'k']
 
@@ -1330,7 +1411,7 @@ class Plane:
     copy = __copy__
 
     def __repr__(self):
-        return 'Plane(<%.2f, %.2f, %.2f>.p = %.2f)' % \
+        return 'Plane(Vector(%.2f, %.2f, %.2f), %.2f)' % \
             (self.n.x, self.n.y, self.n.z, self.k)
 
     def _get_point(self):
@@ -1348,6 +1429,15 @@ class Plane:
         self.k = self.n.dot(p)
 
     def intersect(self, other):
+        """
+        Find the point where this plane intersects the `other` line or plane:
+
+        >>> Plane(Vector(0, 1, 0), 1).intersect(Plane(Vector(1, 0, 0), 2))
+        Line(Point(2, 1, 0), Vector(0, 0, 1))
+        >>> Plane(Vector(0, 0, 1), 2).intersect(Vector(1, 1, 1))
+        Point(2, 2, 2)
+
+        """
         return other._intersect_plane(self)
 
     def _intersect_line3(self, other):
@@ -1357,6 +1447,11 @@ class Plane:
         return _intersect_plane_plane(self, other)
 
     def connect(self, other):
+        """
+        Find the shortest line segment connecting this object to the `other`
+        object.
+
+        """
         return other._connect_plane(self)
 
     def _connect_point3(self, other):

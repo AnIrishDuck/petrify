@@ -1,3 +1,31 @@
+"""
+Creation of complex objects from humble building blocks.
+
+:py:class:`Box`, :py:class:`Cylinder` and :py:class:`Extrusion` are all instances
+of :py:class:`Node`, which allows object joining via CSG union and difference
+operations.
+
+:py:class:`Extrusion` can also be used to create complex geometries from slices
+of arbitrary planar polygons:
+
+>>> parallelogram = [
+    plane.Point(0, 0),
+    plane.Point(0, 1),
+    plane.point(1, 2),
+    plane.point(1, 1)
+]
+>>> square = [
+    plane.Point(0, 0),
+    plane.Point(0, 1),
+    plane.point(1, 1),
+    plane.point(1, 0)
+]
+>>> Extrusion(Projection.unit, [
+    Slice(parallelogram, 0)
+    Slice(square, 1)
+])
+
+"""
 import math
 from csg import core, geom
 
@@ -35,6 +63,13 @@ class Projection:
         v = self.origin + tx + ty + tz
         return Point(v.x, v.y, v.z)
 
+Projection.unit = Projection(
+    Point(0, 0, 0),
+    Vector(1, 0, 0),
+    Vector(0, 1, 0),
+    Vector(0, 0, 1)
+)
+
 class Slice:
     """ A slice of two-dimensional geometry associated with a z-level. """
     def __init__(self, points, dz):
@@ -46,17 +81,16 @@ class Slice:
 
 class Extrusion:
     """
-    A three-dimensional object built from varying height slices of 2d polygons.
+    A three-dimensional object built from varying height :py:class:`Slice`
+    polygons.
 
     The slices must currently all have the same number of vertices. Quads are
     generated to connect each layer, and the bottom and top layers then complete
     the shape.
 
-    Parameters
-    ----------
-    projection :
+    `projection` :
         A :class:`Projection` defining the basis for the projected shape.
-    slices :
+    `slices` :
         A list of :class:`Slice` objects defining each layer of the final shape.
 
     """
@@ -111,7 +145,7 @@ class Node:
     >>> a = Box(Vector(0, 0, 0), Vector(1, 1, 1))
     >>> b = Box(Vector(0, 0, 0.5), Vector(1, 1, 1))
     >>> a + b # union
-    >>> a - b # subtraction
+    >>> a - b # difference
 
     """
     def __init__(self, polygons):
@@ -172,8 +206,12 @@ class Union(Node):
 
 class Box(Extrusion, Node):
     """
-    A simple three-dimensional box constructed from a given `origin` and `size`
-    vector.
+    A simple three-dimensional box.
+
+    `origin` :
+        a :class:`petrify.space.Point` defining the origin of this box.
+    `size` :
+        a :class:`petrify.space.Vector` of the box's size.
 
     """
 
@@ -203,11 +241,19 @@ class Box(Extrusion, Node):
 
 class Cylinder(Extrusion, Node):
     """
-    A three-dimensional cylinder extruded along the given `axis`. The magnitude
-    of the axis is the height of the cylinder.
+    A three-dimensional cylinder extruded along the given `axis`.
 
-    The actual cylinder is constructed from many `segments` of quads to simulate
-    a circular shape.
+    The actual cylinder is approximated by creating many `segments` of quads to
+    simulate a circular shape.
+
+
+    `origin` :
+        a :class:`petrify.space.Point` defining the origin of this cylinder.
+    `axis` :
+        a :class:`petrify.space.Vector` that defines the axis the cylinder will
+        be "spun about". The magnitude of the axis is the height of the cylinder.
+    `segments` :
+        the number of quads to use when approximating the cylinder.
 
     """
 

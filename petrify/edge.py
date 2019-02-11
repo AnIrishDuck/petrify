@@ -1,13 +1,8 @@
 """
-Edge treatments.
-
-Treatments return the original object with modified geometry. All nominal
-object properties are unchanged:
+Geometry geared towards modifying object edges.
 
 >>> box = Box(Vector(1, 1, 1), Vector(1, 1, 1))
->>> chamfered = chamfer(box, box.edges)
->>> chamfered.size
-Vector(1, 1, 1)
+>>> box - Chamfer(box, [Point(0, 0, 0), Point(0, 1, 0)])
 
 """
 from .solver import solve_matrix
