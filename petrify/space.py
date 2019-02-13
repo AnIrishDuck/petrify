@@ -1180,7 +1180,7 @@ class Line:
         if len(args) == 3:
             assert isinstance(args[0], Point) and \
                    isinstance(args[1], Vector) and \
-                   type(args[2]) == float
+                   valid_scalar(args[2])
             self.p = args[0].copy()
             self.v = args[1] * args[2] / abs(args[1])
         elif len(args) == 2:
@@ -1333,7 +1333,7 @@ class Sphere:
     __slots__ = ['c', 'r']
 
     def __init__(self, center, radius):
-        assert isinstance(center, Point) and type(radius) == float
+        assert isinstance(center, Point) and valid_scalar(radius)
         self.c = center.copy()
         self.r = radius
 
