@@ -123,6 +123,16 @@ class Extrusion:
         return [[la[0], lb[0], lb[1], la[1]]
                  for la, lb in zip(lines, lines[1:] + [lines[0]])]
 
+    @property
+    def bottom(self):
+        """ The bottom polygon of this extrusion. """
+        return self.polygons[0]
+
+    @property
+    def top(self):
+        """ The top polygon of this extrusion. """
+        return self.polygons[-1]
+
 def from_pycsg(_csg):
     def from_csg_polygon(csg):
         points = [Point(v.pos.x, v.pos.y, v.pos.z) for v in csg.vertices]
