@@ -36,7 +36,16 @@ def perpendicular(axis):
 class Projection:
     """
     Used for building solids from slices of two-dimensional geometry along a
-    given z-axis.
+    given z-axis:
+
+    >>> project = Projection( \
+        Point.origin,         \
+        Vector(1, 1, 0),      \
+        Vector(0, 1, 1),      \
+        Vector(1, 0, 1)       \
+    )
+    >>> project.convert(plane.Point(1, 1), 1)
+    Point(2, 2, 2)
 
     The basis vectors `bx`, `by` are multiplied by the corresponding `x` and `y`
     scalars of a :py:class:`Slice` points, and the slice height is multiplied by
@@ -66,7 +75,14 @@ Projection.unit = Projection(
 )
 
 class Slice:
-    """ A slice of two-dimensional geometry associated with a z-level. """
+    """
+    A slice of two-dimensional geometry associated with a z-level:
+
+    >>> s = Slice([plane.Point(0, 0), plane.Point(0, 2), plane.Point(1, 1)], 1)
+    >>> s.project(Projection.unit)
+    [Point(0, 0, 1), Point(0, 2, 1), Point(1, 1, 1)]
+
+    """
     def __init__(self, points, dz):
         self.points = points
         self.dz = dz
@@ -74,27 +90,75 @@ class Slice:
     def project(self, projection):
         return [projection.convert(p, self.dz) for p in self.points]
 
-class Extrusion:
+class Node:
+    """
+    Convenience class for performing CSG operations on geometry.
+
+    All instances of this class can be added and subtracted via the built-in
+    `__add__` and `__sub__` methods:
+
+    >>> a = Box(Vector(0, 0, 0), Vector(1, 1, 1))
+    >>> b = Box(Vector(0, 0, 0.5), Vector(1, 1, 1))
+    >>> union = a + b
+    >>> difference = a - b
+
+    """
+    def __init__(self, polygons):
+        self.polygons = polygons
+
+    def __add__(self, other):
+        n = Node(from_pycsg(self.pycsg.union(other.pycsg)))
+        n.left = self
+        n.right = other
+        return n
+
+    def __sub__(self, other):
+        n = Node(from_pycsg(self.pycsg.subtract(other.pycsg)))
+        n.left = self
+        n.right = other
+        return n
+
+    def scale(self, scale):
+        """ Scale this geometry by the provided `scale` vector. """
+        return Transformed(self, Matrix.scale(*scale.xyz))
+
+    def translate(self, delta):
+        """ Translate this geometry by the provided `translate` vector. """
+        return Transformed(self, Matrix.translate(*delta.xyz))
+
+    def rotate_around(self, theta, axis):
+        """ Rotate this geometry around the given `axis` vector by `theta` radians. """
+        return Transformed(self, Matrix.rotate_axis(theta, axis))
+
+    @property
+    def pycsg(self):
+        return to_pycsg(self.polygons)
+
+    def to_stl(self, path):
+        """ Save this shape to an STL-formatted file. """
+        save_polys_to_stl_file(self.pycsg.toPolygons(), path)
+
+class Extrusion(Node):
     """
     A three-dimensional object built from varying height :py:class:`Slice`
     polygon layers:
 
-    >>> parallelogram = [
-        plane.Point(0, 0),
-        plane.Point(0, 1),
-        plane.point(1, 2),
-        plane.point(1, 1)
-    ];
-    >>> square = [
-        plane.Point(0, 0),
-        plane.Point(0, 1),
-        plane.point(1, 1),
-        plane.point(1, 0)
-    ];
-    >>> Extrusion(Projection.unit, [
-        Slice(parallelogram, 0)
-        Slice(square, 1)
-    ]);
+    >>> parallelogram = [  \
+        plane.Point(0, 0), \
+        plane.Point(0, 1), \
+        plane.Point(1, 2), \
+        plane.Point(1, 1)  \
+    ]
+    >>> square = [         \
+        plane.Point(0, 0), \
+        plane.Point(0, 1), \
+        plane.Point(1, 1), \
+        plane.Point(1, 0)  \
+    ]
+    >>> object = Extrusion(Projection.unit, [ \
+        Slice(parallelogram, 0),     \
+        Slice(square, 1)             \
+    ])
 
     The slices must all have the same number of vertices. Quads are
     generated to connect each layer, and the bottom and top layers then complete
@@ -157,56 +221,14 @@ def to_pycsg(polygons):
         return geom.Polygon(vertices)
     return core.CSG.fromPolygons([to_csg_polygon(p) for p in polygons])
 
-class Node:
-    """
-    Convenience class for performing CSG operations on geometry.
-
-    All instances of this class can be added and subtracted via the built-in
-    `__add__` and `__sub__` methods:
-
-    >>> a = Box(Vector(0, 0, 0), Vector(1, 1, 1))
-    >>> b = Box(Vector(0, 0, 0.5), Vector(1, 1, 1))
-    >>> a + b # union
-    >>> a - b # difference
-
-    """
-    def __init__(self, polygons):
-        self.polygons = polygons
-
-    def __add__(self, other):
-        n = Node(from_pycsg(self.pycsg.union(other.pycsg)))
-        n.left = self
-        n.right = other
-        return n
-
-    def __sub__(self, other):
-        n = Node(from_pycsg(self.pycsg.subtract(other.pycsg)))
-        n.left = self
-        n.right = other
-        return n
-
-    def scale(self, scale):
-        """ Scale this geometry by the provided `scale` vector. """
-        return Transformed(self, Matrix.scale(*scale.xyz))
-
-    def translate(self, delta):
-        """ Translate this geometry by the provided `translate` vector. """
-        return Transformed(self, Matrix.translate(*delta.xyz))
-
-    def rotate_around(self, theta, axis):
-        """ Rotate this geometry around the given `axis` vector by `theta` radians. """
-        return Transformed(self, Matrix.rotate_axis(theta, axis))
-
-    @property
-    def pycsg(self):
-        return to_pycsg(self.polygons)
-
-    def to_stl(self, path):
-        """ Save this shape to an STL-formatted file. """
-        save_polys_to_stl_file(self.pycsg.toPolygons(), path)
-
 class Transformed(Node):
-    """ Geometry that has had a matrix transform applied to it. """
+    """
+    Geometry that has had a matrix transform applied to it.
+
+    You probably should use methods on :py:class:`Node` instead of instantiating
+    this class directly.
+
+    """
     def __init__(self, prior, matrix):
         self.prior = prior
         self.matrix = matrix
@@ -218,7 +240,16 @@ class Transformed(Node):
         super().__init__(polygons)
 
 class Union(Node):
-    """ Defines a union of a list of `parts` """
+    """
+    Defines a union of a list of `parts`:
+
+    >>> many = Union([                         \
+        Box(Point(0, 0, 0), Vector(10, 1, 1)), \
+        Box(Point(0, 0, 0), Vector(1, 10, 1)), \
+        Box(Point(0, 0, 0), Vector(1, 1, 10)), \
+    ])
+
+    """
     def __init__(self, parts):
         whole = parts[0].pycsg
         for part in parts[1:]:
@@ -226,9 +257,11 @@ class Union(Node):
         super().__init__(from_pycsg(whole))
         self.parts = parts
 
-class Box(Extrusion, Node):
+class Box(Extrusion):
     """
-    A simple three-dimensional box.
+    A simple three-dimensional box:
+
+    >>> cube = Box(Point.origin, Vector(1, 1, 1))
 
     `origin` :
         a :class:`petrify.space.Point` defining the origin of this box.
@@ -261,10 +294,13 @@ class Box(Extrusion, Node):
     def size(self):
         return self.extent - self.origin
 
-class PolygonExtrusion(Extrusion, Node):
+class PolygonExtrusion(Extrusion):
     """
 
-    Extrusion of a simple two-dimensional polygon into three-dimensional space.
+    Extrusion of a simple two-dimensional polygon into three-dimensional space:
+
+    >>> triangle = [plane.Point(0, 0), plane.Point(0, 2), plane.Point(1, 1)]
+    >>> extruded = PolygonExtrusion(Projection.unit, triangle, 1)
 
     `projection` :
         a :py:class:`Projection` that defines how to transform the points of the
@@ -285,9 +321,11 @@ class PolygonExtrusion(Extrusion, Node):
         top = Slice(footprint, 1)
         super().__init__(projection, [bottom, top])
 
-class Cylinder(PolygonExtrusion):
+class Cylinder(Extrusion):
     """
-    A three-dimensional cylinder extruded along the given `axis`.
+    A three-dimensional cylinder extruded along the given `axis`:
+
+    >>> axle = Cylinder(Point.origin, Vector.basis.y * 10, 1.0)
 
     The actual cylinder is approximated by creating many `segments` of quads to
     simulate a circular shape.
@@ -326,5 +364,6 @@ class Cylinder(PolygonExtrusion):
         )
         super().__init__(project, [bottom, top])
 
-    def length(self):
+    def height(self):
+        """ The height of this cylinder along its `axis`. """
         return self.axis.magnitude()

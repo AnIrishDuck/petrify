@@ -1,4 +1,4 @@
-import unittest
+import doctest, unittest
 from petrify import solid
 from petrify.solid import tau, Vector
 
@@ -33,3 +33,7 @@ class TestNode(unittest.TestCase):
 
         combined = a - b.translate(Vector(0, 0, -0.25))
         self.assertTrue(len(combined.polygons) > len(a.polygons) + len(b.polygons))
+
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocTestSuite(solid))
+    return tests
