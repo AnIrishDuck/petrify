@@ -48,6 +48,11 @@ class Projection:
     Used for building solids from slices of two-dimensional geometry along a
     given z-axis.
 
+    The basis vectors `bx`, `by` are multiplied by the corresponding `x` and `y`
+    scalars of a :py:class:`Slice` points, and the slice height is multiplied by
+    `bz`. All components are added together to get the final point in
+    three-dimensional space.
+
     """
     def __init__(self, origin, bx, by, bz):
         self.origin = origin
@@ -64,10 +69,10 @@ class Projection:
         return Point(v.x, v.y, v.z)
 
 Projection.unit = Projection(
-    Point(0, 0, 0),
-    Vector(1, 0, 0),
-    Vector(0, 1, 0),
-    Vector(0, 0, 1)
+    Point.origin,
+    Vector.basis.x,
+    Vector.basis.y,
+    Vector.basis.z
 )
 
 class Slice:
@@ -249,13 +254,36 @@ class Box(Extrusion, Node):
     def size(self):
         return self.extent - self.origin
 
-class Cylinder(Extrusion, Node):
+class PolygonExtrusion(Extrusion, Node):
+    """
+
+    Extrusion of a simple two-dimensional polygon into three-dimensional space.
+
+    `projection` :
+        a :py:class:`Projection` that defines how to transform the points of the
+        polygon.
+    `footprint` :
+        a list of :py:class:`plane.Point` objects describing a convex polygon
+        that will be extruded along the given `projection`
+    `height` :
+        the final object will join two :py:class:`Slice` polygons: one at `z=0`
+        and one at `z=height`
+
+    """
+    def __init__(self, projection, footprint, height):
+        self.footprint = footprint
+        self.height = height
+
+        bottom = Slice(footprint, 0)
+        top = Slice(footprint, 1)
+        super().__init__(projection, [bottom, top])
+
+class Cylinder(PolygonExtrusion):
     """
     A three-dimensional cylinder extruded along the given `axis`.
 
     The actual cylinder is approximated by creating many `segments` of quads to
     simulate a circular shape.
-
 
     `origin` :
         a :class:`petrify.space.Point` defining the origin of this cylinder.

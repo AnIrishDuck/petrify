@@ -19,6 +19,7 @@ class TestUtilities(unittest.TestCase):
 
         _t(Vector(1, 1, 1))
 
+class TestNode(unittest.TestCase):
     def test_addition(self):
         a = solid.Box(Vector(0, 0, 0), Vector(3, 3, 1))
         b = solid.Box(Vector(1, 1, 0.5), Vector(1, 1, 3))

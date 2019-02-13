@@ -326,6 +326,17 @@ class Vector:
         return self.dot(n)*n
 
     class Basis:
+        """
+        The basis vectors:
+
+        >>> Vector.basis.x
+        Vector(1, 0, 0)
+        >>> Vector.basis.y
+        Vector(0, 1, 0)
+        >>> Vector.basis.z
+        Vector(0, 0, 1)
+
+        """
         @property
         def x(self): return Vector(1, 0, 0)
 
@@ -1163,6 +1174,8 @@ class Point(Vector, Geometry):
     def vector(self):
         """ The vector formed from the origin to this point. """
         return Vector(self.x, self.y, self.z)
+
+Point.origin = Point(0, 0, 0)
 
 class Line:
     """
