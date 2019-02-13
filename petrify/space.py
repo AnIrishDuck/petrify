@@ -5,10 +5,25 @@ Big thanks to pyeuclid, the source of most of the code here.
 
 """
 import math
+import numbers
 import operator
 import types
 
 from .geometry import Geometry, tau
+
+def valid_scalar(v):
+    """
+    Checks if `v` is a valid scalar value for the purposes of this library:
+
+    >>> valid_scalar(1)
+    True
+    >>> valid_scalar(1.0)
+    True
+    >>> valid_scalar('abc')
+    False
+
+    """
+    return isinstance(v, numbers.Number)
 
 class Vector:
     """
@@ -22,7 +37,7 @@ class Vector:
     >>> Vector(1, 0, 1) * 5
     Vector(5, 0, 5)
     >>> Vector(1, 0, 1) / 5
-    Vector(0.2, 0, 0.2)
+    Vector(0.2, 0.0, 0.2)
     >>> Vector(1, 1, 1) == Vector(1, 1, 1)
     True
 
@@ -44,9 +59,7 @@ class Vector:
     copy = __copy__
 
     def __repr__(self):
-        return 'Vector(%.2f, %.2f, %.2f)' % (self.x,
-                                              self.y,
-                                              self.z)
+        return 'Vector({0!r}, {1!r}, {2!r})'.format(*self.xyz)
 
     def __eq__(self, other):
         if isinstance(other, Vector):
@@ -245,6 +258,13 @@ class Vector:
                            self.y / d,
                            self.z / d)
         return self.copy()
+
+    def rounded(self, place=None):
+        """
+        Rounds all elements to `place` decimals.
+
+        """
+        return self.__class__(*(round(v, place) for v in self.xyz))
 
     def dot(self, other):
         """ The dot product of this vector and the `other`. """
@@ -763,9 +783,9 @@ class Quaternion:
     Multiplication can be performed on `Vector` instances to get the transformed
     vector or point:
 
-    >>> r = Quaternion.rotate_axis(tau / 4, Vector.basis.x)
-    >>> r * Vector(0, 1, 0)
-    Vector(1, 0, 0)
+    >>> r = Quaternion.rotate_axis(tau / 4, Vector.basis.x);
+    >>> (r * Vector(0, 1, 0)).rounded()
+    Vector(0, 0, 1)
 
     """
 
@@ -792,8 +812,7 @@ class Quaternion:
     copy = __copy__
 
     def __repr__(self):
-        return 'Quaternion(%.2f, %.2f, %.2f, %.2f)' % \
-            (self.w, self.x, self.y, self.z)
+        return 'Quaternion({0!r}, {1!r}, {2!r}, {3!r})'.format(self.w, self.x, self.y, self.z)
 
     def __mul__(self, other):
         if isinstance(other, Quaternion):
@@ -1099,8 +1118,9 @@ class Point(Vector, Geometry):
     point instead of a transform.
 
     """
+
     def __repr__(self):
-        return 'Point(%.2f, %.2f, %.2f)' % (self.x, self.y, self.z)
+        return 'Point({0!r}, {1!r}, {2!r})'.format(*self.xyz)
 
     def intersect(self, other):
         """
@@ -1149,7 +1169,9 @@ class Line:
     An infinite line:
 
     >>> Line(Point(0, 0, 0), Vector(1, 1, 1))
+    Line(Point(0, 0, 0), Vector(1, 1, 1))
     >>> Line(Point(0, 0, 0), Point(1, 1, 1))
+    Line(Point(0, 0, 0), Vector(1, 1, 1))
 
     """
     __slots__ = ['p', 'v']
@@ -1189,8 +1211,7 @@ class Line:
     copy = __copy__
 
     def __repr__(self):
-        return 'Line(Point(%.2f, %.2f, %.2f), Vector(%.2f, %.2f, %.2f))' % \
-            (self.p.x, self.p.y, self.p.z, self.v.x, self.v.y, self.v.z)
+        return 'Line({0!r}, {1!r})'.format(self.p, self.v)
 
     p1 = property(lambda self: self.p)
     p2 = property(lambda self: Point(self.p.x + self.v.x,
@@ -1208,10 +1229,10 @@ class Line:
         """
         Find the point where this line intersects the `other` plane or sphere:
 
-        >>> l = Line(Point(0, 0, 0), Vector(1, 1, 1))
-        >>> p = Plane(Vector(0, 0, 1), 2)
-        >>> a.intersect(b)
-        Point(2, 2, 2)
+        >>> l = Line(Point(0, 0, 0), Vector(1, 1, 1));
+        >>> p = Plane(Vector(0, 0, 1), 2);
+        >>> l.intersect(p)
+        Point(2.0, 2.0, 2.0)
 
         """
         return other._intersect_line3(self)
@@ -1251,17 +1272,14 @@ class Ray(Line):
 
     """
     def __repr__(self):
-        return 'Ray(Point(%.2f, %.2f, %.2f), Vector(%.2f, %.2f, %.2f))' % \
-            (self.p.x, self.p.y, self.p.z, self.v.x, self.v.y, self.v.z)
+        return 'Ray({0!r}, {1!r})'.format(self.p, self.v)
 
     def _u_in(self, u):
         return u >= 0.0
 
 class LineSegment(Line):
     def __repr__(self):
-        return 'LineSegment(Point(%.2f, %.2f, %.2f), Point(%.2f, %.2f, %.2f))' % \
-            (self.p.x, self.p.y, self.p.z,
-             self.p.x + self.v.x, self.p.y + self.v.y, self.p.z + self.v.z)
+        return 'LineSegment({0!r}, {1!r})'.format(self.p, self.p2)
 
     def _u_in(self, u):
         return u >= 0.0 and u <= 1.0
@@ -1308,7 +1326,8 @@ class Sphere:
     """
     A perfect sphere with the provided `center` and `radius`:
 
-    >>> Sphere(Point(0, 0, 0), 1)
+    >>> Sphere(Point(0, 0, 0), 1.0)
+    Sphere(Point(0, 0, 0), 1.0)
 
     """
     __slots__ = ['c', 'r']
@@ -1324,8 +1343,7 @@ class Sphere:
     copy = __copy__
 
     def __repr__(self):
-        return 'Sphere(<%.2f, %.2f, %.2f>, radius=%.2f)' % \
-            (self.c.x, self.c.y, self.c.z, self.r)
+        return 'Sphere({0!r}, {1})'.format(self.c, self.r)
 
     def _apply_transform(self, t):
         self.c = t * self.c
@@ -1375,7 +1393,7 @@ class Plane:
     scalar:
 
     >>> Plane(Point(0, 0, 0), Point(1, 0, 0), Point(0, 1, 0))
-    Plane(Vector(0, 0, 1), 0)
+    Plane(Vector(0.0, 0.0, 1.0), 0.0)
 
     """
     # n.p = k, where n is normal, p is point on plane, k is constant scalar
@@ -1393,7 +1411,7 @@ class Plane:
             if isinstance(args[0], Point) and isinstance(args[1], Vector):
                 self.n = args[1].normalized()
                 self.k = self.n.dot(args[0])
-            elif isinstance(args[0], Vector) and type(args[1]) == float:
+            elif isinstance(args[0], Vector) and valid_scalar(args[1]):
                 self.n = args[0].normalized()
                 self.k = args[1]
             else:
@@ -1411,8 +1429,7 @@ class Plane:
     copy = __copy__
 
     def __repr__(self):
-        return 'Plane(Vector(%.2f, %.2f, %.2f), %.2f)' % \
-            (self.n.x, self.n.y, self.n.z, self.k)
+        return 'Plane({0!r}, {1!r})'.format(self.n, self.k)
 
     def _get_point(self):
         # Return an arbitrary point on the plane
@@ -1433,9 +1450,9 @@ class Plane:
         Find the point where this plane intersects the `other` line or plane:
 
         >>> Plane(Vector(0, 1, 0), 1).intersect(Plane(Vector(1, 0, 0), 2))
-        Line(Point(2, 1, 0), Vector(0, 0, 1))
-        >>> Plane(Vector(0, 0, 1), 2).intersect(Vector(1, 1, 1))
-        Point(2, 2, 2)
+        Line(Point(2.0, 1.0, 0.0), Vector(0.0, 0.0, 1.0))
+        >>> Plane(Vector(0, 0, 1), 2).intersect(Line(Point(0, 0, 0), Vector(1, 1, 1)))
+        Point(2.0, 2.0, 2.0)
 
         """
         return other._intersect_plane(self)
