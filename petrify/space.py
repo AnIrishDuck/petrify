@@ -43,6 +43,18 @@ class Vector:
 
     In addition to many other specialized vector operations.
 
+    Defines convenience `.basis` members for commonly used basis vectors:
+
+    >>> Vector.basis.x; Vector.bx
+    Vector(1, 0, 0)
+    Vector(1, 0, 0)
+    >>> Vector.basis.y; Vector.by
+    Vector(0, 1, 0)
+    Vector(0, 1, 0)
+    >>> Vector.basis.z; Vector.bz
+    Vector(0, 0, 1)
+    Vector(0, 0, 1)
+
     """
 
     __slots__ = ['x', 'y', 'z']
@@ -326,17 +338,6 @@ class Vector:
         return self.dot(n)*n
 
     class Basis:
-        """
-        The basis vectors:
-
-        >>> Vector.basis.x
-        Vector(1, 0, 0)
-        >>> Vector.basis.y
-        Vector(0, 1, 0)
-        >>> Vector.basis.z
-        Vector(0, 0, 1)
-
-        """
         @property
         def x(self): return Vector(1, 0, 0)
 
@@ -346,6 +347,10 @@ class Vector:
         @property
         def z(self): return Vector(0, 0, 1)
     basis = Basis()
+
+Vector.bx = Vector.basis.x
+Vector.by = Vector.basis.y
+Vector.bz = Vector.basis.z
 
 class Polygon:
     """ A linear cycle of coplanar convex points. """
@@ -1128,6 +1133,11 @@ class Point(Vector, Geometry):
     A close cousin of :py:class:`petrify.space.Vector`, used to represent a
     point instead of a transform.
 
+    Defines a convenience `.origin` attribute for this commonly-used point:
+
+    >>> Point.origin
+    Point(0, 0, 0)
+
     """
 
     def __repr__(self):
@@ -1408,6 +1418,15 @@ class Plane:
     >>> Plane(Point(0, 0, 0), Point(1, 0, 0), Point(0, 1, 0))
     Plane(Vector(0.0, 0.0, 1.0), 0.0)
 
+    `Plane` also defines convenience methods for commonly used origin planes:
+
+    >>> Plane.xy
+    Plane(Vector(0.0, 0.0, 1.0), 0.0)
+    >>> Plane.xz
+    Plane(Vector(0.0, 1.0, 0.0), 0.0)
+    >>> Plane.yz
+    Plane(Vector(1.0, 0.0, 0.0), 0.0)
+
     """
     # n.p = k, where n is normal, p is point on plane, k is constant scalar
     __slots__ = ['n', 'k']
@@ -1498,6 +1517,10 @@ class Plane:
 
     @property
     def normal(self): return self.n
+
+Plane.xy = Plane(Vector(0.0, 0.0, 1.0), 0.0)
+Plane.xz = Plane(Vector(0.0, 1.0, 0.0), 0.0)
+Plane.yz = Plane(Vector(1.0, 0.0, 0.0), 0.0)
 
 # 3D Geometry
 # -------------------------------------------------------------------------
