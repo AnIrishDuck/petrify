@@ -3,10 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to petrify's documentation!
+petrify: a programmatic cad library
 ===================================
 
-petrify can be used to create programmatic / parametric three-dimensional models.
+petrify can be used to create open-source programmatic and parametric
+three-dimensional models.
 
 Example usage::
 

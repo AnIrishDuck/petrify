@@ -1,29 +1,19 @@
 """
-Creation of complex objects from humble building blocks.
+Creation of complex objects from humble building blocks:
 
-:py:class:`Box`, :py:class:`Cylinder` and :py:class:`Extrusion` are all instances
-of :py:class:`Node`, which allows object joining via CSG union and difference
-operations.
+:py:class:`Box` :
+    A simple box.
+:py:class:`Cylinder` :
+    A cylinder rotated around an origin and axis.
+:py:class:`PolygonExtrusion` :
+    Extrusion of a polygon into a three-dimensional shape.
+:py:class:`Extrusion` :
+    Complex layered objects with polygon slices.
+:py:class:`Node` :
+    Arbitrary construction of geometry via polygons.
 
-:py:class:`Extrusion` can also be used to create complex geometries from slices
-of arbitrary planar polygons:
-
->>> parallelogram = [
-    plane.Point(0, 0),
-    plane.Point(0, 1),
-    plane.point(1, 2),
-    plane.point(1, 1)
-]
->>> square = [
-    plane.Point(0, 0),
-    plane.Point(0, 1),
-    plane.point(1, 1),
-    plane.point(1, 0)
-]
->>> Extrusion(Projection.unit, [
-    Slice(parallelogram, 0)
-    Slice(square, 1)
-])
+All of the above classes subclass :py:class:`Node`, which allows object joining
+via CSG union and difference operations.
 
 """
 import math
@@ -87,9 +77,26 @@ class Slice:
 class Extrusion:
     """
     A three-dimensional object built from varying height :py:class:`Slice`
-    polygons.
+    polygon layers:
 
-    The slices must currently all have the same number of vertices. Quads are
+    >>> parallelogram = [
+        plane.Point(0, 0),
+        plane.Point(0, 1),
+        plane.point(1, 2),
+        plane.point(1, 1)
+    ];
+    >>> square = [
+        plane.Point(0, 0),
+        plane.Point(0, 1),
+        plane.point(1, 1),
+        plane.point(1, 0)
+    ];
+    >>> Extrusion(Projection.unit, [
+        Slice(parallelogram, 0)
+        Slice(square, 1)
+    ]);
+
+    The slices must all have the same number of vertices. Quads are
     generated to connect each layer, and the bottom and top layers then complete
     the shape.
 
