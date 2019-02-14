@@ -50,6 +50,9 @@ class Vector:
     def __repr__(self):
         return 'Vector({0!r}, {1!r})'.format(self.x, self.y)
 
+    def __hash__(self):
+        return hash((self.x, self.y))
+
     def __eq__(self, other):
         if isinstance(other, Vector):
             return self.x == other.x and \
@@ -538,6 +541,12 @@ class Line(Geometry):
 
         if not self.v:
             raise AttributeError('Line has zero-length vector')
+
+    def __hash__(self):
+        return hash((self.p, self.v))
+
+    def __eq__(self, other):
+        return self.p == other.p and self.v == other.v
 
     def __copy__(self):
         return self.__class__(self.p, self.v)
