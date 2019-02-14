@@ -26,6 +26,7 @@ Contents
    petrify.solid
    petrify.edge
    petrify.space
+   petrify.plane
    petrify.conversions
 
 Indices and tables

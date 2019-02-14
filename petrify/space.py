@@ -11,25 +11,10 @@ Big thanks to pyeuclid, the source of most of the code here.
 
 """
 import math
-import numbers
 import operator
 import types
 
-from .geometry import Geometry, tau
-
-def valid_scalar(v):
-    """
-    Checks if `v` is a valid scalar value for the purposes of this library:
-
-    >>> valid_scalar(1)
-    True
-    >>> valid_scalar(1.0)
-    True
-    >>> valid_scalar('abc')
-    False
-
-    """
-    return isinstance(v, numbers.Number)
+from .geometry import Geometry, tau, valid_scalar
 
 class Vector:
     """
