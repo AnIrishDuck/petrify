@@ -3,6 +3,12 @@ Math utility library for common three-dimensional constructs.
 
 Big thanks to pyeuclid, the source of most of the code here.
 
+.. note::
+    These examples and this library make heavy use of the `tau` constant for
+    rotational math *instead* of Pi. Read why at the `Tau Manifesto`_.
+
+.. _`Tau Manifesto`: https://tauday.com/tau-manifesto
+
 """
 import math
 import numbers
@@ -353,7 +359,12 @@ Vector.by = Vector.basis.y
 Vector.bz = Vector.basis.z
 
 class Polygon:
-    """ A linear cycle of coplanar convex points. """
+    """
+    A linear cycle of coplanar convex points:
+
+    >>> triangle = Polygon([Point(0, 0, 0), Point(0, 2, 0), Point(1, 1, 0)])
+
+    """
 
     def __init__(self, points):
         self.points = points
@@ -378,7 +389,10 @@ class Polygon:
 class Matrix:
     """
     A matrix that can be used to perform common transformations on
-    three-dimensional points and vectors.
+    three-dimensional points and vectors:
+
+    >>> Matrix.scale(*Vector(1, 2, 1).xyz) * Point(1, 1, 1)
+    Point(1, 2, 1)
 
     """
     __slots__ = list('abcdefghijklmnop')
@@ -595,17 +609,32 @@ class Matrix:
     # Static constructors
     @classmethod
     def new(cls, *values):
+        """ Create a new matrix from the provided `values` array. """
         M = cls()
         M[:] = values
         return M
 
     @classmethod
     def identity(cls):
+        """
+        The identity transform:
+
+        >>> Matrix.identity() * Point(1, 1, 1)
+        Point(1.0, 1.0, 1.0)
+
+        """
         self = cls()
         return self
 
     @classmethod
     def scale(cls, x, y, z):
+        """
+        A scale transform:
+
+        >>> Matrix.scale(*Vector(1, 2, 1).xyz) * Point(1, 1, 1)
+        Point(1, 2, 1)
+
+        """
         self = cls()
         self.a = x
         self.f = y
@@ -614,6 +643,13 @@ class Matrix:
 
     @classmethod
     def translate(cls, x, y, z):
+        """
+        A translation transform:
+
+        >>> Matrix.translate(*Vector(1, 2, 1).xyz) * Point(1, 1, 1)
+        Point(2.0, 3.0, 2.0)
+
+        """
         self = cls()
         self.d = x
         self.h = y
@@ -622,6 +658,13 @@ class Matrix:
 
     @classmethod
     def rotate_axis(cls, angle, axis):
+        """
+        A rotational transform:
+
+        >>> (Matrix.rotate_axis(tau / 4, Vector.basis.z) * Point(1, 0, 0)).rounded()
+        Point(0, 1, 0)
+
+        """
         assert(isinstance(axis, Vector))
         vector = axis.normalized()
         x = vector.x
