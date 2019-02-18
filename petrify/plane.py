@@ -262,16 +262,24 @@ class Vector:
         n = other.normalized()
         return self.dot(n)*n
 
-# a b c
-# e f g
-# i j k
+# a b c  0 3 6
+# e f g  1 4 7
+# i j k  2 5 8
 
 class Matrix:
     """ A matrix that can be used to transform two-dimensional vectors. """
     __slots__ = list('abcefgijk')
 
     def __init__(self):
-        self.identity()
+        self.a = 1
+        self.b = 0
+        self.c = 0
+        self.e = 0
+        self.f = 1
+        self.g = 0
+        self.i = 0
+        self.j = 0
+        self.k = 1
 
     def __copy__(self):
         M = Matrix()
@@ -395,6 +403,12 @@ class Matrix:
     @classmethod
     def identity(cls):
         self = cls()
+        return self
+
+    @classmethod
+    def from_values(cls, *values):
+        self = cls()
+        self[:] = values[:]
         return self
 
     @classmethod
