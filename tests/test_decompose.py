@@ -4,7 +4,24 @@ from petrify import decompose
 from petrify.plane import Point
 
 class TestUtilities(unittest.TestCase):
-    def test_decompose(self):
+    def test_square(self):
+        square = [
+            Point(0, 0),
+            Point(0, 1),
+            Point(1, 1),
+            Point(1, 0),
+        ]
+        polygons = decompose.trapezoidal(square)
+        self.assertEqual(polygons, [
+            [
+                Point(0, 0),
+                Point(0, 1),
+                Point(1, 1),
+                Point(1, 0)
+            ],
+        ])
+
+    def test_complex(self):
         f = [
             Point(0, 0),
             Point(0, 7),

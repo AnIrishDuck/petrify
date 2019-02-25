@@ -2,17 +2,14 @@
 Utility methods for decomposition of polygons into simpler polygons.
 
 """
-from .plane import Point, LineSegment, Line, Ray, Vector
+from .plane import Point, Polygon, LineSegment, Line, Ray, Vector
 import heapq, itertools
 
-class Polygon:
+class Sliced(Polygon):
     def __init__(self, points):
-        self.points = points
+        super().__init__(points)
         self.heap = [(min(l.p1.y, l.p2.y), l) for l in self.segments()]
         self.heap.sort(key=lambda pair: pair[0])
-
-    def segments(self):
-        return [LineSegment(a, b) for a, b in zip(self.points, self.points[1:] + [self.points[0]])]
 
     def departures(self, y):
         output = list(itertools.takewhile(lambda pair: pair[0] == y, self.heap))
@@ -26,7 +23,7 @@ def grouper(n, iterable, fillvalue=None):
 def yl(segment, y):
     return segment.intersect(Line(Point(0, y), Vector(1, 0)))
 
-def trapezoidal(points):
+def trapezoidal(points, min_area=0.0001):
     """
     Trapezoidal decomposition of a linear cycle of :py:class:`petrify.plane.Point`
     objects forming a potentially concave polygon.
@@ -35,7 +32,7 @@ def trapezoidal(points):
         Currently assumes that no edges cross or repeat.
 
     """
-    p = Polygon(points)
+    p = Sliced(points)
     order = {l: ix for ix, l in enumerate(p.segments())}
 
     levels = sorted(set(p.y for p in points))
@@ -67,4 +64,11 @@ def trapezoidal(points):
         active = grouper(2, [a[1] for a in next_active])
         prior = level
 
-    return trapezoids
+    return [t for t in trapezoids if trap_area(t) > min_area]
+
+def tri_area(a, b, c):
+    return abs((a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2)
+
+def trap_area(polygon):
+    a, b, c, d = polygon
+    return tri_area(a, b, c) + tri_area(b, c, d)

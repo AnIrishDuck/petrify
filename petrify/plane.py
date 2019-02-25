@@ -855,3 +855,53 @@ def _connect_circle_circle(A, B):
     v = v.normalized()
     return LineSegment(Point(A.c.x + s1 * v.x * A.r, A.c.y + s1 * v.y * A.r),
                         Point(B.c.x + s2 * v.x * B.r, B.c.y + s2 * v.y * B.r))
+
+class Polygon:
+    """
+    A two-dimensional polygon:
+
+    >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+    Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+
+    """
+
+    def __init__(self, points):
+        self.points = points
+
+    def __repr__(self):
+        return 'Polygon({0!r})'.format(self.points)
+
+    def segments(self):
+        pairs = zip(self.points, self.points[1:] + [self.points[0]])
+        return [LineSegment(a, b) for a, b in pairs]
+
+    def clockwise(self):
+        """
+        Returns `True` if the points in this polygon are in clockwise order:
+
+        >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)]).clockwise()
+        True
+        >>> Polygon([Point(1, 1), Point(0, 0), Point(2, 0)]).clockwise()
+        False
+
+        """
+        area = sum((l.p2.x - l.p1.x) * (l.p2.y + l.p1.y) for l in self.segments())
+        return area > 0
+
+    def inverted(self):
+        return Polygon(list(reversed(self.points)))
+
+    def contains(self, p):
+        """
+        Tests whether a point lies within this polygon:
+
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> tri.contains(Point(1.0, 0.5))
+        True
+        >>> tri.contains(Point(0.5, 1.5))
+        False
+
+        """
+        test = Ray(Point(p.x, p.y), Vector(1, 0))
+        counts = sum(1 for l in self.segments() if l.intersect(test))
+        return counts != 0

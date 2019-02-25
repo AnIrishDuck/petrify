@@ -1,7 +1,59 @@
+"""
+**Experimental** SVG support.
+
+This currently only works with SVG paths devoid of problematic constructions:
+
+- usage of fill-rule resulting in a single non-terminated (with the `Z` command)
+  path resulting in unfilled areas.
+- motion commands that move the "pen" without terminating the path.
+
+Its current primary three-dimensional purpose is generating
+solid :py:class:`PathExtrusion` objects.
+
+"""
 from svg.path import parse_path, Line, CubicBezier, QuadraticBezier, Arc
-from ..plane import Matrix, Point
+from ..plane import Matrix, Point, Polygon
+from ..decompose import trapezoidal
+from ..solid import Node, PolygonExtrusion, Union
 import re
 import xml.sax
+
+class PathExtrusion(Node):
+    """
+    A SVG path extruded into three-dimensional space.
+
+    >>> from petrify.space import Plane, Point, Vector
+    >>> from petrify.solid import Projection
+    >>> paths = parse('tests/fixtures/example.svg')
+    >>> box = paths['rect']
+    >>> plane = Plane(Point.origin, Vector.basis.z)
+    >>> example = PathExtrusion(box, 1.0, Projection.unit)
+
+    """
+    def __init__(self, path, height, projection):
+        path = path.polygons()
+        interior = []
+        exterior = []
+
+        for ix, polygon in enumerate(path):
+            if not polygon.clockwise():
+                polygon = polygon.inverted()
+            first = polygon.points[0]
+            trapezoids = trapezoidal(polygon.points)
+            others = path[:ix] + path[ix + 1:]
+            if any(other.contains(first) for other in others):
+                interior.extend(trapezoids)
+            else:
+                exterior.extend(trapezoids)
+
+        interior = Union(
+            [PolygonExtrusion(projection, p, height + 1) for p in interior]
+        )
+        exterior = Union(
+            [PolygonExtrusion(projection, p, height) for p in exterior]
+        )
+
+        super().__init__((exterior - interior).polygons)
 
 exp = re.compile('(.*)\((.*)\)')
 def parse_transform(s):
@@ -58,7 +110,7 @@ class Path:
 
         if current: polygons.append(current)
 
-        return polygons
+        return [Polygon(p) for p in polygons]
 
 class Handler(xml.sax.ContentHandler):
     def __init__(self):

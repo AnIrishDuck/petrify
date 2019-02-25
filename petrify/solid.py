@@ -318,7 +318,7 @@ class PolygonExtrusion(Extrusion):
         self.height = height
 
         bottom = Slice(footprint, 0)
-        top = Slice(footprint, 1)
+        top = Slice(footprint, height)
         super().__init__(projection, [bottom, top])
 
 class Cylinder(Extrusion):
