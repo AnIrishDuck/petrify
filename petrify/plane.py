@@ -911,10 +911,22 @@ class Polygon:
         """
         mid = (edge.p1 + edge.p2) / 2
         ray = Ray(Point(*mid), edge.v.cross())
+
         # NOTE: this still might have issues with parallel lines that intersect
         # the ray drawn from the midpoint along their entire span.
-        count = sum(1 for other in self.segments() if ray.intersect(other) is not None)
-        return (ray if count % 2 == 0 else -ray).v.normalized()
+        intersections = (
+            (other, ray.intersect(other)) for other in self.segments() if other != edge
+        )
+
+        # If the intersection is a point on the edge of a segment, it will also
+        # intersect the next segment, even though it has only crossed the
+        # boundary of the polygon once. We arbitrarily ignore the next segment
+        # (via the != l.p2 check) to resolve this corner case.
+        count = sum(
+            1 for l, i in intersections
+            if i is not None and i != l.p2
+        )
+        return (ray if count % 2 == 1 else -ray).v.normalized()
 
     def inverted(self):
         return Polygon(list(reversed(self.points)))
