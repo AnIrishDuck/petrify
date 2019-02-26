@@ -1,7 +1,7 @@
 import doctest, unittest
 
 from petrify import plane
-from petrify.plane import Polygon, Point
+from petrify.plane import Polygon, Point, Ray, Vector
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(plane))
@@ -19,3 +19,25 @@ class TestPolygon(unittest.TestCase):
         ])
 
         self.assertTrue(star.contains(Point(50, 50)))
+
+    def test_inwards(self):
+        w = Polygon([
+            Point(0, 0), Point(0, 2), Point(1, 2), Point(1, 1),
+            Point(2, 1), Point(2, 2), Point(3, 2), Point(3, 1),
+            Point(4, 1), Point(4, 2), Point(5, 2), Point(5, 0),
+        ])
+
+        down = Vector(0, -1)
+        up = Vector(0, 1)
+        left = Vector(-1, 0)
+        right = Vector(1, 0)
+
+        directions = [
+            right, down, left, down,
+            right, down, left, down,
+            right, down, left,
+            up
+        ]
+
+        for s, d in zip(w.segments(), directions):
+            self.assertEqual(w.inwards(s), d)

@@ -187,8 +187,7 @@ class Vector:
                        operator.truediv(other, self.y))
 
     def __neg__(self):
-        return Vector(-self.x,
-                        -self.y)
+        return Vector(-self.x, -self.y)
 
     __pos__ = __copy__
 
@@ -556,6 +555,9 @@ class Line(Geometry):
         if not self.v:
             raise AttributeError('Line has zero-length vector')
 
+    def __neg__(self):
+        return self.__class__(self.p2, self.p1)
+
     def __hash__(self):
         return hash((self.p, self.v))
 
@@ -580,6 +582,16 @@ class Line(Geometry):
 
     def _u_in(self, u):
         return True
+
+    def normalized(self):
+        """
+        Normalizes this line:
+
+        >>> Line(Point(0, 0), Point(2, 0)).normalized()
+        Line(Point(0, 0), Vector(1.0, 0.0))
+
+        """
+        return self.__class__(self.p, self.v.normalized())
 
     def intersect(self, other):
         """
@@ -887,6 +899,22 @@ class Polygon:
         """
         area = sum((l.p2.x - l.p1.x) * (l.p2.y + l.p1.y) for l in self.segments())
         return area > 0
+
+    def inwards(self, edge):
+        """
+        Finds the normalized :py:class:`Ray` facing inwards for a given `edge`:
+
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> tri.inwards(tri.segments()[0])
+        Vector(0.0, 1.0)
+
+        """
+        mid = (edge.p1 + edge.p2) / 2
+        ray = Ray(Point(*mid), edge.v.cross())
+        # NOTE: this still might have issues with parallel lines that intersect
+        # the ray drawn from the midpoint along their entire span.
+        count = sum(1 for other in self.segments() if ray.intersect(other) is not None)
+        return (ray if count % 2 == 0 else -ray).v.normalized()
 
     def inverted(self):
         return Polygon(list(reversed(self.points)))
