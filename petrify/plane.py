@@ -918,10 +918,10 @@ class Polygon:
             (other, ray.intersect(other)) for other in self.segments() if other != edge
         )
 
-        # If the intersection is a point on the edge of a segment, it will also
-        # intersect the next segment, even though it has only crossed the
-        # boundary of the polygon once. We arbitrarily ignore the next segment
-        # (via the != l.p2 check) to resolve this corner case.
+        # The intersection can be a point on the outside of the polygon. In this
+        # case, it will intersect two segments, even though it has only crossed
+        # the boundary of the polygon once. We arbitrarily ignore one of these
+        # segments (via the != l.p2 check) to resolve this corner case.
         count = sum(
             1 for l, i in intersections
             if i is not None and i != l.p2
