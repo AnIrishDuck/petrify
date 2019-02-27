@@ -1,4 +1,6 @@
-import unittest
+import doctest, unittest
+
+from petrify import edge
 from petrify.edge import Chamfer, EdgeChamfer, edge_inset, polygon_inset
 from petrify.solid import Box, Vector, Point
 from petrify.space import LineSegment, Polygon
@@ -91,3 +93,7 @@ class TestInset(unittest.TestCase):
 
         chamfer = Chamfer(cube, edges, 0.1)
         self.assertValidPoints(cube - chamfer)
+
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocTestSuite(edge))
+    return tests

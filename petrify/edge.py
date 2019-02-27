@@ -1,8 +1,11 @@
 """
 Geometry geared towards modifying object edges.
 
->>> box = Box(Vector(1, 1, 1), Vector(1, 1, 1))
->>> box - Chamfer(box, [Point(0, 0, 0), Point(0, 1, 0)])
+>>> from petrify.solid import Box, Vector, Point
+>>> from petrify.space import LineSegment
+>>> box = Box(Point.origin, Vector(1, 1, 1))
+>>> edge = LineSegment(Point(0, 0, 0), Point(0, 1, 0))
+>>> chamfered = box - Chamfer(box, [edge], 0.25)
 
 """
 from .solver import solve_matrix
