@@ -2,7 +2,7 @@
 Utility methods for decomposition of polygons into simpler polygons.
 
 """
-from .plane import Point, Polygon, LineSegment, Line, Ray, Vector
+from .plane import tau, Point, Polygon, LineSegment, Line, Ray, Vector
 import heapq, itertools
 
 class Sliced(Polygon):
@@ -72,3 +72,34 @@ def tri_area(a, b, c):
 def trap_area(polygon):
     a, b, c, d = polygon
     return tri_area(a, b, c) + tri_area(b, c, d)
+
+def fragment(segments, error=0.0001):
+    """
+    Takes a list of line segments, and fragments any segment that is touched
+    by the endpoint of another segment.
+
+    """
+    # TODO: this is incredibly inefficient (O(n^2)) without kd-trees
+    fragments = []
+    for ix, cutee in enumerate(segments):
+        def non_overlapping(a, b):
+            theta = a.v.angle(b.v)
+            return theta != 0 and theta != tau / 2
+
+        before = itertools.islice(segments, ix)
+        after = itertools.islice(segments, ix + 1, len(segments))
+        connections = [
+            (line, p.connect(cutee)) for line in (*before, *after)
+            for p in [line.p1, line.p2]
+            if p != cutee.p1 and p != cutee.p2
+            if non_overlapping(cutee, line)
+        ]
+        _intersects = [(x, l.p2) for x, l in connections if l.magnitude_squared() <= (error ** 2)]
+        intersects = (v for _, v in _intersects)
+
+        distance = lambda p: (cutee.p - p).magnitude_squared()
+        parts = sorted(intersects, key=distance)
+        points = [cutee.p1, *parts, cutee.p2]
+        fragments.extend([LineSegment(a, b) for a, b in zip(points, points[1:])])
+
+    return fragments

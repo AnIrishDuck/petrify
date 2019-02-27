@@ -1,9 +1,9 @@
 import unittest
 
 from petrify import decompose
-from petrify.plane import Point
+from petrify.plane import Point, LineSegment, Polygon
 
-class TestUtilities(unittest.TestCase):
+class TestTrapezoid(unittest.TestCase):
     def test_square(self):
         square = [
             Point(0, 0),
@@ -69,3 +69,46 @@ class TestUtilities(unittest.TestCase):
             [Point(4.0, 2.0), Point(4.0, 4.0), Point(2.0, 4.0), Point(2.0, 2.0)],
             [Point(7.0, 2.0), Point(7.0, 4.0), Point(5.0, 4.0), Point(5.0, 2.0)]
         ])
+
+def rect(a, b):
+    return Polygon([a, Point(a.x, b.y), b, Point(b.x, a.y)])
+
+class TestFragmentation(unittest.TestCase):
+    def test_simple(self):
+        polygons = [
+            rect(Point(0, 0), Point(1, 1)),
+            rect(Point(1, 0), Point(2, 2))
+        ]
+
+        segments = [l for p in polygons for l in p.segments()]
+        fragments = decompose.fragment(segments)
+        self.assertEqual(set(fragments) - set(segments), set([
+            LineSegment(Point(1, 0), Point(1, 1)),
+            LineSegment(Point(1, 1), Point(1, 2))
+        ]))
+
+        self.assertEqual(set(segments) - set(fragments), set([
+            LineSegment(Point(1, 0), Point(1, 2))
+        ]))
+
+    def test_multi_frag(self):
+        polygons = [
+            rect(Point(0, 0), Point(5, 1)),
+            rect(Point(0, 1), Point(1, 2)),
+            rect(Point(2, 1), Point(3, 2)),
+            rect(Point(4, 1), Point(5, 2)),
+        ]
+
+        segments = [l for p in polygons for l in p.segments()]
+        fragments = decompose.fragment(segments)
+        self.assertEqual(set(fragments) - set(segments), set([
+            LineSegment(Point(0, 1), Point(1, 1)),
+            LineSegment(Point(1, 1), Point(2, 1)),
+            LineSegment(Point(2, 1), Point(3, 1)),
+            LineSegment(Point(3, 1), Point(4, 1)),
+            LineSegment(Point(4, 1), Point(5, 1))
+        ]))
+
+        self.assertEqual(set(segments) - set(fragments), set([
+            LineSegment(Point(0, 1), Point(5, 1))
+        ]))
