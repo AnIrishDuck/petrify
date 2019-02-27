@@ -9,6 +9,8 @@ Creation of complex objects from humble building blocks:
     Extrusion of a polygon into a three-dimensional shape.
 :py:class:`Extrusion` :
     Complex layered objects with polygon slices.
+:py:class:`External` :
+    An external mesh loaded from an STL file.
 :py:class:`Node` :
     Arbitrary construction of geometry via polygons.
 
@@ -20,7 +22,7 @@ import math
 from csg import core, geom
 
 from . import plane
-from .stl import save_polys_to_stl_file, read_polys_from_stl_file
+from .formats.stl import save_polys_to_stl_file, read_polys_from_stl_file
 from .space import Matrix, Point, Polygon, Vector
 from .geometry import tau
 
@@ -213,7 +215,7 @@ def from_pycsg(_csg):
     def from_csg_polygon(csg):
         points = [Point(v.pos.x, v.pos.y, v.pos.z) for v in csg.vertices]
         return Polygon(points)
-    return [from_csg_polygon(p) for p in _csg.toPolygons()]
+    return [from_csg_polygon(p) for p in (_csg if isinstance(_csg, list) else _csg.toPolygons())]
 
 def to_pycsg(polygons):
     def to_csg_polygon(polygon):
@@ -238,6 +240,20 @@ class Transformed(Node):
             for polygon in prior.polygons
         ]
         super().__init__(polygons)
+
+class External(Node):
+    """
+    Geometry loaded from an external stl file:
+
+    >>> e = External('tests/fixtures/svg.stl')
+    >>> len(e.polygons)
+    40
+
+    """
+
+    def __init__(self, path):
+        polygons = read_polys_from_stl_file(path)
+        super().__init__(from_pycsg(polygons))
 
 class Union(Node):
     """

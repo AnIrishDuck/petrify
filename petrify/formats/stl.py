@@ -1,7 +1,6 @@
 import struct
 from csg.geom import Polygon, Vertex
 
-
 class StlEndOfFileException(Exception):
     """Exception class for reaching the end of the STL file while reading."""
     pass
