@@ -103,3 +103,57 @@ def fragment(segments, error=0.0001):
         fragments.extend([LineSegment(a, b) for a, b in zip(points, points[1:])])
 
     return fragments
+
+def index_by(it, f):
+    # why this isn't a stdlib function like in every other sane language escapes
+    # me...
+    d = {}
+    for i in it:
+        k = f(i)
+        previous = d.get(k, [])
+        previous.append(i)
+        d[k] = previous
+    return d
+
+def recreate_polygons(segments):
+    """
+    Takes a list of fragmented line segments and returns all polygons forming
+    complete loops, ignoring all shared line segments.
+
+    .. note::
+        Currently assumes no polygons share points.
+
+    """
+    valid = set(segments)
+    backwards = set(LineSegment(l.p2, l.p1) for l in segments)
+
+    for segment in segments:
+        if segment in backwards:
+            valid.remove(segment)
+
+    by_point = index_by(((p, l) for l in valid for p in (l.p1, l.p2)), lambda t: t[0])
+
+    size = len(valid)
+
+    polygons = []
+    while valid:
+        polygon = []
+        l = next(iter(valid))
+        valid.remove(l)
+        p1, p2 = l.p1, l.p2
+        first = p1
+        polygon.append(p1)
+        while p2:
+            polygon.append(p2)
+            ls = [l for _, l in by_point[p2]]
+            l, = set(ls) - set([l])
+            valid.remove(l)
+            p1, p2 = l.p1, l.p2
+            if p2 == first:
+                p2 = None
+
+        polygons.append(Polygon(polygon))
+        assert(size != len(valid))
+        size = len(valid)
+
+    return polygons
