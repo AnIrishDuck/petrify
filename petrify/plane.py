@@ -15,6 +15,7 @@ import operator
 import types
 
 from .geometry import Geometry, tau, valid_scalar
+from .solver import solve_matrix
 
 class Vector:
     """
@@ -260,6 +261,15 @@ class Vector:
         """ Return one vector projected on the vector other """
         n = other.normalized()
         return self.dot(n)*n
+
+    def round(self, places):
+        """
+        Rounds this vector to the given decimal place:
+
+        >>> Vector(1.00001, 1.00001).round(2)
+        Vector(1.0, 1.0)
+        """
+        return self.__class__(round(self.x, places), round(self.y, places))
 
 # a b c  0 3 6
 # e f g  1 4 7
@@ -927,6 +937,65 @@ class Polygon:
             if i is not None and i != l.p2
         )
         return (ray if count % 2 == 1 else -ray).v.normalized()
+
+    def offset(self, amount, tolerance=0.0001):
+        """
+        Finds the dynamic offset of a polygon by moving all edges by a given
+        `amount` perpendicular to their direction::
+
+        >>> square = Polygon([Point(0, 0), Point(0, 1), Point(1, 1), Point(1, 0)])
+        >>> square.offset(-0.1)
+        Polygon([Point(0.1, 0.1), Point(0.1, 0.9), Point(0.9, 0.9), Point(0.9, 0.1)])
+        >>> square.offset(0.1)
+        Polygon([Point(-0.1, -0.1), Point(-0.1, 1.1), Point(1.1, 1.1), Point(1.1, -0.1)])
+        >>> square.offset(10) is None
+        True
+
+
+        .. note::
+            This is currently a naive implementation that does not properly
+            handle non-local intersections that can split the polygon.
+
+        """
+        def magnitude(line, normal, inwards):
+            # u * line.vector + normal = w * inwards
+            # w * inwards - u * line.vector = normal
+            rows = list(zip(inwards.xy, (-line).xy, normal))
+            matrix = list(list(row) for row in rows)
+            solution = solve_matrix(matrix)
+            return inwards * solution[0]
+
+        amount_squared = amount ** 2
+        lines = self.segments()
+        inwards = [self.inwards(l) for l in lines]
+        remnant = []
+        for ai, l, n, bi in zip((inwards[-1], *inwards), lines, inwards, (*inwards[1:], inwards[0])):
+            ra = Ray(l.p1, ai + n)
+            rb = Ray(l.p2, bi + n)
+
+            # We need to find the true magnitude of the "halfway" pair inwards
+            # vector. It forms a triangle with the normal and the line itself.
+            i = ra.intersect(rb)
+            motion = magnitude(l.v, n, ra.v)
+            m = motion.magnitude_squared()
+            if not i or (i - ra.p).magnitude_squared() / m > amount_squared:
+                remnant.append((l, n))
+
+        if not remnant:
+            return None
+
+        points = []
+        for a, b in zip((remnant[-1], *remnant), remnant):
+            al, ai = a
+            bl, bi = b
+
+            start = Line(al.p, al.v).intersect(Line(bl.p, bl.v))
+            motion = magnitude(bl.v, bi, ai + bi)
+
+            points.append(start + (motion * -amount))
+
+        return Polygon(points)
+
 
     def inverted(self):
         return Polygon(list(reversed(self.points)))
