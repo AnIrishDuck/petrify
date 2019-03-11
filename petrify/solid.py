@@ -80,17 +80,22 @@ class Slice:
     """
     A slice of two-dimensional geometry associated with a z-level:
 
-    >>> s = Slice([plane.Point(0, 0), plane.Point(0, 2), plane.Point(1, 1)], 1)
+    >>> triangle = plane.Polygon([  \
+        plane.Point(0, 0),          \
+        plane.Point(0, 2),          \
+        plane.Point(1, 1)           \
+    ])
+    >>> s = Slice(triangle, 1)
     >>> s.project(Projection.unit)
     [Point(0, 0, 1), Point(0, 2, 1), Point(1, 1, 1)]
 
     """
-    def __init__(self, points, dz):
-        self.points = points
+    def __init__(self, polygon, dz):
+        self.polygon = polygon
         self.dz = dz
 
     def project(self, projection):
-        return [projection.convert(p, self.dz) for p in self.points]
+        return [projection.convert(p, self.dz) for p in self.polygon.points]
 
 class Node:
     """
@@ -145,18 +150,18 @@ class Extrusion(Node):
     A three-dimensional object built from varying height :py:class:`Slice`
     polygon layers:
 
-    >>> parallelogram = [  \
+    >>> parallelogram = plane.Polygon([  \
         plane.Point(0, 0), \
         plane.Point(0, 1), \
         plane.Point(1, 2), \
         plane.Point(1, 1)  \
-    ]
-    >>> square = [         \
-        plane.Point(0, 0), \
-        plane.Point(0, 1), \
-        plane.Point(1, 1), \
-        plane.Point(1, 0)  \
-    ]
+    ])
+    >>> square = plane.Polygon([    \
+        plane.Point(0, 0),          \
+        plane.Point(0, 1),          \
+        plane.Point(1, 1),          \
+        plane.Point(1, 0)           \
+    ])
     >>> object = Extrusion(Projection.unit, [ \
         Slice(parallelogram, 0),     \
         Slice(square, 1)             \
@@ -175,7 +180,7 @@ class Extrusion(Node):
 
     def __init__(self, projection, slices):
         self.projection = projection
-        assert(len(set(len(sl.points) for sl in slices)) == 1)
+        assert(len(set(len(sl.polygon.points) for sl in slices)) == 1)
         self.slices = slices
 
         super().__init__(self.generate_polygons())
@@ -186,7 +191,6 @@ class Extrusion(Node):
         top = self.slices[-1].project(self.projection)
 
         def i(p): return list(reversed(p))
-        ix = len(self.slices[0].points)
         middle = [i(p) for a, b in zip(self.slices, self.slices[1:])
                   for p in self.ring(a, b)]
         polygons = [bottom] + middle + [i(top)]
@@ -290,12 +294,12 @@ class Box(Extrusion):
         self.origin = origin
         self.extent = extent = origin + size
 
-        footprint = [plane.Point(x, y) for x, y in [
+        footprint = plane.Polygon([plane.Point(x, y) for x, y in [
             [origin.x, origin.y],
             [origin.x, extent.y],
             [extent.x, extent.y],
             [extent.x, origin.y]
-        ]]
+        ]])
         bottom = Slice(footprint, origin.z)
         top = Slice(footprint, extent.z)
 
@@ -315,7 +319,11 @@ class PolygonExtrusion(Extrusion):
 
     Extrusion of a simple two-dimensional polygon into three-dimensional space:
 
-    >>> triangle = [plane.Point(0, 0), plane.Point(0, 2), plane.Point(1, 1)]
+    >>> triangle = plane.Polygon([  \
+        plane.Point(0, 0),          \
+        plane.Point(0, 2),          \
+        plane.Point(1, 1)           \
+    ])
     >>> extruded = PolygonExtrusion(Projection.unit, triangle, 1)
 
     `projection` :
@@ -362,10 +370,10 @@ class Cylinder(Extrusion):
         self.radius = radius
 
         angles = list(tau * float(a) / segments for a in range(segments))
-        footprint = [
+        footprint = plane.Polygon([
             plane.Point(math.cos(theta) * radius, math.sin(theta) * radius)
             for theta in angles
-        ]
+        ])
 
         bottom = Slice(footprint, 0)
         top = Slice(footprint, 1)

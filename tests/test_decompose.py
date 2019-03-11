@@ -12,7 +12,7 @@ class TestTrapezoid(unittest.TestCase):
             Point(1, 0),
         ]
         polygons = decompose.trapezoidal(square)
-        self.assertEqual(polygons, [
+        self.assertEqual([p.points for p in polygons], [
             [
                 Point(0, 0),
                 Point(0, 1),
@@ -36,7 +36,7 @@ class TestTrapezoid(unittest.TestCase):
         ]
 
         polygons = decompose.trapezoidal(f)
-        self.assertEqual(polygons, [
+        self.assertEqual([p.points for p in polygons], [
             [
                 Point(0, 0),
                 Point(0, 2),
@@ -64,7 +64,8 @@ class TestTrapezoid(unittest.TestCase):
         ])
 
         inverted = [Point(p.y, p.x) for p in f]
-        self.assertEqual(decompose.trapezoidal(inverted), [
+        polygons = decompose.trapezoidal(inverted)
+        self.assertEqual([p.points for p in polygons], [
             [Point(7.0, 0.0), Point(7.0, 2.0), Point(0.0, 2.0), Point(0.0, 0.0)],
             [Point(4.0, 2.0), Point(4.0, 4.0), Point(2.0, 4.0), Point(2.0, 2.0)],
             [Point(7.0, 2.0), Point(7.0, 4.0), Point(5.0, 4.0), Point(5.0, 2.0)]
