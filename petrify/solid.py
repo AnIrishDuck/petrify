@@ -109,21 +109,66 @@ class Node:
     >>> union = a + b
     >>> difference = a - b
 
+    All nodes also support scaling and translation via vectors:
+
+    >>> box = Box(Vector(0, 0, 0), Vector(1, 1, 1))
+    >>> (box * Vector(2, 1, 1)).envelope()
+    Box(Vector(0, 0, 0), Vector(2, 1, 1))
+    >>> (box + Vector(1, 0, 1)).envelope()
+    Box(Vector(1.0, 0.0, 1.0), Vector(1.0, 1.0, 1.0))
+
     """
     def __init__(self, polygons):
         self.polygons = polygons
 
     def __add__(self, other):
-        n = Node(from_pycsg(self.pycsg.union(other.pycsg)))
-        n.left = self
-        n.right = other
-        return n
+        if isinstance(other, Vector):
+            return self.translate(other)
+        else:
+            n = Node(from_pycsg(self.pycsg.union(other.pycsg)))
+            n.left = self
+            n.right = other
+            return n
+
+    def __mul__(self, other):
+        if isinstance(other, Vector):
+            return self.scale(other)
+        else:
+            raise RuntimeError("Incompatible type for multiplication: {0}".format(type(other)))
 
     def __sub__(self, other):
         n = Node(from_pycsg(self.pycsg.subtract(other.pycsg)))
         n.left = self
         n.right = other
         return n
+
+    def envelope(self):
+        """
+        Returns the axis-aligned bounding box for this shape:
+
+        >>> parallelogram = plane.Polygon([  \
+            plane.Point(0, 0), \
+            plane.Point(0, 1), \
+            plane.Point(1, 2), \
+            plane.Point(1, 1)  \
+        ])
+        >>> extruded = PolygonExtrusion(Projection.unit, parallelogram, 1)
+        >>> extruded.envelope()
+        Box(Vector(0, 0, 0), Vector(1, 2, 1))
+
+        """
+        points = [x for p in self.polygons for x in p.points]
+        origin = Vector(
+            min(p.x for p in points),
+            min(p.y for p in points),
+            min(p.z for p in points)
+        )
+        extent = Vector(
+            max(p.x for p in points),
+            max(p.y for p in points),
+            max(p.z for p in points)
+        )
+        return Box(origin, extent - origin)
 
     def scale(self, scale):
         """ Scale this geometry by the provided `scale` vector. """
@@ -310,6 +355,9 @@ class Box(Extrusion):
             Vector(0, 0, 1)
         )
         super().__init__(project, [bottom, top])
+
+    def __repr__(self):
+        return "Box({0!r}, {1!r})".format(self.origin, self.size())
 
     def size(self):
         return self.extent - self.origin
