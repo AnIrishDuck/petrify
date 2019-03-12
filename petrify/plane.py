@@ -102,7 +102,8 @@ class Vector:
             return _class(self.x + other.x,
                           self.y + other.y)
         else:
-            assert hasattr(other, '__len__') and len(other) == 2
+            if not (hasattr(other, '__len__') and len(other) == 2):
+                return NotImplemented
             return Vector(self.x + other[0],
                            self.y + other[1])
     __radd__ = __add__
@@ -142,9 +143,9 @@ class Vector:
                            other.y - self[1])
 
     def __mul__(self, other):
-        assert type(other) in (int, float)
-        return Vector(self.x * other,
-                       self.y * other)
+        if type(other) not in (int, float):
+            return NotImplemented
+        return Vector(self.x * other, self.y * other)
 
     __rmul__ = __mul__
 
@@ -375,6 +376,7 @@ class Matrix:
             other = other.copy()
             other._apply_transform(self)
             return other
+    __rmul__ = __mul__
 
     def __imul__(self, other):
         assert isinstance(other, Matrix)
@@ -885,10 +887,25 @@ class Polygon:
     >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
     Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
 
+    Supports scaling and translation:
+    >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+    >>> tri * Vector(2, 3)
+    Polygon([Point(4, 0), Point(0, 0), Point(2, 3)])
+    >>> tri + Vector(2, 1)
+    Polygon([Point(4, 1), Point(2, 1), Point(3, 2)])
+
     """
 
     def __init__(self, points):
         self.points = points
+
+    def __mul__(self, v):
+        m = Matrix.scale(*v)
+        return Polygon([p * m for p in self.points])
+
+    def __add__(self, v):
+        m = Matrix.translate(*v)
+        return Polygon([p * m for p in self.points])
 
     def __repr__(self):
         return 'Polygon({0!r})'.format(self.points)

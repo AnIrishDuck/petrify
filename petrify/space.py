@@ -1440,10 +1440,20 @@ class Plane:
     """
     A three-dimensional plane.
 
-    Can be constructed with three coplanar points or a normal and solution
-    scalar:
+    Can be constructed with three coplanar points:
 
     >>> Plane(Point(0, 0, 0), Point(1, 0, 0), Point(0, 1, 0))
+    Plane(Vector(0.0, 0.0, 1.0), 0.0)
+
+    Or an origin point and two basis vectors:
+    >>> Plane(Point(0, 0, 0), Vector.basis.x, Vector.basis.y)
+    Plane(Vector(0.0, 0.0, 1.0), 0.0)
+
+    Or a normal and solution scalar / point:
+
+    >>> Plane(Vector.basis.z, 0)
+    Plane(Vector(0.0, 0.0, 1.0), 0)
+    >>> Plane(Vector.basis.z, Point.origin)
     Plane(Vector(0.0, 0.0, 1.0), 0.0)
 
     `Plane` also defines convenience methods for commonly used origin planes:
@@ -1461,24 +1471,29 @@ class Plane:
 
     def __init__(self, *args):
         if len(args) == 3:
-            assert isinstance(args[0], Point) and \
-                   isinstance(args[1], Point) and \
-                   isinstance(args[2], Point)
-            self.n = (args[1] - args[0]).cross(args[2] - args[0])
-            self.n.normalize()
-            self.k = self.n.dot(args[0])
-        elif len(args) == 2:
-            if isinstance(args[0], Point) and isinstance(args[1], Vector):
-                self.n = args[1].normalized()
+            if isinstance(args[0], Point):
+                if all(isinstance(a, Point) for a in args[1:]):
+                    self.n = (args[1] - args[0]).cross(args[2] - args[0])
+                    self.n.normalize()
+                elif all(isinstance(a, Vector) for a in args[1:]):
+                    self.n = args[1].cross(args[2])
+                    self.n.normalize()
+                else:
+                    raise TypeError('Cannot instantiate Vector from {0!r}'.format(args))
                 self.k = self.n.dot(args[0])
+        elif len(args) == 2:
+            if not isinstance(args[0], Vector):
+                raise TypeError('Cannot instantiate Vector from {0!r}'.format(args))
+            self.n = args[0].normalized()
+            if isinstance(args[0], Vector) and isinstance(args[1], Point):
+                self.k = self.n.dot(args[1])
             elif isinstance(args[0], Vector) and valid_scalar(args[1]):
-                self.n = args[0].normalized()
                 self.k = args[1]
             else:
-                raise AttributeError('%r' % (args,))
+                raise TypeError('Cannot instantiate Vector from {0!r}'.format(args))
 
         else:
-            raise AttributeError('%r' % (args,))
+            raise TypeError('Cannot instantiate Vector from {0!r}'.format(args))
 
         if not self.n:
             raise AttributeError('Points on plane are colinear')

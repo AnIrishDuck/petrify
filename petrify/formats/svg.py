@@ -26,7 +26,7 @@ class PathExtrusion(Node):
     >>> from petrify.solid import Projection
     >>> paths = parse('tests/fixtures/example.svg')
     >>> box = paths['rect']
-    >>> plane = Plane(Point.origin, Vector.basis.z)
+    >>> plane = Plane(Vector.basis.z, Point.origin)
     >>> example = PathExtrusion(box, 1.0, Projection.unit)
 
     """

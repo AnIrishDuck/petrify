@@ -7,6 +7,8 @@ Creation of complex objects from humble building blocks:
     A cylinder rotated around an origin and axis.
 :py:class:`PolygonExtrusion` :
     Extrusion of a polygon into a three-dimensional shape.
+:py:class:`Sweep` :
+    Sweep a series of polygons along a three-dimensional line.
 :py:class:`Extrusion` :
     Complex layered objects with polygon slices.
 :py:class:`External` :
@@ -392,6 +394,59 @@ class PolygonExtrusion(Extrusion):
         bottom = Slice(footprint, 0)
         top = Slice(footprint, height)
         super().__init__(projection, [bottom, top])
+
+class Sweep(Extrusion):
+    """
+    Create a solid from pairs of polygons swept along an arbitrary
+    three-dimensional path. The basis for each polygon is constructed from
+    combining path normals and a pre-provided basis vector that defines a
+    uniform y-axis:
+
+    >>> radius = 0.25
+    >>> angles = [tau * float(a) / 10 for a in range(10)]
+    >>> circle = plane.Polygon([ \
+        plane.Point(math.cos(theta) * radius, math.sin(theta) * radius) \
+        for theta in angles \
+    ])
+    >>> circles = [ \
+        (Point(1, 0, 0), circle), \
+        (Point(1, 1, 0), circle * plane.Vector(2, 2)), \
+        (Point(0, 1, 0), circle)  \
+    ]
+    >>> angle = Sweep(circles, Vector.basis.z)
+
+
+    .. warning::
+        This code currently has no way of detecting self-intersection, which
+        should be avoided.
+
+    """
+
+    class Projection:
+        def __init__(self, path, by):
+            self.by = by
+            self.origins = [point for point, _ in path]
+            vectors = [b - a for a, b in zip(self.origins, self.origins[1:])]
+            z = Vector(0, 0, 0)
+            self.normals = [
+                (a + b) for a, b in zip((z, *vectors), (*vectors, z))
+            ]
+
+        def convert(self, point, dz):
+            origin = self.origins[dz]
+            bx = self.normals[dz].cross(self.by).normalized()
+            v = origin + (point.x * bx) + (point.y * self.by)
+            return Point(*v.xyz)
+
+    def __init__(self, path, by):
+        self.path = path
+        self.by = by
+        project = Sweep.Projection(self.path, self.by)
+        slices = [
+            Slice(footprint, ix)
+            for ix, (_, footprint) in enumerate(path)
+        ]
+        super().__init__(project, slices)
 
 class Cylinder(Extrusion):
     """
