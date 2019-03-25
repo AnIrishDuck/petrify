@@ -128,20 +128,23 @@ class Node:
             return self.translate(other)
         else:
             n = Node(from_pycsg(self.pycsg.union(other.pycsg)))
-            n.left = self
-            n.right = other
+            n.parts = [self, other]
             return n
 
     def __mul__(self, other):
         if isinstance(other, Vector):
             return self.scale(other)
+        elif isinstance(other, Node):
+            n = Node(from_pycsg(self.pycsg.intersect(other.pycsg)))
+            n.parts = [self, other]
+            return n
         else:
-            raise RuntimeError("Incompatible type for multiplication: {0}".format(type(other)))
+            return NotImplemented
 
     def __sub__(self, other):
         n = Node(from_pycsg(self.pycsg.subtract(other.pycsg)))
-        n.left = self
-        n.right = other
+        n.original = self
+        n.removal = other
         return n
 
     def envelope(self):
