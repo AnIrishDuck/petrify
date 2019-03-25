@@ -272,6 +272,17 @@ class Vector:
         """
         return self.__class__(round(self.x, places), round(self.y, places))
 
+    def snap(self, grid):
+        """
+        Snaps this vector to a `grid`:
+
+        >>> Vector(1.15, 1.15).snap(0.25)
+        Vector(1.25, 1.25)
+        """
+        def snap(v):
+            return round(v / grid) * grid
+        return self.__class__(snap(self.x), snap(self.y))
+
 # a b c  0 3 6
 # e f g  1 4 7
 # i j k  2 5 8
@@ -914,6 +925,34 @@ class Polygon:
         pairs = zip(self.points, self.points[1:] + [self.points[0]])
         return [LineSegment(a, b) for a, b in pairs]
 
+    def simplify(self, tolerance=0.0001):
+        """
+        Remove any duplicate points, within a certain `tolerance`:
+
+        >>> Polygon([Point(1, 1), Point(2, 0), Point(0, 0), Point(1, 1)]).simplify()
+        Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+
+        """
+        prior = self.points[-1].snap(tolerance)
+        points = []
+        for point in self.points:
+            snapped = point.snap(tolerance)
+            if snapped != prior:
+                points.append(point)
+                prior = snapped
+        return Polygon(points)
+
+    def to_clockwise(self):
+        """
+        Converts this polygon to a clockwise one if necessary:
+
+        >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)]).clockwise()
+        True
+        >>> Polygon([Point(1, 1), Point(0, 0), Point(2, 0)]).clockwise()
+        False
+        """
+        return self if self.clockwise() else self.inverted()
+
     def clockwise(self):
         """
         Returns `True` if the points in this polygon are in clockwise order:
@@ -1015,6 +1054,14 @@ class Polygon:
 
 
     def inverted(self):
+        """
+        Reverse the points in this polygon:
+
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> tri.inverted()
+        Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])
+
+        """
         return Polygon(list(reversed(self.points)))
 
     def contains(self, p):
