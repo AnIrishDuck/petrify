@@ -131,10 +131,10 @@ class Handler(xml.sax.ContentHandler):
         transform = None
         if 'transform' in attributes:
             transform = attributes['transform']
-        if tag == 'g' and transform:
+        if tag == 'g':
             self.stack.append(transform)
         if tag == 'path':
-            transforms = list(self.stack)
+            transforms = list(t for t in self.stack if t is not None)
             if transform: transforms.append(transform)
             transforms = [parse_transform(t) for t in transforms]
             path = Path(transforms, attributes['d'])
