@@ -195,6 +195,19 @@ class Node:
         """ Save this shape to an STL-formatted file. """
         save_polys_to_stl_file(self.pycsg.toPolygons(), path)
 
+class Collection(Node):
+    """
+    Collection of multiple objects. Self-intersection is unsupported, but
+    lack of intersection is not enforced:
+
+    >>> c = Collection([ \
+        Box(Point.origin, Vector(1, 1, 1)),     \
+        Box(Point(0, 5, 0), Vector(1, 1, 1))    \
+    ])
+    """
+    def __init__(self, nodes):
+        super().__init__([p for n in nodes for p in n.polygons])
+
 class Extrusion(Node):
     """
     A three-dimensional object built from varying height :py:class:`Slice`
