@@ -1,5 +1,15 @@
 """
-Math utility library for common three-dimensional constructs.
+Math utility library for common three-dimensional constructs:
+
+- :py:class:`Vector`
+- :py:class:`Point`
+- :py:class:`Polygon`
+- :py:class:`Plane`
+- :py:class:`Quaternion`
+- :py:class:`Matrix`
+- :py:class:`Line`
+- :py:class:`Ray`
+- :py:class:`LineSegment`
 
 Big thanks to pyeuclid, the source of most of the code here.
 

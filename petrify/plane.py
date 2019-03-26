@@ -1,5 +1,13 @@
 """
-Math utility library for common two-dimensional constructs.
+Math utility library for common two-dimensional constructs:
+
+- :py:class:`Vector`
+- :py:class:`Point`
+- :py:class:`Polygon`
+- :py:class:`Matrix`
+- :py:class:`Line`
+- :py:class:`Ray`
+- :py:class:`LineSegment`
 
 Big thanks to pyeuclid, the source of most of the code here.
 
@@ -997,7 +1005,7 @@ class Polygon:
     def offset(self, amount, tolerance=0.0001):
         """
         Finds the dynamic offset of a polygon by moving all edges by a given
-        `amount` perpendicular to their direction::
+        `amount` perpendicular to their direction:
 
         >>> square = Polygon([Point(0, 0), Point(0, 1), Point(1, 1), Point(1, 0)])
         >>> square.offset(-0.1)
@@ -1006,7 +1014,6 @@ class Polygon:
         Polygon([Point(-0.1, -0.1), Point(-0.1, 1.1), Point(1.1, 1.1), Point(1.1, -0.1)])
         >>> square.offset(10) is None
         True
-
 
         .. note::
             This is currently a naive implementation that does not properly
