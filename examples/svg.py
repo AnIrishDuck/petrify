@@ -2,7 +2,7 @@ from petrify.solid import Projection
 from petrify.formats import svg
 
 def shape():
-    paths = svg.parse('tests/fixtures/example.svg')
+    paths = svg.SVG.read('tests/fixtures/example.svg', 'mm')
     box = paths['rect']
     return svg.PathExtrusion(box, 100.0, Projection.unit)
 
