@@ -9,13 +9,18 @@ petrify: a programmatic cad library
 petrify can be used to create open-source programmatic and parametric
 three-dimensional models.
 
-Example usage::
+Example usage:
 
-  from petrify.solid import Point, Vector, Box
+.. testcode::
 
-  big = Box(Point(0, 0, 0), Vector(1, 1, 1))
-  small = Box(Point(0.5, 0.5, 0.5), Vector(0.5, 0.5, 0.5))
-  (big - small).to_stl('example.stl')
+    from petrify import u
+    from petrify.formats import STL
+    from petrify.solid import Point, Vector, Box
+
+    big = Box(Point(0, 0, 0), Vector(1, 1, 1))
+    small = Box(Point(0.5, 0.5, 0.5), Vector(0.5, 0.5, 0.5))
+
+    STL('example.stl', 'mm').write((big - small).as_unit('in'))
 
 Contents
 ========
@@ -23,11 +28,11 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   petrify.units
    petrify.solid
    petrify.edge
    petrify.space
    petrify.plane
-   petrify.conversions
 
 Indices and tables
 ==================

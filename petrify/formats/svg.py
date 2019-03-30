@@ -8,10 +8,12 @@ This currently only works with SVG paths devoid of problematic constructions:
 - motion commands that move the "pen" without terminating the path.
 
 Its current primary three-dimensional purpose is generating
-solid :py:class:`PathExtrusion` objects.
+:py:class:`petrify.solid.PathExtrusion` objects.
 
 """
 from svg.path import parse_path, Line, CubicBezier, QuadraticBezier, Arc
+from .. import units
+from ..geometry import valid_scalar
 from ..plane import Matrix, Point, Polygon
 from ..decompose import trapezoidal
 from ..solid import Node, PolygonExtrusion, Union
@@ -22,10 +24,11 @@ class PathExtrusion(Node):
     """
     A SVG path extruded into three-dimensional space.
 
+    >>> from petrify import u
     >>> from petrify.space import Plane, Point, Vector
     >>> from petrify.solid import Projection
-    >>> paths = parse('tests/fixtures/example.svg')
-    >>> box = paths['rect']
+    >>> paths = SVG.read('tests/fixtures/example.svg', u.inches / (90 * u.file))
+    >>> box = paths['rect'].m_as(u.inches)
     >>> plane = Plane(Vector.basis.z, Point.origin)
     >>> example = PathExtrusion(box, 1.0, Projection.unit)
 
@@ -84,11 +87,17 @@ def from_complex(v):
 lines = [Line, CubicBezier, QuadraticBezier, Arc]
 class Path:
     def __init__(self, transforms, data):
-        self.transforms = [parse_transform(t) for t in transforms]
+        self.transforms = transforms
         self.data = data
+
         self.transform = Matrix.identity()
         for transform in self.transforms:
             self.transform *= transform
+
+    def __mul__(self, f):
+        if not valid_scalar(f): return NotImplemented
+        return Path([Matrix.scale(f, f), *self.transforms], self.data)
+    __rmul__ = __mul__
 
     def parse(self):
         return parse_path(self.data)
@@ -113,8 +122,9 @@ class Path:
         return [Polygon(p) for p in polygons]
 
 class Handler(xml.sax.ContentHandler):
-    def __init__(self):
+    def __init__(self, scale):
         self.stack = []
+        self.scale = units.conversion(scale)
         self.paths = {}
 
     def startElement(self, tag, attributes):
@@ -126,15 +136,20 @@ class Handler(xml.sax.ContentHandler):
         if tag == 'path':
             transforms = list(self.stack)
             if transform: transforms.append(transform)
-            self.paths[attributes['id']] = Path(transforms, attributes['d'])
+            transforms = [parse_transform(t) for t in transforms]
+            path = Path(transforms, attributes['d'])
+            x = path * units.u.file
+            self.paths[attributes['id']] = path * units.u.file * self.scale
 
     def endElement(self, tag):
         if tag == 'g':
             self.stack.pop()
 
-def parse(source):
-    parser = xml.sax.make_parser()
-    svg = Handler()
-    parser.setContentHandler(svg)
-    parser.parse(source)
-    return svg.paths
+class SVG:
+    @classmethod
+    def read(cls, path, scale):
+        parser = xml.sax.make_parser()
+        svg = Handler(scale)
+        parser.setContentHandler(svg)
+        parser.parse(path)
+        return svg.paths

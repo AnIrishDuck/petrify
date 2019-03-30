@@ -11,18 +11,32 @@ Math utility library for common three-dimensional constructs:
 - :py:class:`Ray`
 - :py:class:`LineSegment`
 
+The `pint`_ library can be used to specify dimensions:
+
+>>> from petrify import u
+>>> p = Point(50, 25, 50) * u.mm
+>>> p.to('m')
+<Quantity(Point(0.05, 0.025, 0.05), 'meter')>
+
+Many methods are nominally supported when wrapped with `pint`. We recommend
+you only use units when exporting and importing data, and pick a canonical unit
+for all petrify operations.
+
 Big thanks to pyeuclid, the source of most of the code here.
 
 .. note::
     These examples and this library make heavy use of the `tau` constant for
     rotational math *instead* of Pi. Read why at the `Tau Manifesto`_.
 
+.. _`pint`: https://pint.readthedocs.io/en/0.9/
 .. _`Tau Manifesto`: https://tauday.com/tau-manifesto
 
 """
 import math
 import operator
 import types
+
+from pint.unit import _Unit
 
 from .geometry import Geometry, tau, valid_scalar
 
@@ -173,29 +187,17 @@ class Vector:
                            other.z - self[2])
 
     def __mul__(self, other):
-        if isinstance(other, Vector):
-            # TODO component-wise mul/div in-place and on Vector2; docs.
-            if self.__class__ is Point or other.__class__ is Point:
-                _class = Point
-            else:
-                _class = Vector
-            return _class(self.x * other.x,
-                          self.y * other.y,
-                          self.z * other.z)
+        if isinstance(other, _Unit):
+            assert (1 * other).check('[length]'), 'only compatible with length units'
+            return NotImplemented
+        elif valid_scalar(other):
+            return self.__class__(self.x * other,
+                                  self.y * other,
+                                  self.z * other)
         else:
-            assert type(other) in (int, float)
-            return Vector(self.x * other,
-                           self.y * other,
-                           self.z * other)
+            return NotImplemented
 
     __rmul__ = __mul__
-
-    def __imul__(self, other):
-        assert type(other) in (int, float)
-        self.x *= other
-        self.y *= other
-        self.z *= other
-        return self
 
     def __div__(self, other):
         assert type(other) in (int, float)
@@ -337,6 +339,18 @@ class Vector:
         """ Return one vector projected on the vector other. """
         n = other.normalized()
         return self.dot(n)*n
+
+    def snap(self, grid):
+        """
+        Snaps this vector to a `grid`:
+
+        >>> Vector(1.15, 1.15, 0.9).snap(0.25)
+        Vector(1.25, 1.25, 1.0)
+
+        """
+        def snap(v):
+            return round(v / grid) * grid
+        return self.__class__(snap(self.x), snap(self.y), snap(self.z))
 
     class Basis:
         @property

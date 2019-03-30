@@ -34,6 +34,12 @@ class TestNode(unittest.TestCase):
         combined = a - b.translate(Vector(0, 0, -0.25))
         self.assertTrue(len(combined.polygons) > len(a.polygons) + len(b.polygons))
 
+    def test_division(self):
+        a = solid.Box(Vector(0, 0, 0), Vector(2, 2, 2))
+
+        scaled = a / 2
+        self.assertEqual(scaled.envelope().size(), Vector(1, 1, 1))
+
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(solid))
     return tests

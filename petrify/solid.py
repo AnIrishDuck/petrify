@@ -23,10 +23,9 @@ via CSG union and difference operations.
 import math
 from csg import core, geom
 
-from . import plane
-from .formats.stl import save_polys_to_stl_file, read_polys_from_stl_file
+from . import plane, units
 from .space import Matrix, Point, Polygon, Vector
-from .geometry import tau
+from .geometry import tau, valid_scalar
 
 def perpendicular(axis):
     "Return a vector that is perpendicular to the given axis."
@@ -119,6 +118,17 @@ class Node:
     >>> (box + Vector(1, 0, 1)).envelope()
     Box(Vector(1.0, 0.0, 1.0), Vector(1.0, 1.0, 1.0))
 
+    To support unit operations via `pint`, multiplication and division by a
+    scalar are also supported:
+
+    >>> (box * 2).envelope()
+    Box(Vector(0, 0, 0), Vector(2, 2, 2))
+    >>> (box / 2).envelope()
+    Box(Vector(0.0, 0.0, 0.0), Vector(0.5, 0.5, 0.5))
+    >>> from petrify import u
+    >>> (box * u.mm).units
+    <Unit('millimeter')>
+
     """
     def __init__(self, polygons):
         self.polygons = polygons
@@ -138,6 +148,15 @@ class Node:
             n = Node(from_pycsg(self.pycsg.intersect(other.pycsg)))
             n.parts = [self, other]
             return n
+        elif valid_scalar(other):
+            return self * Vector(other, other, other)
+        else:
+            return NotImplemented
+    __rmul__ = __mul__
+
+    def __truediv__(self, other):
+        if valid_scalar(other):
+            return self * Vector(1 / other, 1 / other, 1 / other)
         else:
             return NotImplemented
 
@@ -175,6 +194,16 @@ class Node:
         )
         return Box(origin, extent - origin)
 
+    def as_unit(self, unit):
+        """
+        Declare a unit for unitless geometry:
+
+        >>> Box(Vector(0, 0, 0), Vector(1, 1, 1)).as_unit('inch').units
+        <Unit('inch')>
+
+        """
+        return units.assert_lengthy(1 * units.parse_unit(unit)) * self
+
     def scale(self, scale):
         """ Scale this geometry by the provided `scale` vector. """
         return Transformed(self, Matrix.scale(*scale.xyz))
@@ -190,10 +219,6 @@ class Node:
     @property
     def pycsg(self):
         return to_pycsg(self.polygons)
-
-    def to_stl(self, path):
-        """ Save this shape to an STL-formatted file. """
-        save_polys_to_stl_file(self.pycsg.toPolygons(), path)
 
 class Collection(Node):
     """
@@ -307,20 +332,6 @@ class Transformed(Node):
             for polygon in prior.polygons
         ]
         super().__init__(polygons)
-
-class External(Node):
-    """
-    Geometry loaded from an external stl file:
-
-    >>> e = External('tests/fixtures/svg.stl')
-    >>> len(e.polygons)
-    40
-
-    """
-
-    def __init__(self, path):
-        polygons = read_polys_from_stl_file(path)
-        super().__init__(from_pycsg(polygons))
 
 class Union(Node):
     """

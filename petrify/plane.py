@@ -9,12 +9,24 @@ Math utility library for common two-dimensional constructs:
 - :py:class:`Ray`
 - :py:class:`LineSegment`
 
+The `pint`_ library can be used to specify dimensions:
+
+>>> from petrify import u
+>>> p = Point(24, 12) * u.inches
+>>> p.to(u.ft)
+<Quantity(Point(2.0, 1.0), 'foot')>
+
+Many methods are nominally supported when wrapped with `pint`. We recommend
+you only use units when exporting and importing data, and pick a canonical unit
+for all petrify operations.
+
 Big thanks to pyeuclid, the source of most of the code here.
 
 .. note::
     These examples and this library make heavy use of the `tau` constant for
     rotational math *instead* of Pi. Read why at the `Tau Manifesto`_.
 
+.. _`pint`: https://pint.readthedocs.io/en/0.9/
 .. _`Tau Manifesto`: https://tauday.com/tau-manifesto
 
 """
@@ -22,6 +34,7 @@ import math
 import operator
 import types
 
+from . import units
 from .geometry import Geometry, tau, valid_scalar
 from .solver import solve_matrix
 
@@ -48,6 +61,7 @@ class Vector:
     __hash__ = None
 
     def __init__(self, x=0, y=0):
+        assert valid_scalar(x) and valid_scalar(y)
         self.x = x
         self.y = y
 
@@ -151,17 +165,15 @@ class Vector:
                            other.y - self[1])
 
     def __mul__(self, other):
-        if type(other) not in (int, float):
+        if isinstance(other, units.u.Unit):
+            assert (1 * other).check('[length]'), 'only compatible with length units'
             return NotImplemented
-        return Vector(self.x * other, self.y * other)
+        elif valid_scalar(other):
+            return self.__class__(self.x * other, self.y * other)
+        else:
+            return NotImplemented
 
     __rmul__ = __mul__
-
-    def __imul__(self, other):
-        assert type(other) in (int, float)
-        self.x *= other
-        self.y *= other
-        return self
 
     def __div__(self, other):
         assert type(other) in (int, float)
@@ -918,8 +930,9 @@ class Polygon:
     def __init__(self, points):
         self.points = points
 
-    def __mul__(self, v):
-        m = Matrix.scale(*v)
+    def __mul__(self, m):
+        if isinstance(m, Vector):
+            m = Matrix.scale(*m)
         return Polygon([p * m for p in self.points])
 
     def __add__(self, v):

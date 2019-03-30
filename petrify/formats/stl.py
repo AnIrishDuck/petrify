@@ -1,6 +1,63 @@
 import struct
 from csg.geom import Polygon, Vertex
 
+from ..solid import from_pycsg, Node
+from .. import units
+
+class STL:
+    """
+    A STL-formatted file at the given `path` with the specified file `scale`:
+
+    >>> import tempfile
+    >>> from petrify import u
+    >>> output = STL.read('tests/fixtures/svg.stl', 1 * u.mm / u.file)
+    >>> output = STL.read('tests/fixtures/svg.stl', 'mm')
+    >>> with tempfile.NamedTemporaryFile() as fp: \
+        STL(fp.name, 'inches').write(output)
+
+    """
+    def __init__(self, path, scale):
+        self.path = path
+        self.scale = units.conversion(scale)
+
+    @classmethod
+    def read(cls, path, scale):
+        """
+        Read a :class:`petrify.solid.Node` from a STL-formatted file:
+
+        >>> from petrify import u
+        >>> e = STL.read('tests/fixtures/svg.stl', 1 * u.inch / u.file)
+        >>> len(e.polygons)
+        40
+        >>> e.units
+        <Unit('inch')>
+
+        """
+        polygons = read_polys_from_stl_file(path)
+        scale = units.conversion(scale)
+        return Node(from_pycsg(polygons)) * units.u.file * scale
+
+    def write(self, solid):
+        """
+        Save a :class:`petrify.solid.Node` to a STL-formatted file.
+
+        >>> from petrify import u
+        >>> from petrify.solid import Box, Point, Vector
+        >>> b = Box(Point.origin, Vector(1, 1, 1))
+        >>> STL('output/box.stl', 1 * u.mm / u.file).write(b.as_unit('inches'))
+
+        The input geometry must have a length unit tag:
+
+        >>> STL('output/box.stl', 1 * u.mm / u.file).write(b)
+        Traceback (most recent call last):
+        ...
+        AssertionError: object does not have unit tag: Box(Point(0, 0, 0), Vector(1, 1, 1))
+
+        """
+        units.assert_lengthy(solid)
+        output = (solid / self.scale).m_as(units.u.file)
+        save_polys_to_stl_file(output.pycsg.toPolygons(), self.path)
+
 class StlEndOfFileException(Exception):
     """Exception class for reaching the end of the STL file while reading."""
     pass
