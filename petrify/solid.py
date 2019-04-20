@@ -194,6 +194,44 @@ class Node:
         )
         return Box(origin, extent - origin)
 
+    def visualize(self):
+        """
+        Create a `pythreejs`_ visualization of this geometry for use in
+        interactive notebooks.
+
+        .. _`pythreejs`: https://github.com/jupyter-widgets/pythreejs
+
+        """
+        import numpy as np
+        import pythreejs as js
+
+        def triangles(polygon):
+            points = polygon.points
+            return [(points[0], points[ix], points[ix + 1])
+                    for ix in range(1, len(polygon.points) - 1)]
+
+        def _ba(vs):
+            points = np.array(vs, dtype=np.float32)
+            return js.BufferAttribute(array=points, normalized=False)
+
+        vertices = [
+            list(p.xyz) for polygon in self.polygons
+            for t in triangles(polygon)
+            for p in t
+        ]
+        normals = [
+            list(polygon.plane.normal.xyz) for polygon in self.polygons
+            for t in triangles(polygon)
+            for p in t
+        ]
+
+        return js.BufferGeometry(
+            attributes={
+                'position': _ba(vertices),
+                'normal': _ba(normals)
+            },
+        )
+
     def as_unit(self, unit):
         """
         Declare a unit for unitless geometry:
