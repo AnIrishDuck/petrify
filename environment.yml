@@ -7,5 +7,7 @@ dependencies:
   - matplotlib
   - scipy
   - scikit-image
-  - petrify
   - numpy
+  - pip
+  - pip:
+    - petrify
