@@ -1,6 +1,7 @@
 name: petrify
 channels:
   - conda-forge
+  - defaults
 dependencies:
   - pythreejs
   - matplotlib
