@@ -1096,5 +1096,8 @@ class Polygon:
 
         """
         test = Ray(Point(p.x, p.y), Vector(1, 0))
-        counts = sum(1 for l in self.segments() if l.intersect(test))
-        return counts != 0
+        def intersect_partial(l):
+            i = l.intersect(test)
+            return i is not None and i != l.p2
+        counts = sum(1 for l in self.segments() if intersect_partial(l))
+        return counts % 2 == 1

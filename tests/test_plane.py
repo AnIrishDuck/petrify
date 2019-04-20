@@ -8,8 +8,10 @@ def load_tests(loader, tests, ignore):
     return tests
 
 class TestPolygon(unittest.TestCase):
-    def test_inside(self):
+    def test_star_contain(self):
         # taken from https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/fill-rule
+        # we use the evenodd fill-rule so we don't have to calculate crossing
+        # orientation.
         star = Polygon([
             Point(50, 0),
             Point(21, 90),
@@ -18,7 +20,28 @@ class TestPolygon(unittest.TestCase):
             Point(79, 90)
         ])
 
-        self.assertTrue(star.contains(Point(50, 50)))
+        self.assertFalse(star.contains(Point(50, 50)))
+
+    def test_contain_through_point(self):
+        # when we cross through a vertex, it still only should count as one
+        # boundary crossing for evenodd purposes.
+        shape = Polygon([
+            Point(-1, 0),
+            Point(0, 1),
+            Point(1, 0),
+            Point(0, -1)
+        ])
+
+        self.assertTrue(shape.contains(Point(0, 0)))
+        self.assertTrue(shape.contains(Point(-0.5, 0)))
+        self.assertTrue(shape.contains(Point(0, -0.5)))
+        self.assertTrue(shape.contains(Point(0, 0.5)))
+        self.assertTrue(shape.contains(Point(0.5, 0)))
+
+        self.assertFalse(shape.contains(Point(2, 0)))
+        self.assertFalse(shape.contains(Point(0, 2)))
+        self.assertFalse(shape.contains(Point(0, -2)))
+        self.assertFalse(shape.contains(Point(-2, 0)))
 
     def test_inwards(self):
         w = Polygon([
