@@ -1,1 +1,2 @@
 v0.1 - initial release
+v0.2 - unit conversions and handling, lots of fixes
