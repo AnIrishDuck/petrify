@@ -5,6 +5,10 @@ Petrify
 .. image:: https://travis-ci.org/AnIrishDuck/petrify.svg?branch=master
     :target: https://travis-ci.org/AnIrishDuck/petrify
 
+.. image:: https://readthedocs.org/projects/petrify/badge/?version=latest
+    :target: https://petrify.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 A library for working with three-dimensional geometry. Designed for CAD / CAM
 applications.
 
