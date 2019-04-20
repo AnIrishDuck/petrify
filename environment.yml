@@ -1,0 +1,10 @@
+name: petrify
+channels:
+  - conda-forge
+dependencies:
+  - pythreejs
+  - matplotlib
+  - scipy
+  - scikit-image
+  - petrify
+  - numpy
