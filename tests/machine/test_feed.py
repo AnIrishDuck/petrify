@@ -106,7 +106,3 @@ class TestLinearStepFeed(unittest.TestCase):
 
         part = Part(circle, [Tab(Line(Point(0, 0), Vector(0, 1)), 2)])
         self.assertEqual(len(feed.part(part, tip)), 2)
-
-        for p in feed.part(part, tip):
-            print('part')
-            for l in p.segments(): print(l)
