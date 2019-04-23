@@ -105,13 +105,19 @@ class Path:
     def t(self, point):
         return self.transform * point
 
-    def polygons(self):
+    def polygons(self, min_length = 1.0):
         parsed = self.parse()
         polygons = []
         current = []
         for ix in range(len(parsed)):
             command = parsed[ix]
             if any(isinstance(command, T) for T in lines):
+                if not isinstance(command, Line):
+                    l = command.length(error=1e-5)
+                    points = l / min_length
+                    for ix in range(0, max(0, int(points) - 1)):
+                        subpoint = from_complex(command.point(ix / points))
+                        current.append(self.t(subpoint))
                 current.append(self.t(from_complex(command.end)))
             else:
                 if current: polygons.append(current)
