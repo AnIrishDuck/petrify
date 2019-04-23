@@ -43,12 +43,14 @@ class STL:
 
         >>> from petrify import u
         >>> from petrify.solid import Box, Point, Vector
+        >>> from tempfile import NamedTemporaryFile
         >>> b = Box(Point.origin, Vector(1, 1, 1))
-        >>> STL('tests/fixtures/svg.stl', 1 * u.mm / u.file).write(b.as_unit('inches'))
+        >>> with NamedTemporaryFile() as fp: \
+            STL(fp.name, 1 * u.mm / u.file).write(b.as_unit('inches'))
 
         The input geometry must have a length unit tag:
 
-        >>> STL('tests/fixtures/svg.stl', 1 * u.mm / u.file).write(b)
+        >>> STL('/tmp/error.stl', 1 * u.mm / u.file).write(b)
         Traceback (most recent call last):
         ...
         AssertionError: object does not have unit tag: Box(Point(0, 0, 0), Vector(1, 1, 1))
