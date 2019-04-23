@@ -90,7 +90,7 @@ class Path:
         self.transforms = transforms
         self.data = data
 
-        self.transform = Matrix.identity()
+        self.transform = Matrix.scale(1, -1)
         for transform in self.transforms:
             self.transform *= transform
 
