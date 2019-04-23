@@ -104,6 +104,27 @@ class LinearStepFeed:
         self.stepover = stepover
         self.dz = dz
 
+    def part(self, part, tip):
+        outline = part.outline.offset(tip.radius)
+
+        active = None
+        paths = [PlanarToolpath(outline.points[0])]
+        for line in outline.segments():
+            for tab in part.tabs:
+                i = tab.intersect(line)
+                if i is not None:
+                    if active is None:
+                        active = tab
+                        paths[-1].move_to(i)
+                    else:
+                        active = None
+                        paths.append(PlanarToolpath(i))
+
+            if active is None:
+                paths[-1].move_to(line.p2)
+
+        return paths
+
     def pocket_removal(self, pocket, tip):
         lines = self.scanlines(pocket, tip)
         return [ScanlineToolpath(b) for b in batch_scanlines(lines)]

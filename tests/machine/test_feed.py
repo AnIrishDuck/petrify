@@ -1,7 +1,8 @@
+import math
 import unittest
 
-from petrify.plane import LineSegment, Point, Polygon
-from petrify.machine import Pocket, StraightTip, LinearStepFeed
+from petrify.plane import tau, Line, LineSegment, Point, Polygon, Vector
+from petrify.machine import Part, Pocket, StraightTip, Tab, LinearStepFeed
 from petrify.machine.feed import batch_scanlines
 
 inside = Polygon([Point(0, 0), Point(0, 3), Point(3, 3), Point(3, 0)])
@@ -93,3 +94,19 @@ class TestLinearStepFeed(unittest.TestCase):
                 *y(2.75, (2.75, 0.25)),
             ]
         ])
+
+    def test_part(self):
+        r = 10
+        n = 6
+        angles = [tau * i / n for i in range(n)]
+        circle = Polygon([
+            Point(math.cos(theta) * r, math.sin(theta) * r)
+            for theta in angles
+        ])
+
+        part = Part(circle, [Tab(Line(Point(0, 0), Vector(0, 1)), 2)])
+        self.assertEqual(len(feed.part(part, tip)), 2)
+
+        for p in feed.part(part, tip):
+            print('part')
+            for l in p.segments(): print(l)
