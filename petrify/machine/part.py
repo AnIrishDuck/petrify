@@ -1,7 +1,9 @@
 class Part:
-    def __init__(self, outline, tabs):
+    def __init__(self, outline, tabs, depth):
+        assert depth > 0
         self.outline = outline
         self.tabs = tabs
+        self.depth = depth
 
 class Tab:
     def __init__(self, line, width):

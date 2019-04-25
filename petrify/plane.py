@@ -1095,7 +1095,7 @@ class Polygon:
         False
 
         """
-        test = Ray(Point(p.x, p.y), Vector(1, 0))
+        test = Ray(Point(p.x, p.y), Vector(0, 1))
         def intersect_partial(l):
             i = l.intersect(test)
             return i is not None and i != l.p2
