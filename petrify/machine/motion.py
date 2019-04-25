@@ -26,6 +26,16 @@ class Motion:
         self.z = z
         self.f = f
 
+    def __add__(self, v):
+        if not isinstance(v, Vector):
+            return NotImplemented
+        return self.merge(
+            Motion(
+                x=(self.x + v.x if self.x is not None else None),
+                y=(self.y + v.y if self.y is not None else None),
+            )
+        )
+
     def __repr__(self):
         return "Motion(x={0.x}, y={0.y}, z={0.z}, f={0.f})".format(self)
 
@@ -117,6 +127,11 @@ class Batch(Cut):
     def __init__(self, phases):
         self.phases = phases
 
+    def __add__(self, v):
+        if not isinstance(v, Vector):
+            return NotImplemented
+        return MovedBatch(self.phases, v)
+
     def then(self, other):
         return Sequence([*self.phases, other])
 
@@ -124,3 +139,13 @@ class Batch(Cut):
         for phase in self.phases:
             for parent, motion in phase.motions():
                 yield (parent, motion)
+
+class MovedBatch(Batch):
+    def __init__(self, phases, translate):
+        super().__init__(phases)
+        self.translate = translate
+
+    def motions(self):
+        for phase in self.phases:
+            for parent, motion in phase.motions():
+                yield (parent, motion + self.translate)
