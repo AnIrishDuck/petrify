@@ -105,7 +105,7 @@ class Path:
     def t(self, point):
         return self.transform * point
 
-    def polygons(self, min_length = 1.0):
+    def polygons(self, min_length = 1.0 * u.file):
         parsed = self.parse()
         polygons = []
         current = []

@@ -17,6 +17,7 @@ class TestExtrusion(unittest.TestCase):
     def test_conversion(self):
         scale = 1 * u.inches / u.file
         paths = SVG.read('tests/fixtures/example.svg', scale)
+        paths['text'].polygons()
         paths['text'].polygons(1.0 * u.mm / scale)
 
 def load_tests(loader, tests, ignore):
