@@ -57,7 +57,7 @@ class Motion:
         if self.y: parts.append('Y{0}'.format(self.y))
         if self.z: parts.append('Z{0}'.format(self.z))
         parts.append('F{0}'.format(self.f))
-        return parts.join(' ')
+        return ' '.join(parts)
 
 class Cut:
     def named(self, name):
@@ -69,6 +69,7 @@ class Cut:
     def gcode(self, f):
         for parent, motion in self.motions():
             f.write(motion.gcode())
+            f.write('\n')
 
     def visualize(self, colors={}):
         import pythreejs as js
