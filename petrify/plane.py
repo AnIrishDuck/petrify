@@ -1102,3 +1102,17 @@ class Polygon:
         intersects = (l.intersect(test) for l in self.segments())
         intersects = set(i for i in intersects if i is not None)
         return len(intersects) % 2 == 1
+
+class ComplexPolygon:
+    def __init__(self, polygons):
+        self.interior = []
+        self.exterior = []
+        for ix, polygon in enumerate(polygons):
+            if not polygon.clockwise():
+                polygon = polygon.inverted()
+            first = polygon.points[0]
+            others = (*polygons[:ix], *polygons[ix + 1:])
+            if any(other.contains(first) for other in others):
+                self.interior.append(polygon.simplify())
+            else:
+                self.exterior.append(polygon.simplify())

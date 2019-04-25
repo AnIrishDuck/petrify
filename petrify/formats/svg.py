@@ -14,7 +14,7 @@ Its current primary three-dimensional purpose is generating
 from svg.path import parse_path, Line, CubicBezier, QuadraticBezier, Arc
 from .. import units, u
 from ..geometry import valid_scalar
-from ..plane import Matrix, Point, Polygon
+from ..plane import Matrix, Point, Polygon, ComplexPolygon
 from ..decompose import trapezoidal
 from ..solid import Node, PolygonExtrusion, Union
 import re
@@ -34,20 +34,13 @@ class PathExtrusion(Node):
 
     """
     def __init__(self, path, height, projection):
-        path = path.polygons()
-        interior = []
-        exterior = []
+        path = path.polygon()
 
-        for ix, polygon in enumerate(path):
-            if not polygon.clockwise():
-                polygon = polygon.inverted()
-            first = polygon.points[0]
-            trapezoids = trapezoidal(polygon.points)
-            others = path[:ix] + path[ix + 1:]
-            if any(other.contains(first) for other in others):
-                interior.extend(trapezoids)
-            else:
-                exterior.extend(trapezoids)
+        def trapezoids(polygons):
+            return [t.simplify() for polygon in polygons for t in trapezoidal(polygon.points)]
+
+        interior = trapezoids(path.interior)
+        exterior = trapezoids(path.exterior)
 
         interior = Union(
             [PolygonExtrusion(projection, p, height + 1) for p in interior]
@@ -125,7 +118,10 @@ class Path:
 
         if current: polygons.append(current)
 
-        return [Polygon(p) for p in polygons]
+        return [Polygon(p).simplify() for p in polygons]
+
+    def polygon(self, min_length = 1.0 * u.file):
+        return ComplexPolygon(self.polygons(min_length))
 
 class Handler(xml.sax.ContentHandler):
     def __init__(self, scale):

@@ -13,10 +13,14 @@ class TestExtrusion(unittest.TestCase):
         paths = SVG.read('tests/fixtures/example.svg', 1 * u.inches / u.file)
         box = paths['rect']
         example = svg.PathExtrusion(box, 1.0, Projection.unit)
+        self.assertEqual(len(box.polygon().interior), 1)
+        self.assertEqual(len(box.polygon().exterior), 1)
 
     def test_conversion(self):
         scale = 1 * u.inches / u.file
         paths = SVG.read('tests/fixtures/example.svg', scale)
+        paths['text'].polygon()
+        paths['text'].polygon(1.0 * u.file)
         paths['text'].polygons()
         paths['text'].polygons(1.0 * u.mm / scale)
 

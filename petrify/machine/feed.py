@@ -101,8 +101,8 @@ class LinearStepFeed:
 
     def scanlines(self, configuration, pocket):
         tool = configuration.tool
-        inside = bounding_lines(pocket.inside, -tool.radius)
-        outside = bounding_lines(pocket.outside, tool.radius)
+        inside = bounding_lines(pocket.exterior, -tool.radius)
+        outside = bounding_lines(pocket.interior, tool.radius)
         bounds = [*inside, *outside]
 
         start = min(y for l in bounds for y in (l.p1.y, l.p2.y))
@@ -124,22 +124,27 @@ class LinearStepFeed:
 
     def part(self, configuration, part):
         tool = configuration.tool
-        outline = part.outline.offset(tool.radius)
+        exterior = [p.offset(tool.radius) for p in part.exterior]
+        interior = [p.offset(-tool.radius) for p in part.interior]
 
+        all_paths =  []
         active = None
-        paths = [PlanarToolpath(outline.points[0])]
-        for line in outline.segments():
-            for tab in part.tabs:
-                i = tab.intersect(line)
-                if i is not None:
-                    if active is None:
-                        active = tab
-                        paths[-1].move_to(i)
-                    else:
-                        active = None
-                        paths.append(PlanarToolpath(i))
+        for outline in (*exterior, *interior):
+            paths = [PlanarToolpath(outline.points[0])]
+            for line in outline.segments():
+                for tab in part.tabs:
+                    i = tab.intersect(line)
+                    if i is not None:
+                        if active is None:
+                            active = tab
+                            paths[-1].move_to(i)
+                        else:
+                            active = None
+                            paths.append(PlanarToolpath(i))
 
-            if active is None:
-                paths[-1].move_to(line.p2)
+                if active is None:
+                    paths[-1].move_to(line.p2)
 
-        return self.step(configuration, paths, part)
+            all_paths.extend(paths)
+
+        return self.step(configuration, all_paths, part)

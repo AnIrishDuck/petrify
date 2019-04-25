@@ -1,6 +1,13 @@
+from ..plane import ComplexPolygon
+
 class Pocket:
-    def __init__(self, inside, outside, depth):
+    def __init__(self, polygon, depth):
         assert depth > 0
-        self.outside = outside
-        self.inside = inside
+        self.polygon = polygon
+        if isinstance(self.polygon, ComplexPolygon):
+            self.interior = polygon.interior
+            self.exterior = polygon.exterior
+        else:
+            self.interior = []
+            self.exterior = [polygon]
         self.depth = depth

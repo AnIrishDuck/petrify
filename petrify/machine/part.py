@@ -1,7 +1,15 @@
+from ..plane import ComplexPolygon
+
 class Part:
-    def __init__(self, outline, tabs, depth):
+    def __init__(self, polygon, tabs, depth):
         assert depth > 0
-        self.outline = outline
+        self.polygon = polygon
+        if isinstance(self.polygon, ComplexPolygon):
+            self.interior = polygon.interior
+            self.exterior = polygon.exterior
+        else:
+            self.interior = []
+            self.exterior = [polygon]
         self.tabs = tabs
         self.depth = depth
 

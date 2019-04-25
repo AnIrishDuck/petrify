@@ -1,7 +1,7 @@
 import math
 import unittest
 
-from petrify.plane import tau, Line, LineSegment, Point, Polygon, Vector
+from petrify.plane import tau, ComplexPolygon, Line, LineSegment, Point, Polygon, Vector
 from petrify.machine import (
     Part,
     Pocket,
@@ -19,17 +19,20 @@ tool = StraightTip(0.5)
 feed = LinearStepFeed(0.5, 1.0)
 config = mpcnc.configure(feed, speeds, tool)
 
-inside = Polygon([Point(0, 0), Point(0, 3), Point(3, 3), Point(3, 0)])
-outside = Polygon([Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 1)])
-pocket = Pocket([inside], [outside], 1.0)
-
 def y(y, pairs):
     pairs = [pairs] if isinstance(pairs, tuple) else pairs
     return [(Point(x1, y), Point(x2, y)) for x1, x2 in pairs]
 
 class TestLinearStepFeed(unittest.TestCase):
+    def pocket(self):
+        polygon = ComplexPolygon([
+            Polygon([Point(0, 0), Point(0, 3), Point(3, 3), Point(3, 0)]),
+            Polygon([Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 1)])
+        ])
+        return Pocket(polygon, 1.0)
+
     def test_scanlines(self):
-        lines = feed.scanlines(config, pocket)
+        lines = feed.scanlines(config, self.pocket())
         self.assertEqual(lines, [
             y(0.25, [(0.25, 2.75)]),
             y(0.50, [(0.25, 2.75)]),
@@ -45,7 +48,7 @@ class TestLinearStepFeed(unittest.TestCase):
         ])
 
     def test_batching(self):
-        batches = batch_scanlines(feed.scanlines(config, pocket))
+        batches = batch_scanlines(feed.scanlines(config, self.pocket()))
         self.assertEqual(sorted(batches, key=lambda b: len(b)), [
             [
                 *y(0.75, (2.25, 2.75)),
@@ -72,7 +75,7 @@ class TestLinearStepFeed(unittest.TestCase):
         ])
 
     def test_toolpath(self):
-        passes = feed.pocket(config, pocket).passes
+        passes = feed.pocket(config, self.pocket()).passes
         def fy(yl, line):
             fx = line[-1]
             # Account for the feed-up line segment.
