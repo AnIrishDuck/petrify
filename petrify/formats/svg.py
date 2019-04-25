@@ -12,7 +12,7 @@ Its current primary three-dimensional purpose is generating
 
 """
 from svg.path import parse_path, Line, CubicBezier, QuadraticBezier, Arc
-from .. import units
+from .. import units, u
 from ..geometry import valid_scalar
 from ..plane import Matrix, Point, Polygon
 from ..decompose import trapezoidal
@@ -114,7 +114,7 @@ class Path:
             if any(isinstance(command, T) for T in lines):
                 if not isinstance(command, Line):
                     l = command.length(error=1e-5)
-                    points = l / min_length
+                    points = l / min_length.m_as(u.file)
                     for ix in range(0, max(0, int(points) - 1)):
                         subpoint = from_complex(command.point(ix / points))
                         current.append(self.t(subpoint))

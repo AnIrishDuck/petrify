@@ -14,6 +14,11 @@ class TestExtrusion(unittest.TestCase):
         box = paths['rect']
         example = svg.PathExtrusion(box, 1.0, Projection.unit)
 
+    def test_conversion(self):
+        scale = 1 * u.inches / u.file
+        paths = SVG.read('tests/fixtures/example.svg', scale)
+        paths['text'].polygons(1.0 * u.mm / scale)
+
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(svg))
     return tests
