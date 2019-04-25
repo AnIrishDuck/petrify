@@ -942,6 +942,9 @@ class Polygon:
     def __repr__(self):
         return 'Polygon({0!r})'.format(self.points)
 
+    def __eq__(self, other):
+        return all(a == b for a, b in zip(self.points, other.points))
+
     def segments(self):
         pairs = zip(self.points, self.points[1:] + [self.points[0]])
         return [LineSegment(a, b) for a, b in pairs]
@@ -1104,15 +1107,31 @@ class Polygon:
         return len(intersects) % 2 == 1
 
 class ComplexPolygon:
-    def __init__(self, polygons):
-        self.interior = []
-        self.exterior = []
-        for ix, polygon in enumerate(polygons):
-            if not polygon.clockwise():
-                polygon = polygon.inverted()
-            first = polygon.points[0]
-            others = (*polygons[:ix], *polygons[ix + 1:])
-            if any(other.contains(first) for other in others):
-                self.interior.append(polygon.simplify())
-            else:
-                self.exterior.append(polygon.simplify())
+    def __init__(self, polygons=None, interior=None, exterior=None):
+        if polygons is not None:
+            self.interior = []
+            self.exterior = []
+            for ix, polygon in enumerate(polygons):
+                if not polygon.clockwise():
+                    polygon = polygon.inverted()
+                first = polygon.points[0]
+                others = (*polygons[:ix], *polygons[ix + 1:])
+                if any(other.contains(first) for other in others):
+                    self.interior.append(polygon.simplify())
+                else:
+                    self.exterior.append(polygon.simplify())
+        elif interior is not None and exterior is not None:
+            self.interior = interior
+            self.exterior = exterior
+
+    def __mul__(self, v):
+        return ComplexPolygon(
+            interior=[p * v for p in self.interior],
+            exterior=[p * v for p in self.exterior]
+        )
+
+    def __add__(self, v):
+        return ComplexPolygon(
+            interior=[p + v for p in self.interior],
+            exterior=[p + v for p in self.exterior]
+        )

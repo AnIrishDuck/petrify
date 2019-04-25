@@ -1,7 +1,7 @@
 import doctest, unittest
 
 from petrify import plane
-from petrify.plane import Polygon, Point, Ray, Vector
+from petrify.plane import ComplexPolygon, Polygon, Point, Ray, Vector
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(plane))
@@ -166,4 +166,37 @@ class TestPolygon(unittest.TestCase):
             Point(-0.1, 1.1),
             Point(1.1, 1.1),
             Point(1.1, -0.1)
+        ])
+
+class TestComplexPolygon(unittest.TestCase):
+    def test_complex_add(self):
+        polygon = ComplexPolygon([
+            Polygon([Point(0, 0), Point(0, 3), Point(3, 3), Point(3, 0)]),
+            Polygon([Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 1)])
+        ])
+
+        moved = polygon + Vector(20, 10)
+
+        self.assertEqual(moved.interior, [
+            Polygon([Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 1)]) + Vector(20, 10)
+        ])
+
+        self.assertEqual(moved.exterior, [
+            Polygon([Point(0, 0), Point(0, 3), Point(3, 3), Point(3, 0)]) + Vector(20, 10)
+        ])
+
+    def test_complex_multiply(self):
+        polygon = ComplexPolygon([
+            Polygon([Point(0, 0), Point(0, 3), Point(3, 3), Point(3, 0)]),
+            Polygon([Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 1)])
+        ])
+
+        moved = polygon * Vector(20, 10)
+
+        self.assertEqual(moved.interior, [
+            Polygon([Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 1)]) * Vector(20, 10)
+        ])
+
+        self.assertEqual(moved.exterior, [
+            Polygon([Point(0, 0), Point(0, 3), Point(3, 3), Point(3, 0)]) * Vector(20, 10)
         ])
