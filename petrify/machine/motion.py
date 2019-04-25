@@ -133,7 +133,7 @@ class Batch(Cut):
         return MovedBatch(self.phases, v)
 
     def then(self, other):
-        return Sequence([*self.phases, other])
+        return Batch([*self.phases, other])
 
     def motions(self):
         for phase in self.phases:
