@@ -97,6 +97,7 @@ class LinearStepFeed:
     def pocket(self, configuration, pocket):
         lines = self.scanlines(configuration, pocket)
         paths = [ScanlineToolpath(b) for b in batch_scanlines(lines)]
+        paths = sorted(paths, key=lambda p: p.path[0].x)
         return self.step(configuration, paths, pocket)
 
     def scanlines(self, configuration, pocket):
