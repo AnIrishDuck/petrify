@@ -43,6 +43,32 @@ class TestPolygon(unittest.TestCase):
         self.assertFalse(shape.contains(Point(0, -2)))
         self.assertFalse(shape.contains(Point(-2, 0)))
 
+    def test_contain_through_lines(self):
+        shape = Polygon([
+            Point(0, 0),
+            Point(0, 1),
+            Point(1, 1),
+            Point(1, 0)
+        ])
+
+        self.assertFalse(shape.contains(Point(-1, 0)))
+        self.assertFalse(shape.contains(Point(0, -1)))
+        self.assertFalse(shape.contains(Point(2, 0)))
+        self.assertFalse(shape.contains(Point(0, 2)))
+
+    def test_point_on_shape(self):
+        shape = Polygon([
+            Point(0, 0),
+            Point(0, 1),
+            Point(1, 1),
+            Point(1, 0)
+        ])
+
+        self.assertTrue(shape.contains(Point(0.5, 0)))
+        self.assertTrue(shape.contains(Point(0, 0.5)))
+        self.assertTrue(shape.contains(Point(1, 0.5)))
+        self.assertTrue(shape.contains(Point(0.5, 1)))
+
     def test_inwards(self):
         w = Polygon([
             Point(0, 0), Point(0, 2), Point(1, 2), Point(1, 1),

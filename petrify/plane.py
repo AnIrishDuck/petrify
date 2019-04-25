@@ -1095,9 +1095,10 @@ class Polygon:
         False
 
         """
-        test = Ray(Point(p.x, p.y), Vector(0, 1))
-        def intersect_partial(l):
-            i = l.intersect(test)
-            return i is not None and i != l.p2
-        counts = sum(1 for l in self.segments() if intersect_partial(l))
-        return counts % 2 == 1
+        for l in self.segments():
+            if l.v.magnitude_squared() > 0 and l.connect(p).v.magnitude_squared() == 0:
+                return True
+        test = Ray(Point(p.x, p.y), Vector(1, 0))
+        intersects = (l.intersect(test) for l in self.segments())
+        intersects = set(i for i in intersects if i is not None)
+        return len(intersects) % 2 == 1
