@@ -91,7 +91,9 @@ class LinearStepFeed:
         self.dz = dz
 
     def step(self, configuration, toolpath, shape):
-        steps = Steps(-self.dz, -shape.depth, -self.dz)
+        start = shape.start or self.dz
+        assert start > 0
+        steps = Steps(-start, -shape.depth, -self.dz)
         return CutSteps(toolpath, steps, configuration)
 
     def pocket(self, configuration, pocket):
