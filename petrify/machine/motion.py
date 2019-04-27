@@ -90,8 +90,8 @@ class ToolPause:
         super().__init__('Tool: {0}'.format(tool.name))
 
 class Cut:
-    def named(self, name):
-        return NamedPhase(name, self)
+    def props(self, **props):
+        return AnnotatedPhase(self, props)
 
     def then(self, other):
         return Sequence([self, other])
@@ -128,10 +128,11 @@ class Cut:
         material = js.LineBasicMaterial(vertexColors='VertexColors', linewidth=1)
         return js.LineSegments(geometry, material)
 
-class NamedPhase(Cut):
-    def __init__(self, name, inner):
-        self.name = name
+class AnnotatedPhase(Cut):
+    def __init__(self, inner, props):
         self.inner = inner
+        for key, prop in props.items():
+            setattr(self, key, prop)
 
     def commands(self):
         return ((self, command) for _, command in self.inner.commands())
