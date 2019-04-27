@@ -59,6 +59,36 @@ class Motion:
         parts.append('F{0}'.format(self.f))
         return ' '.join(parts)
 
+class GCode:
+    def __init__(self, line):
+        self.line = line
+
+    def __add__(self, v):
+        if not isinstance(v, Vector):
+            return NotImplemented
+        return self
+
+    def gcode(self):
+        return self.line
+
+class ToolChange:
+    def __init__(self, tool):
+        self.tool = tool
+
+    def commands(self):
+        return [(self, GCode('M6 T{0}'.format(self.tool.number)))]
+
+class Pause:
+    def __init__(self, message):
+        self.message = message
+
+    def commands(self):
+        return [(self, GCode('M0 {0}'.format(self.message)))]
+
+class ToolPause:
+    def __init__(self, tool):
+        super().__init__('Tool: {0}'.format(tool.name))
+
 class Cut:
     def named(self, name):
         return NamedPhase(name, self)
@@ -67,8 +97,8 @@ class Cut:
         return Sequence([self, other])
 
     def gcode(self, f):
-        for parent, motion in self.motions():
-            f.write(motion.gcode())
+        for parent, command in self.commands():
+            f.write(command.gcode())
             f.write('\n')
 
     def visualize(self, colors={}):
@@ -79,12 +109,13 @@ class Cut:
         lines = []
         line_colors = []
 
-        for parent, motion in self.motions():
-            updated = prior.merge(motion)
-            lines.extend([prior.xyz, updated.xyz])
-            prior = updated
-            color = [0, 1, 0]
-            line_colors.extend([color, color])
+        for parent, command in self.commands():
+            if isinstance(command, Motion):
+                updated = prior.merge(command)
+                lines.extend([prior.xyz, updated.xyz])
+                prior = updated
+                color = getattr(parent, 'color', [0, 1, 0])
+                line_colors.extend([color, color])
 
         lines = np.array(lines, dtype=np.float32)
         line_colors = np.array(line_colors, dtype=np.float32)
@@ -102,8 +133,8 @@ class NamedPhase(Cut):
         self.name = name
         self.inner = inner
 
-    def motions(self):
-        return self.inner.motions()
+    def commands(self):
+        return ((self, command) for _, command in self.inner.commands())
 
 class CutSteps(Cut):
     def __init__(self, passes, steps, configuration):
@@ -111,7 +142,7 @@ class CutSteps(Cut):
         self.steps = steps
         self.configuration = configuration
 
-    def motions(self):
+    def commands(self):
         m = self.configuration.machine
         s = self.configuration.speeds
 
@@ -136,17 +167,17 @@ class Batch(Cut):
     def then(self, other):
         return Batch([*self.phases, other])
 
-    def motions(self):
+    def commands(self):
         for phase in self.phases:
-            for parent, motion in phase.motions():
-                yield (parent, motion)
+            for parent, command in phase.commands():
+                yield (parent, command)
 
 class MovedBatch(Batch):
     def __init__(self, phases, translate):
         super().__init__(phases)
         self.translate = translate
 
-    def motions(self):
+    def commands(self):
         for phase in self.phases:
-            for parent, motion in phase.motions():
-                yield (parent, motion + self.translate)
+            for parent, command in phase.commands():
+                yield (parent, command + self.translate)

@@ -7,8 +7,10 @@ class Speed:
         self.z = z
 
 class StraightTip:
-    def __init__(self, diameter):
+    def __init__(self, number, diameter, name=None):
+        self.number = number
         self.diameter = diameter
+        self.name = name or '{0} straight'
 
     @property
     def radius(self):
