@@ -15,7 +15,7 @@ from petrify.machine.feed import batch_scanlines
 
 mpcnc = Machine(clearance=2.0)
 speeds = Speed(xy=900, z=200)
-tool = StraightTip(0.5)
+tool = StraightTip(1, 0.5)
 feed = LinearStepFeed(0.5, 1.0)
 config = mpcnc.configure(feed, speeds, tool)
 

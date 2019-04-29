@@ -12,7 +12,8 @@ Its current primary three-dimensional purpose is generating
 
 """
 from svg.path import parse_path, Line, CubicBezier, QuadraticBezier, Arc
-from .. import units, u
+from .. import units
+from ..units import u
 from ..geometry import valid_scalar
 from ..plane import Matrix, Point, Polygon, ComplexPolygon
 from ..decompose import trapezoidal
