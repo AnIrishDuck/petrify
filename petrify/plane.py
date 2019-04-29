@@ -1156,6 +1156,16 @@ class ComplexPolygon:
         material = js.LineBasicMaterial(vertexColors='VertexColors', linewidth=1)
         return js.LineSegments(geometry, material)
 
+    def offset(self, amount):
+        def off(ps, v):
+            polygons = [p.offset(v) for p in ps]
+            return [p for p in polygons if p is not None]
+
+        return ComplexPolygon(
+            interior=off(self.interior, amount),
+            exterior=off(self.exterior, -amount)
+        )
+
     def __mul__(self, v):
         return ComplexPolygon(
             interior=[p * v for p in self.interior],
