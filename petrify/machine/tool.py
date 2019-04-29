@@ -10,7 +10,7 @@ class StraightTip:
     def __init__(self, number, diameter, name=None):
         self.number = number
         self.diameter = diameter
-        self.name = name or '{0} straight'
+        self.name = name or '{0} straight'.format(diameter)
 
     @property
     def radius(self):

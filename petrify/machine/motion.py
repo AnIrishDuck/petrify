@@ -125,6 +125,7 @@ class CutSteps(Cut):
                 yield (self, Motion(z=step, f=s.z))
                 for point in path[1:]:
                     yield (self, Motion(x=point.x, y=point.y, f=s.xy))
+                yield (self, Motion(z=m.clearance, f=s.z))
 
 class Batch(Cut):
     def __init__(self, phases):

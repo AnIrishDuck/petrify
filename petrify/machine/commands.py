@@ -26,6 +26,6 @@ class Pause:
     def commands(self):
         return [(self, GCode('M0 {0}'.format(self.message)))]
 
-class ToolPause:
+class ToolPause(Pause):
     def __init__(self, tool):
-        super().__init__('Tool: {0}'.format(tool.name))
+        super().__init__('Tool to {0}'.format(tool.number))
