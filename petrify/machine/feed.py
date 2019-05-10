@@ -91,11 +91,11 @@ class LinearStepFeed:
         self.stepover = stepover
         self.dz = dz
 
-    def step(self, configuration, toolpath, shape):
+    def step(self, configuration, toolpaths, shape):
         start = shape.start or self.dz
         assert start > 0
         steps = Steps(-start, -shape.depth, -self.dz)
-        return CutSteps(toolpath, steps, configuration)
+        return CutSteps(toolpaths, steps, configuration)
 
     def pocket(self, configuration, pocket):
         lines = self.scanlines(configuration, pocket)
