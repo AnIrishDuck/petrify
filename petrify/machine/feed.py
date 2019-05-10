@@ -153,3 +153,15 @@ class LinearStepFeed:
             all_paths.extend(paths)
 
         return self.step(configuration, all_paths, part)
+
+    def engrave(self, configuration, engrave):
+        def path(polygon):
+            p = PlanarToolpath(None)
+            p.path = [*polygon.points, polygon.points[0]]
+            return p
+
+        toolpaths = [path(polygon) for polygon in engrave.polygon.polygons()]
+        toolpaths = sorted(toolpaths, key=lambda p: p.path[0].x)
+
+        steps = Steps(-engrave.depth, -engrave.depth, -self.dz)
+        return CutSteps(toolpaths, steps, configuration)

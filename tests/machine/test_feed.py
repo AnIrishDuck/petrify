@@ -3,6 +3,7 @@ import unittest
 
 from petrify.plane import tau, ComplexPolygon, Line, LineSegment, Point, Polygon, Vector
 from petrify.machine import (
+    Engrave,
     Part,
     Pocket,
     StraightTip,
@@ -141,3 +142,13 @@ class TestLinearStepFeed(unittest.TestCase):
 
         passes = feed.part(config, pocket).passes
         self.assertEqual(len(passes), 1)
+
+    def test_engrave(self):
+        polygon = ComplexPolygon([
+            Polygon([Point(0, 0), Point(0, 100), Point(100, 100), Point(100, 0)]),
+            Polygon([Point(1, 1), Point(1, 1.25), Point(1.25, 1.25), Point(1.25, 1)])
+        ])
+
+        engrave = Engrave(polygon, 0.5)
+        passes = feed.engrave(config, engrave).passes
+        self.assertEqual(len(passes[0].path), 5)

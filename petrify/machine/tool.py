@@ -1,3 +1,4 @@
+from .engrave import Engrave
 from .pocket import Pocket
 from .part import Part
 
@@ -36,6 +37,8 @@ class Configuration:
             return self.feed.pocket(self, shape)
         elif isinstance(shape, Part):
             return self.feed.part(self, shape)
+        elif isinstance(shape, Engrave):
+            return self.feed.engrave(self, shape)
 
 class Tool:
     def __init__(self, tip, feeds, speeds):
