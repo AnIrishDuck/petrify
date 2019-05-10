@@ -57,6 +57,7 @@ def batch_scanlines(scanlines):
     for level_lines in scanlines:
         next_shapes = []
         for line in level_lines:
+            if line[1] is None: continue
             matched = False
             for ix, shape in enumerate(current_shapes):
                 ax0, ax1 = shape[-1][0].x, shape[-1][1].x
