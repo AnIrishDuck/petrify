@@ -956,6 +956,11 @@ class Polygon:
         >>> Polygon([Point(1, 1), Point(2, 0), Point(0, 0), Point(1, 1)]).simplify()
         Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
 
+        Returns `None` if the resulting simplification would create a point:
+
+        >>> Polygon([Point(1, 1), Point(2, 0), Point(0, 0), Point(1, 1)]).simplify(100) is None
+        True
+
         """
         prior = self.points[-1].snap(tolerance)
         points = []
@@ -964,7 +969,7 @@ class Polygon:
             if snapped != prior:
                 points.append(point)
                 prior = snapped
-        return Polygon(points)
+        return Polygon(points) if len(points) > 1 else None
 
     def to_clockwise(self):
         """
@@ -1112,14 +1117,18 @@ class ComplexPolygon:
             self.interior = []
             self.exterior = []
             for ix, polygon in enumerate(polygons):
-                if not polygon.clockwise():
-                    polygon = polygon.inverted()
-                first = polygon.points[0]
+                simple = polygon.simplify()
+                if simple is None:
+                    continue
+
+                if not simple.clockwise():
+                    simple = simple.inverted()
+                first = simple.points[0]
                 others = (*polygons[:ix], *polygons[ix + 1:])
                 if any(other.contains(first) for other in others):
-                    self.interior.append(polygon.simplify())
+                    self.interior.append(simple)
                 else:
-                    self.exterior.append(polygon.simplify())
+                    self.exterior.append(simple)
         elif interior is not None and exterior is not None:
             self.interior = interior
             self.exterior = exterior

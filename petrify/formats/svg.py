@@ -119,7 +119,8 @@ class Path:
 
         if current: polygons.append(current)
 
-        return [Polygon(p).simplify() for p in polygons]
+        polygons = (Polygon(p).simplify() for p in polygons)
+        return [p for p in polygons if p is not None]
 
     def polygon(self, min_length = 1.0 * u.file):
         return ComplexPolygon(self.polygons(min_length))
