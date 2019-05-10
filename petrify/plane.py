@@ -949,6 +949,9 @@ class Polygon:
         pairs = zip(self.points, self.points[1:] + [self.points[0]])
         return [LineSegment(a, b) for a, b in pairs]
 
+    def polygons(self):
+        return [self]
+
     def simplify(self, tolerance=0.0001):
         """
         Remove any duplicate points, within a certain `tolerance`:
@@ -1165,14 +1168,20 @@ class ComplexPolygon:
         material = js.LineBasicMaterial(vertexColors='VertexColors', linewidth=1)
         return js.LineSegments(geometry, material)
 
+    def segments(self):
+        return (s for p in self.polygons() for s in p.segments())
+
+    def polygons(self):
+        return (*self.exterior, *self.interior)
+
     def offset(self, amount):
         def off(ps, v):
             polygons = [p.offset(v) for p in ps]
             return [p for p in polygons if p is not None]
 
         return ComplexPolygon(
-            interior=off(self.interior, amount),
-            exterior=off(self.exterior, -amount)
+            interior=off(self.interior, -amount),
+            exterior=off(self.exterior, amount)
         )
 
     def __mul__(self, v):

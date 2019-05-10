@@ -105,9 +105,11 @@ class LinearStepFeed:
 
     def scanlines(self, configuration, pocket):
         tool = configuration.tool
-        inside = bounding_lines(pocket.exterior, -tool.radius)
-        outside = bounding_lines(pocket.interior, tool.radius)
-        bounds = [*inside, *outside]
+        off = pocket.polygon.offset(-tool.radius)
+        bounds = [
+            l for l in off.segments()
+            if l.v.y != 0
+        ]
 
         start = min(y for l in bounds for y in (l.p1.y, l.p2.y))
         end = max(y for l in bounds for y in (l.p1.y, l.p2.y))
@@ -128,12 +130,11 @@ class LinearStepFeed:
 
     def part(self, configuration, part):
         tool = configuration.tool
-        exterior = [p.offset(tool.radius) for p in part.exterior]
-        interior = [p.offset(-tool.radius) for p in part.interior]
+        off = part.polygon.offset(tool.radius)
 
         all_paths =  []
         active = None
-        for outline in (*exterior, *interior):
+        for outline in off.polygons():
             paths = [PlanarToolpath(outline.points[0])]
             for line in outline.segments():
                 for tab in part.tabs:

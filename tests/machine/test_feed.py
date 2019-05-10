@@ -121,3 +121,23 @@ class TestLinearStepFeed(unittest.TestCase):
         part = Part(circle, [Tab(Line(Point(0, 0), Vector(0, 1)), 2)], 1.0)
         passes = feed.part(config, part).passes
         self.assertEqual(len(passes), 2)
+
+    def test_unworkable_pocket_removal(self):
+        polygon = ComplexPolygon([
+            Polygon([Point(0, 0), Point(0, 100), Point(100, 100), Point(100, 0)]),
+            Polygon([Point(1, -1), Point(1, -1.25), Point(1.25, -1.25), Point(1.25, -1)])
+        ])
+        pocket = Pocket(polygon, 1.0)
+
+        passes = feed.pocket(config, pocket).passes
+        self.assertEqual(len(passes), 1)
+
+    def test_unworkable_part_removal(self):
+        polygon = ComplexPolygon([
+            Polygon([Point(0, 0), Point(0, 100), Point(100, 100), Point(100, 0)]),
+            Polygon([Point(1, 1), Point(1, 1.25), Point(1.25, 1.25), Point(1.25, 1)])
+        ])
+        pocket = Part(polygon, [], 1.0)
+
+        passes = feed.part(config, pocket).passes
+        self.assertEqual(len(passes), 1)
