@@ -1649,6 +1649,9 @@ class Basis:
         else:
             return NotImplemented
 
+    def normal(self):
+        return self.bx.cross(self.by)
+
 Basis.unit = Basis(Point.origin, Vector.basis.x, Vector.basis.y)
 Basis.xy = Basis.unit
 Basis.yz = Basis(Point.origin, Vector.basis.y, Vector.basis.z)
@@ -1699,10 +1702,16 @@ class Face(PlanarPolygon):
 
     def __init__(self, basis, direction, polygon):
         assert direction in [Face.Positive, Face.Negative]
-        if direction == Face.Negative:
+        a = basis.normal().angle(Vector.basis.x)
+        if a == tau / 4:
+            a = basis.normal().angle(Vector.basis.y)
+            if a == tau / 4:
+                a = basis.normal().angle(Vector.basis.z)
+        inverted = a > tau / 4
+        if inverted ^ (direction == Face.Negative):
             polygon = polygon.to_counterclockwise()
         else:
-            polygon.to_clockwise()
+            polygon = polygon.to_clockwise()
         super().__init__(basis, polygon)
         self.direction = direction
 
