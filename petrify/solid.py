@@ -194,7 +194,7 @@ class Node:
         )
         return Box(origin, extent - origin)
 
-    def visualize(self):
+    def visualize(self, wireframe=False):
         """
         Create a `pythreejs`_ visualization of this geometry for use in
         interactive notebooks.
@@ -225,12 +225,18 @@ class Node:
             for p in t
         ]
 
-        return js.BufferGeometry(
+        geometry = js.BufferGeometry(
             attributes={
                 'position': _ba(vertices),
                 'normal': _ba(normals)
             },
         )
+
+        if not wireframe:
+            return geometry
+        else:
+            material = js.MeshBasicMaterial(color='#00ff00', wireframe=True)
+            return js.Mesh(geometry, material)
 
     def as_unit(self, unit):
         """
