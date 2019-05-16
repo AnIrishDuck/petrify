@@ -978,12 +978,25 @@ class Polygon:
         """
         Converts this polygon to a clockwise one if necessary:
 
-        >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)]).clockwise()
-        True
-        >>> Polygon([Point(1, 1), Point(0, 0), Point(2, 0)]).clockwise()
-        False
+        >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)]).to_clockwise()
+        Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> Polygon([Point(1, 1), Point(0, 0), Point(2, 0)]).to_clockwise()
+        Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+
         """
         return self if self.clockwise() else self.inverted()
+
+    def to_counterclockwise(self):
+        """
+        Converts this polygon to a clockwise one if necessary:
+
+        >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)]).to_counterclockwise()
+        Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])
+        >>> Polygon([Point(1, 1), Point(0, 0), Point(2, 0)]).to_counterclockwise()
+        Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])
+
+        """
+        return self.inverted() if self.clockwise() else self
 
     def clockwise(self):
         """

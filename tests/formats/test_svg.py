@@ -1,6 +1,6 @@
 import doctest, unittest
 from petrify.formats import svg, SVG
-from petrify.solid import Projection
+from petrify.solid import Basis, Vector
 from petrify import u
 
 class TestParse(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestExtrusion(unittest.TestCase):
     def test_example(self):
         paths = SVG.read('tests/fixtures/example.svg', 1 * u.inches / u.file)
         box = paths['rect']
-        example = svg.PathExtrusion(box, 1.0, Projection.unit)
+        example = svg.PathExtrusion(Basis.unit, box, Vector(0, 0, 1))
         self.assertEqual(len(box.polygon().interior), 1)
         self.assertEqual(len(box.polygon().exterior), 1)
 

@@ -16,7 +16,7 @@ from .. import units
 from ..geometry import valid_scalar
 from ..plane import Matrix, Point, Polygon, ComplexPolygon
 from ..decompose import trapezoidal
-from ..solid import Node, PolygonExtrusion, Union
+from ..solid import Basis, Node, PlanarPolygon, PolygonExtrusion, Union
 import re
 import xml.sax
 
@@ -28,14 +28,13 @@ class PathExtrusion(Node):
 
     >>> from petrify import u
     >>> from petrify.space import Plane, Point, Vector
-    >>> from petrify.solid import Projection
+    >>> from petrify.solid import Basis
     >>> paths = SVG.read('tests/fixtures/example.svg', u.inches / (90 * u.file))
     >>> box = paths['rect'].m_as(u.inches)
-    >>> plane = Plane(Vector.basis.z, Point.origin)
-    >>> example = PathExtrusion(box, 1.0, Projection.unit)
+    >>> example = PathExtrusion(Basis.unit, box, Vector(0, 0, 1))
 
     """
-    def __init__(self, path, height, projection):
+    def __init__(self, basis, path, direction):
         path = path.polygon()
 
         def trapezoids(polygons):
@@ -45,10 +44,10 @@ class PathExtrusion(Node):
         exterior = trapezoids(path.exterior)
 
         interior = Union(
-            [PolygonExtrusion(projection, p, height + 1) for p in interior]
+            [PolygonExtrusion(PlanarPolygon(basis, p), direction) for p in interior]
         )
         exterior = Union(
-            [PolygonExtrusion(projection, p, height) for p in exterior]
+            [PolygonExtrusion(PlanarPolygon(basis, p), direction) for p in exterior]
         )
 
         super().__init__((exterior - interior).polygons)

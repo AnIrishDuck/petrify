@@ -1,6 +1,6 @@
 import doctest, unittest
-from petrify import solid
-from petrify.solid import tau, Vector
+from petrify import plane, solid
+from petrify.solid import tau, Vector, Basis, PlanarPolygon, Extrusion
 
 class TestUtilities(unittest.TestCase):
     def test_perpendicular(self):
@@ -18,6 +18,25 @@ class TestUtilities(unittest.TestCase):
         _t(Vector(0, 1, 1))
 
         _t(Vector(1, 1, 1))
+
+class TestExtrusion(unittest.TestCase):
+    def test_simple(self):
+        parallelogram = plane.Polygon([
+            plane.Point(0, 0),
+            plane.Point(0, 1),
+            plane.Point(1, 2),
+            plane.Point(1, 1)
+        ])
+        square = plane.Polygon([
+            plane.Point(0, 0),
+            plane.Point(0, 1),
+            plane.Point(1, 1),
+            plane.Point(1, 0)
+        ])
+        object = Extrusion([
+            PlanarPolygon(Basis.xy, parallelogram),
+            PlanarPolygon(Basis.xy + Vector(0, 0, 1), square),
+        ])
 
 class TestNode(unittest.TestCase):
     def test_addition(self):

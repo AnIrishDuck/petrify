@@ -38,6 +38,7 @@ import types
 
 from pint.unit import _Unit
 
+from . import plane
 from .geometry import Geometry, tau, valid_scalar
 
 class Vector:
@@ -1588,6 +1589,123 @@ class Plane:
 Plane.xy = Plane(Vector(0.0, 0.0, 1.0), 0.0)
 Plane.xz = Plane(Vector(0.0, 1.0, 0.0), 0.0)
 Plane.yz = Plane(Vector(1.0, 0.0, 0.0), 0.0)
+
+class Basis:
+    """
+    Embeds a two-dimensional space into a three-dimensional space:
+
+    >>> basis = Basis(Point(1, 0, 0), Vector.basis.y, Vector.basis.z)
+    >>> basis.project(plane.Point(2, 3))
+    Point(1, 2, 3)
+    >>> basis.project(plane.Vector(-2, -3))
+    Vector(1, -2, -3)
+
+    Can be translated:
+
+    >>> translated = basis.xy + Vector(0, 0, 2)
+    >>> translated
+    Basis(Point(0, 0, 2), Vector(1, 0, 0), Vector(0, 1, 0))
+    >>> translated.project(plane.Point(2, 3))
+    Point(2, 3, 2)
+
+    ..note ::
+        A :class:`Plane` has an infinite number of associated `Basis`
+        constructions.
+
+    There are special `Basis` objects for commonly used bases:
+
+    >>> Basis.unit
+    Basis(Point(0, 0, 0), Vector(1, 0, 0), Vector(0, 1, 0))
+    >>> Basis.xy
+    Basis(Point(0, 0, 0), Vector(1, 0, 0), Vector(0, 1, 0))
+    >>> Basis.yz
+    Basis(Point(0, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1))
+    >>> Basis.xz
+    Basis(Point(0, 0, 0), Vector(1, 0, 0), Vector(0, 0, 1))
+
+    """
+    def __init__(self, origin, bx, by):
+        assert isinstance(origin, Point)
+        assert isinstance(bx, Vector)
+        assert isinstance(by, Vector)
+        assert bx.angle(by) > 0
+        self.origin = origin
+        self.bx = bx
+        self.by = by
+
+    def __add__(self, v):
+        if not isinstance(v, Vector): return NotImplemented
+        return Basis(self.origin + v, self.bx, self.by)
+
+    def __repr__(self):
+        return "Basis({0.origin!r}, {0.bx!r}, {0.by!r})".format(self)
+
+    def project(self, v):
+        p = self.origin + self.bx * v.x + self.by * v.y
+        if isinstance(v, plane.Point):
+            return p
+        elif isinstance(v, plane.Vector):
+            return p.vector()
+        else:
+            return NotImplemented
+
+Basis.unit = Basis(Point.origin, Vector.basis.x, Vector.basis.y)
+Basis.xy = Basis.unit
+Basis.yz = Basis(Point.origin, Vector.basis.y, Vector.basis.z)
+Basis.xz = Basis(Point.origin, Vector.basis.x, Vector.basis.z)
+
+class PlanarPolygon:
+    """
+    A two-dimensional polygon embedded in three-dimensional space via a
+    :class:`Basis`:
+
+    >>> tri = plane.Polygon([   \
+        plane.Point(0, 0),      \
+        plane.Point(0, 2),      \
+        plane.Point(1, 1)       \
+    ])
+    >>> triangle = PlanarPolygon(Basis.xy, tri)
+    >>> triangle.project()
+    Polygon([Point(0, 0, 0), Point(0, 2, 0), Point(1, 1, 0)])
+
+    """
+
+    def __init__(self, basis, polygon):
+        self.basis = basis
+        self.polygon = polygon
+
+    def project(self):
+        return Polygon([self.basis.project(p) for p in self.polygon.points])
+
+    def to_face(self, direction):
+        return Face(self.basis, direction, self.polygon)
+
+
+class Face(PlanarPolygon):
+    """
+    A `PlanarPolygon` with an associated polarity. `Face.Positive` polarity
+    follows the right hand rule, `Face.Negative` is inverted.
+
+    >>> tri= plane.Polygon([    \
+        plane.Point(0, 0),      \
+        plane.Point(0, 2),      \
+        plane.Point(1, 1)       \
+    ])
+    >>> triangle = Face(Basis.xy, Face.Positive, tri)
+
+    """
+    Positive = 1
+    Negative = -1
+
+    def __init__(self, basis, direction, polygon):
+        assert direction in [Face.Positive, Face.Negative]
+        if direction == Face.Negative:
+            polygon = polygon.to_counterclockwise()
+        else:
+            polygon.to_clockwise()
+        super().__init__(basis, polygon)
+        self.direction = direction
+
 
 # 3D Geometry
 # -------------------------------------------------------------------------

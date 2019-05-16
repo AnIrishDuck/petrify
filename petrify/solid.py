@@ -6,9 +6,7 @@ Creation of complex objects from humble building blocks:
 :py:class:`Cylinder` :
     A cylinder rotated around an origin and axis.
 :py:class:`PolygonExtrusion` :
-    Extrusion of a polygon into a three-dimensional shape.
-:py:class:`Sweep` :
-    Sweep a series of polygons along a three-dimensional line.
+    Extrusion of a :class:`space.PlanarPolygon` into a three-dimensional shape.
 :py:class:`Extrusion` :
     Complex layered objects with polygon slices.
 :py:class:`External` :
@@ -24,7 +22,7 @@ import math
 from csg import core, geom
 
 from . import plane, units
-from .space import Matrix, Point, Polygon, Vector
+from .space import Matrix, Point, Polygon, PlanarPolygon, Face, Basis, Vector
 from .geometry import tau, valid_scalar
 
 def perpendicular(axis):
@@ -35,68 +33,6 @@ def perpendicular(axis):
         return Vector(-axis.y, axis.x, 0)
     else:
         return Vector(axis.y, axis.x, -2 * axis.x * axis.y)
-
-class Projection:
-    """
-    Used for building solids from slices of two-dimensional geometry along a
-    given z-axis:
-
-    >>> project = Projection( \
-        Point.origin,         \
-        Vector(1, 1, 0),      \
-        Vector(0, 1, 1),      \
-        Vector(1, 0, 1)       \
-    )
-    >>> project.convert(plane.Point(1, 1), 1)
-    Point(2, 2, 2)
-
-    The basis vectors `bx`, `by` are multiplied by the corresponding `x` and `y`
-    scalars of a :py:class:`Slice` points, and the slice height is multiplied by
-    `bz`. All components are added together to get the final point in
-    three-dimensional space.
-
-    """
-    def __init__(self, origin, bx, by, bz):
-        self.origin = origin
-        self.bx = bx
-        self.by = by
-        self.bz = bz
-
-    def convert(self, point, dz):
-        tx = point.x * self.bx
-        ty = point.y * self.by
-        tz = dz * self.bz
-
-        v = self.origin + tx + ty + tz
-        return Point(v.x, v.y, v.z)
-
-Projection.unit = Projection(
-    Point.origin,
-    Vector.basis.x,
-    Vector.basis.y,
-    Vector.basis.z
-)
-
-class Slice:
-    """
-    A slice of two-dimensional geometry associated with a z-level:
-
-    >>> triangle = plane.Polygon([  \
-        plane.Point(0, 0),          \
-        plane.Point(0, 2),          \
-        plane.Point(1, 1)           \
-    ])
-    >>> s = Slice(triangle, 1)
-    >>> s.project(Projection.unit)
-    [Point(0, 0, 1), Point(0, 2, 1), Point(1, 1, 1)]
-
-    """
-    def __init__(self, polygon, dz):
-        self.polygon = polygon
-        self.dz = dz
-
-    def project(self, projection):
-        return [projection.convert(p, self.dz) for p in self.polygon.points]
 
 class Node:
     """
@@ -176,7 +112,10 @@ class Node:
             plane.Point(1, 2), \
             plane.Point(1, 1)  \
         ])
-        >>> extruded = PolygonExtrusion(Projection.unit, parallelogram, 1)
+        >>> extruded = PolygonExtrusion(            \
+            PlanarPolygon(Basis.xy, parallelogram), \
+            Vector(0, 0, 1)                         \
+        )
         >>> extruded.envelope()
         Box(Vector(0, 0, 0), Vector(1, 2, 1))
 
@@ -279,8 +218,8 @@ class Collection(Node):
 
 class Extrusion(Node):
     """
-    A three-dimensional object built from varying height :py:class:`Slice`
-    polygon layers:
+    A three-dimensional object built from rings of :class:`space.PlanarPolygon`
+    objects with the same number of points at each ring:
 
     >>> parallelogram = plane.Polygon([  \
         plane.Point(0, 0), \
@@ -294,58 +233,41 @@ class Extrusion(Node):
         plane.Point(1, 1),          \
         plane.Point(1, 0)           \
     ])
-    >>> object = Extrusion(Projection.unit, [ \
-        Slice(parallelogram, 0),     \
-        Slice(square, 1)             \
+    >>> object = Extrusion([                                \
+        PlanarPolygon(Basis.xy, parallelogram),             \
+        PlanarPolygon(Basis.xy + Vector(0, 0, 1), square),  \
     ])
 
-    The slices must all have the same number of vertices. Quads are
-    generated to connect each layer, and the bottom and top layers then complete
-    the shape.
+    The rings must all have the same number of vertices. Quads are generated to
+    connect each ring, and the bottom and top layers then complete the shape.
 
-    `projection` :
-        A :class:`Projection` defining the basis for the projected shape.
-    `slices` :
-        A list of :class:`Slice` objects defining each layer of the final shape.
+    `rings` :
+        A list of :class:`space.PlanarPolygon` objects defining each ring of
+        the final shape.
 
     """
 
-    def __init__(self, projection, slices):
-        self.projection = projection
+    def __init__(self, slices):
         assert(len(set(len(sl.polygon.points) for sl in slices)) == 1)
         self.slices = slices
 
         super().__init__(self.generate_polygons())
 
     def generate_polygons(self):
-        """ Returns all polygons from this shape. """
-        bottom = self.slices[0].project(self.projection)
-        top = self.slices[-1].project(self.projection)
+        """ Calculates all polygons for this shape. """
+        rings = [s.to_face(Face.Positive).project() for s in self.slices]
 
-        def i(p): return list(reversed(p))
-        middle = [i(p) for a, b in zip(self.slices, self.slices[1:])
-                  for p in self.ring(a, b)]
-        polygons = [bottom] + middle + [i(top)]
+        bottom = rings[0]
+        middle = [p for a, b in zip(rings, rings[1:]) for p in self.ring(a, b)]
+        top = self.slices[-1].to_face(Face.Negative).project()
 
-        return [Polygon(p) for p in polygons]
+        return [bottom, *middle, top]
 
-    def ring(self, a, b):
+    def ring(self, bottom, top):
         """ Builds a ring from two slices. """
-        bottom = a.project(self.projection)
-        top = b.project(self.projection)
-        lines = list(zip(bottom, top))
-        return [[la[0], lb[0], lb[1], la[1]]
+        lines = list(zip(bottom.points, top.points))
+        return [Polygon([la[1], lb[1], lb[0], la[0]])
                  for la, lb in zip(lines, lines[1:] + [lines[0]])]
-
-    @property
-    def bottom(self):
-        """ The bottom polygon of this extrusion. """
-        return self.polygons[0]
-
-    @property
-    def top(self):
-        """ The top polygon of this extrusion. """
-        return self.polygons[-1]
 
 def from_pycsg(_csg):
     def from_csg_polygon(csg):
@@ -418,16 +340,11 @@ class Box(Extrusion):
             [extent.x, extent.y],
             [extent.x, origin.y]
         ]])
-        bottom = Slice(footprint, origin.z)
-        top = Slice(footprint, extent.z)
+        bz = Vector.basis.z
+        bottom = PlanarPolygon(Basis.xy + bz * origin.z, footprint)
+        top = PlanarPolygon(Basis.xy + bz * extent.z, footprint)
 
-        project = Projection(
-            Vector(0, 0, 0),
-            Vector(1, 0, 0),
-            Vector(0, 1, 0),
-            Vector(0, 0, 1)
-        )
-        super().__init__(project, [bottom, top])
+        super().__init__([bottom, top])
 
     def __repr__(self):
         return "Box({0!r}, {1!r})".format(self.origin, self.size())
@@ -445,81 +362,25 @@ class PolygonExtrusion(Extrusion):
         plane.Point(0, 2),          \
         plane.Point(1, 1)           \
     ])
-    >>> extruded = PolygonExtrusion(Projection.unit, triangle, 1)
+    >>> planar = PlanarPolygon(Basis.xy, triangle)
+    >>> extruded = PolygonExtrusion(planar, Vector(0, 0, 1))
 
-    `projection` :
-        a :py:class:`Projection` that defines how to transform the points of the
-        polygon.
     `footprint` :
-        a list of :py:class:`plane.Point` objects describing a convex polygon
-        that will be extruded along the given `projection`
-    `height` :
-        the final object will join two :py:class:`Slice` polygons: one at `z=0`
-        and one at `z=height`
+        a :py:class:`space.PlanarPolygon` object describing a the polygon
+        that will be extruded in the given `direction`
+    `direction` :
+        A :class:`space.Vector` defining which direction the polygon will be
+        linearly extruded into.
 
     """
-    def __init__(self, projection, footprint, height):
+    def __init__(self, footprint, direction):
         self.footprint = footprint
-        self.height = height
+        self.bottom = self.footprint
+        self.top = PlanarPolygon(footprint.basis + direction, footprint.polygon)
 
-        bottom = Slice(footprint, 0)
-        top = Slice(footprint, height)
-        super().__init__(projection, [bottom, top])
+        super().__init__([self.bottom, self.top])
 
-class Sweep(Extrusion):
-    """
-    Create a solid from pairs of polygons swept along an arbitrary
-    three-dimensional path. The basis for each polygon is constructed from
-    combining path normals and a pre-provided basis vector that defines a
-    uniform y-axis:
-
-    >>> radius = 0.25
-    >>> angles = [tau * float(a) / 10 for a in range(10)]
-    >>> circle = plane.Polygon([ \
-        plane.Point(math.cos(theta) * radius, math.sin(theta) * radius) \
-        for theta in angles \
-    ])
-    >>> circles = [ \
-        (Point(1, 0, 0), circle), \
-        (Point(1, 1, 0), circle * plane.Vector(2, 2)), \
-        (Point(0, 1, 0), circle)  \
-    ]
-    >>> angle = Sweep(circles, Vector.basis.z)
-
-
-    .. warning::
-        This code currently has no way of detecting self-intersection, which
-        should be avoided.
-
-    """
-
-    class Projection:
-        def __init__(self, path, by):
-            self.by = by
-            self.origins = [point for point, _ in path]
-            vectors = [b - a for a, b in zip(self.origins, self.origins[1:])]
-            z = Vector(0, 0, 0)
-            self.normals = [
-                (a + b) for a, b in zip((z, *vectors), (*vectors, z))
-            ]
-
-        def convert(self, point, dz):
-            origin = self.origins[dz]
-            bx = self.normals[dz].cross(self.by).normalized()
-            v = origin + (point.x * bx) + (point.y * self.by)
-            return Point(*v.xyz)
-
-    def __init__(self, path, by):
-        self.path = path
-        self.by = by
-        project = Sweep.Projection(self.path, self.by)
-        slices = [
-            Slice(footprint, ix)
-            for ix, (_, footprint) in enumerate(path)
-        ]
-        super().__init__(project, slices)
-
-class Cylinder(Extrusion):
+class Cylinder(PolygonExtrusion):
     """
     A three-dimensional cylinder extruded along the given `axis`:
 
@@ -544,23 +405,15 @@ class Cylinder(Extrusion):
         self.radius = radius
 
         angles = list(tau * float(a) / segments for a in range(segments))
-        footprint = plane.Polygon([
+        circle = plane.Polygon([
             plane.Point(math.cos(theta) * radius, math.sin(theta) * radius)
             for theta in angles
         ])
 
-        bottom = Slice(footprint, 0)
-        top = Slice(footprint, 1)
-
-        bx = perpendicular(axis)
-        by = bx.cross(axis)
-        project = Projection(
-            origin,
-            bx.normalized(),
-            by.normalized(),
-            axis
-        )
-        super().__init__(project, [bottom, top])
+        bx = perpendicular(axis).normalized()
+        by = bx.cross(axis).normalized()
+        bottom = PlanarPolygon(Basis(origin, bx, by), circle)
+        super().__init__(bottom, axis)
 
     def height(self):
         """ The height of this cylinder along its `axis`. """
