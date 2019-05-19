@@ -353,6 +353,10 @@ class Vector:
             return round(v / grid) * grid
         return self.__class__(snap(self.x), snap(self.y), snap(self.z))
 
+    def point(self):
+        """ Convert this vector into a point. """
+        return Point(self.x, self.y, self.z)
+
     class Basis:
         @property
         def x(self): return Vector(1, 0, 0)
@@ -380,10 +384,35 @@ class Polygon:
         self.points = points
         self.plane = Plane(*points[0:3])
 
+    def inverted(self):
+        return Polygon(list(reversed(self.points)))
+
     def segments(self):
         """ Returns all line segments composing this polygon's edges. """
         paired = zip(self.points, self.points[1:] + [self.points[0]])
         return [LineSegment(a, b) for a, b in paired]
+
+    def simplify(self, tolerance = 0.0001):
+        """
+        Remove any duplicate points, within a certain `tolerance`:
+
+        >>> Polygon([Point(1, 1, 0), Point(2, 0, 0), Point(0, 0, 0), Point(1, 1, 0)]).simplify()
+        Polygon([Point(2, 0, 0), Point(0, 0, 0), Point(1, 1, 0)])
+
+        Returns `None` if the resulting simplification would create a point:
+
+        >>> Polygon([Point(1, 1, 0), Point(2, 0, 0), Point(0, 0, 0)]).simplify(100) is None
+        True
+
+        """
+        prior = self.points[-1].snap(tolerance)
+        points = []
+        for point in self.points:
+            snapped = point.snap(tolerance)
+            if snapped != prior:
+                points.append(point)
+                prior = snapped
+        return Polygon(points) if len(points) > 2 else None
 
     def has_edge(self, edge):
         """ Returns true if this polygon contains the given `edge`. """

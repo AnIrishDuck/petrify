@@ -7,6 +7,8 @@ Creation of complex objects from humble building blocks:
     A cylinder rotated around an origin and axis.
 :py:class:`PolygonExtrusion` :
     Extrusion of a :class:`space.PlanarPolygon` into a three-dimensional shape.
+:py:class:`Spun` :
+    A series of profiles spun around an axis and connected together.
 :py:class:`Extrusion` :
     Complex layered objects with polygon slices.
 :py:class:`External` :
@@ -257,11 +259,11 @@ class Extrusion(Node):
         """ Calculates all polygons for this shape. """
         rings = [s.to_face(Face.Positive).project() for s in self.slices]
 
-        bottom = rings[0]
+        self.bottom = rings[0]
         middle = [p for a, b in zip(rings, rings[1:]) for p in self.ring(a, b)]
-        top = self.slices[-1].to_face(Face.Negative).project()
+        self.top = self.slices[-1].to_face(Face.Negative).project()
 
-        return [bottom, *middle, top]
+        return [self.bottom, *middle, self.top]
 
     def ring(self, bottom, top):
         """ Builds a ring from two slices. """
@@ -375,10 +377,63 @@ class PolygonExtrusion(Extrusion):
     """
     def __init__(self, footprint, direction):
         self.footprint = footprint
-        self.bottom = self.footprint
-        self.top = PlanarPolygon(footprint.basis + direction, footprint.polygon)
+        bottom = self.footprint
+        top = PlanarPolygon(footprint.basis + direction, footprint.polygon)
 
-        super().__init__([self.bottom, self.top])
+        super().__init__([bottom, top])
+
+class Spun(Node):
+    """
+    A three-dimensional object built from two-dimensional profiles rotated uniformly around
+    an axis:
+
+    >>> axis = Vector.basis.z
+    >>> start = Vector.basis.y
+    >>> tri = plane.Polygon([   \
+        plane.Point(0, 0),      \
+        plane.Point(1, 1),      \
+        plane.Point(0, 2)       \
+    ])
+    >>> spun = Spun(axis, start, [tri] * 5)
+
+    The y-axis of the profile is used as the rotational axis when building the solid.
+
+    """
+    def __init__(self, axis, start, turns):
+        self.axis = axis
+        self.start = start
+        assert(len(set(len(t.points) for t in turns)) == 1)
+        self.turns = turns
+
+        super().__init__(self.generate_polygons())
+
+    def profile(self, polygon, angle):
+        bx = self.start.rotate_around(self.axis, angle)
+        return Polygon([
+            (p.x * bx + p.y * self.axis).point()
+            for p in polygon.points
+        ])
+
+    def generate_polygons(self):
+        """ Calculates all polygons for this shape. """
+        steps = len(self.turns) - 1
+        profiles = [
+            self.profile(polygon, tau * float(ix) / steps)
+            for ix, polygon in enumerate(self.turns)
+        ]
+
+        middle = [p
+                  for a, b in zip(profiles, profiles[1:])
+                  for p in self.rotation(a, b)]
+
+        return middle
+
+    def rotation(self, a, b):
+        """ Builds a ring from two slices. """
+        lines = list(zip(a.points, b.points))
+        polygons = [Polygon([la[1], lb[1], lb[0], la[0]]).simplify()
+                    for la, lb in zip(lines, lines[1:] + [lines[0]])]
+        return [p for p in polygons if p is not None]
 
 class Cylinder(PolygonExtrusion):
     """
