@@ -268,8 +268,9 @@ class Extrusion(Node):
     def ring(self, bottom, top):
         """ Builds a ring from two slices. """
         lines = list(zip(bottom.points, top.points))
-        return [Polygon([la[1], lb[1], lb[0], la[0]])
-                 for la, lb in zip(lines, lines[1:] + [lines[0]])]
+        polygons =  [Polygon([la[1], lb[1], lb[0], la[0]]).simplify()
+                     for la, lb in zip(lines, lines[1:] + [lines[0]])]
+        return [p for p in polygons if p is not None]
 
 def from_pycsg(_csg):
     def from_csg_polygon(csg):

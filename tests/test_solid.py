@@ -38,6 +38,27 @@ class TestExtrusion(unittest.TestCase):
             PlanarPolygon(Basis.xy + Vector(0, 0, 1), square),
         ])
 
+    def test_simplification(self):
+        triangle = plane.Polygon([
+            plane.Point(0, 0),
+            plane.Point(0, 1),
+            plane.Point(0, 1),
+            plane.Point(1, 1)
+        ])
+        square = plane.Polygon([
+            plane.Point(0, 0),
+            plane.Point(0, 1),
+            plane.Point(1, 1),
+            plane.Point(1, 0)
+        ])
+        dz = Vector.basis.z
+        final = Extrusion([
+            PlanarPolygon(Basis.xy, square),
+            PlanarPolygon(Basis.xy + dz, triangle),
+            PlanarPolygon(Basis.xy + 2 * dz, square),
+        ])
+        self.assertEqual(set(len(p.points) for p in final.polygons), set([3, 4]))
+
 class TestNode(unittest.TestCase):
     def test_addition(self):
         a = solid.Box(Vector(0, 0, 0), Vector(3, 3, 1))
