@@ -38,7 +38,7 @@ import types
 
 from pint.unit import _Unit
 
-from . import plane
+from . import plane, decompose
 from .geometry import Geometry, tau, valid_scalar
 
 class Vector:
@@ -1721,6 +1721,39 @@ class PlanarPolygon:
     def to_face(self, direction):
         return Face(self.basis, direction, self.polygon)
 
+    def visualize(self, colors={}):
+        """
+        Visualize this polygon in a Jupyter notebook.
+
+        """
+        import pythreejs as js
+        import numpy as np
+
+        lines = []
+        line_colors = []
+
+        def xyz(p): return [p.x, p.y, 0]
+
+        red = [1, 0, 0]
+        green = [0, 1, 0]
+        exterior = self.project(exterior=True)
+        interior = self.project(exterior=False)
+        for color, polygons in zip([green, red], [exterior, interior]):
+            for polygon in polygons:
+                for segment in polygon.segments():
+                    lines.extend([xyz(segment.p1), xyz(segment.p2)])
+                    line_colors.extend([color, color])
+
+        lines = np.array(lines, dtype=np.float32)
+        line_colors = np.array(line_colors, dtype=np.float32)
+        geometry = js.BufferGeometry(
+            attributes={
+                'position': js.BufferAttribute(lines, normalized=False),
+                'color': js.BufferAttribute(line_colors, normalized=False),
+            },
+        )
+        material = js.LineBasicMaterial(vertexColors='VertexColors', linewidth=1)
+        return js.LineSegments(geometry, material)
 
 class Face(PlanarPolygon):
     """
@@ -1752,6 +1785,13 @@ class Face(PlanarPolygon):
             polygon = polygon.to_clockwise()
         super().__init__(basis, polygon)
         self.direction = direction
+
+    def simplified_projection(self):
+        if isinstance(self.polygon, plane.Polygon) and self.polygon.is_convex():
+            simple = [self.polygon]
+        else:
+            simple = decompose.trapezoidal(self.polygon.polygons())
+        return [Face(self.basis, self.direction, p).project()[0] for p in simple]
 
 
 # 3D Geometry

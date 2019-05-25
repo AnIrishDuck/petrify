@@ -1259,38 +1259,6 @@ class ComplexPolygon:
     def __repr__(self):
         return "ComplexPolygon({0!r})".format([*self.exterior, *self.interior])
 
-    def visualize(self, colors={}):
-        """
-        Visualize this polygon on the z-0 plane in a Jupyter notebook.
-
-        """
-        import pythreejs as js
-        import numpy as np
-
-        lines = []
-        line_colors = []
-
-        def xyz(p): return [p.x, p.y, 0]
-
-        red = [1, 0, 0]
-        green = [0, 1, 0]
-        for color, polygons in zip([green, red], [self.exterior, self.interior]):
-            for polygon in polygons:
-                for segment in polygon.segments():
-                    lines.extend([xyz(segment.p1), xyz(segment.p2)])
-                    line_colors.extend([color, color])
-
-        lines = np.array(lines, dtype=np.float32)
-        line_colors = np.array(line_colors, dtype=np.float32)
-        geometry = js.BufferGeometry(
-            attributes={
-                'position': js.BufferAttribute(lines, normalized=False),
-                'color': js.BufferAttribute(line_colors, normalized=False),
-            },
-        )
-        material = js.LineBasicMaterial(vertexColors='VertexColors', linewidth=1)
-        return js.LineSegments(geometry, material)
-
     def segments(self):
         return (s for p in self.polygons() for s in p.segments())
 

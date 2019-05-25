@@ -23,7 +23,7 @@ via CSG union and difference operations.
 import math
 from csg import core, geom
 
-from . import plane, units, decompose
+from . import plane, units
 from .space import Matrix, Point, Polygon, PlanarPolygon, Face, Basis, Vector
 from .geometry import tau, valid_scalar
 
@@ -279,11 +279,7 @@ class Extrusion(Node):
         return [*bottom, *middle, *top]
 
     def create_cap(self, slice, polarity):
-        if isinstance(slice.polygon, plane.Polygon) and slice.polygon.is_convex():
-            simple = [slice.polygon]
-        else:
-            simple = decompose.trapezoidal(slice.polygon.polygons())
-        return [Face(slice.basis, polarity, p).project()[0] for p in simple]
+        return Face(slice.basis, polarity, slice.polygon).simplified_projection()
 
     def ring(self, bottom, top):
         """ Builds a ring from two slices. """
