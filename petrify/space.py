@@ -1688,8 +1688,8 @@ Basis.xz = Basis(Point.origin, Vector.basis.x, Vector.basis.z)
 
 class PlanarPolygon:
     """
-    A two-dimensional polygon embedded in three-dimensional space via a
-    :class:`Basis`:
+    A possibly-complex two-dimensional polygon embedded in three-dimensional
+    space via a :class:`Basis`:
 
     >>> tri = plane.Polygon([   \
         plane.Point(0, 0),      \
@@ -1698,7 +1698,7 @@ class PlanarPolygon:
     ])
     >>> triangle = PlanarPolygon(Basis.xy, tri)
     >>> triangle.project()
-    Polygon([Point(0, 0, 0), Point(0, 2, 0), Point(1, 1, 0)])
+    [Polygon([Point(0, 0, 0), Point(0, 2, 0), Point(1, 1, 0)])]
 
     """
 
@@ -1706,8 +1706,17 @@ class PlanarPolygon:
         self.basis = basis
         self.polygon = polygon
 
-    def project(self):
-        return Polygon([self.basis.project(p) for p in self.polygon.points])
+    def project(self, exterior=True):
+        def simple(polygon):
+            return Polygon([self.basis.project(p) for p in polygon.points])
+
+        if isinstance(self.polygon, plane.Polygon):
+            return [simple(self.polygon)] if exterior else []
+        elif isinstance(self.polygon, plane.ComplexPolygon):
+            polygons = self.polygon.exterior if exterior else self.polygon.interior
+            return [simple(p) for p in  polygons]
+        else:
+            return NotImplemented
 
     def to_face(self, direction):
         return Face(self.basis, direction, self.polygon)

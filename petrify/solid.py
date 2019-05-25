@@ -23,7 +23,7 @@ via CSG union and difference operations.
 import math
 from csg import core, geom
 
-from . import plane, units
+from . import plane, units, decompose
 from .space import Matrix, Point, Polygon, PlanarPolygon, Face, Basis, Vector
 from .geometry import tau, valid_scalar
 
@@ -250,20 +250,40 @@ class Extrusion(Node):
     """
 
     def __init__(self, slices):
-        assert(len(set(len(sl.polygon.points) for sl in slices)) == 1)
+        sizes = (
+            tuple(len(poly.points) for poly in sl.polygon.polygons())
+            for sl in slices
+        )
+        assert(len(set(sizes)) == 1)
         self.slices = slices
 
         super().__init__(self.generate_polygons())
 
     def generate_polygons(self):
         """ Calculates all polygons for this shape. """
-        rings = [s.to_face(Face.Positive).project() for s in self.slices]
+        levels = [
+            [
+                *s.to_face(Face.Positive).project(exterior=True),
+                *s.to_face(Face.Negative).project(exterior=False)
+            ] for s in self.slices
+        ]
 
-        self.bottom = rings[0]
-        middle = [p for a, b in zip(rings, rings[1:]) for p in self.ring(a, b)]
-        self.top = self.slices[-1].to_face(Face.Negative).project()
+        bottom = self.create_cap(self.slices[0], Face.Positive)
+        middle = [
+            p for la, lb in zip(levels, levels[1:])
+            for a, b in zip(la, lb)
+            for p in self.ring(a, b)
+        ]
+        top = self.create_cap(self.slices[-1], Face.Negative)
 
-        return [self.bottom, *middle, self.top]
+        return [*bottom, *middle, *top]
+
+    def create_cap(self, slice, polarity):
+        if isinstance(slice.polygon, plane.Polygon) and slice.polygon.is_convex():
+            simple = [slice.polygon]
+        else:
+            simple = decompose.trapezoidal(slice.polygon.polygons())
+        return [Face(slice.basis, polarity, p).project()[0] for p in simple]
 
     def ring(self, bottom, top):
         """ Builds a ring from two slices. """
