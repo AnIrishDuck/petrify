@@ -23,24 +23,25 @@ def grouper(n, iterable, fillvalue=None):
 def yl(segment, y):
     return segment.intersect(Line(Point(0, y), Vector(1, 0)))
 
-def trapezoidal(points, min_area=0.0001):
+def trapezoidal(polygons, min_area=0.0001):
     """
-    Trapezoidal decomposition of a linear cycle of :py:class:`petrify.plane.Point`
-    objects forming a potentially concave polygon.
+    Trapezoidal decomposition of a list of :py:class:`petrify.plane.Polygon`
+    objects forming a complex polygon that can be concave, consist of many
+    disjoint rejoins, and contain holes.
 
     ..note ::
         Currently assumes that no edges cross or repeat.
 
     """
-    p = Sliced(points)
-    order = {l: ix for ix, l in enumerate(p.segments())}
+    sliced = [Sliced(p.points) for p in polygons]
+    order = {l: ix for p in sliced for ix, l in enumerate(p.segments())}
 
-    levels = sorted(set(p.y for p in points))
+    levels = sorted(set(p.y for poly in sliced for p in poly.points))
     trapezoids = []
     active = []
     prior = None
     for level in levels:
-        departures = p.departures(level)
+        departures = [l for p in sliced for l in p.departures(level)]
         next_active = []
         for a in active:
             a = sorted(a, key=lambda l: order[l])

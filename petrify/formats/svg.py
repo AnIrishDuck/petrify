@@ -38,7 +38,7 @@ class PathExtrusion(Node):
         path = path.polygon()
 
         def trapezoids(polygons):
-            return [t.simplify() for polygon in polygons for t in trapezoidal(polygon.points)]
+            return [t.simplify() for polygon in polygons for t in trapezoidal([polygon])]
 
         interior = trapezoids(path.interior)
         exterior = trapezoids(path.exterior)

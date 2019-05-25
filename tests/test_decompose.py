@@ -5,13 +5,13 @@ from petrify.plane import Point, LineSegment, Polygon
 
 class TestTrapezoid(unittest.TestCase):
     def test_square(self):
-        square = [
+        square = Polygon([
             Point(0, 0),
             Point(0, 1),
             Point(1, 1),
             Point(1, 0),
-        ]
-        polygons = decompose.trapezoidal(square)
+        ])
+        polygons = decompose.trapezoidal([square])
         self.assertEqual([p.points for p in polygons], [
             [
                 Point(0, 0),
@@ -22,7 +22,7 @@ class TestTrapezoid(unittest.TestCase):
         ])
 
     def test_complex(self):
-        f = [
+        f = Polygon([
             Point(0, 0),
             Point(0, 7),
             Point(4, 7),
@@ -33,9 +33,9 @@ class TestTrapezoid(unittest.TestCase):
             Point(4, 2),
             Point(2, 2),
             Point(2, 0)
-        ]
+        ])
 
-        polygons = decompose.trapezoidal(f)
+        polygons = decompose.trapezoidal([f])
         self.assertEqual([p.points for p in polygons], [
             [
                 Point(0, 0),
@@ -63,13 +63,55 @@ class TestTrapezoid(unittest.TestCase):
             ]
         ])
 
-        inverted = [Point(p.y, p.x) for p in f]
-        polygons = decompose.trapezoidal(inverted)
+        inverted = Polygon([Point(p.y, p.x) for p in f.points])
+        polygons = decompose.trapezoidal([inverted])
         self.assertEqual([p.points for p in polygons], [
             [Point(7.0, 0.0), Point(7.0, 2.0), Point(0.0, 2.0), Point(0.0, 0.0)],
             [Point(4.0, 2.0), Point(4.0, 4.0), Point(2.0, 4.0), Point(2.0, 2.0)],
             [Point(7.0, 2.0), Point(7.0, 4.0), Point(5.0, 4.0), Point(5.0, 2.0)]
         ])
+
+    def test_embedded(self):
+        square = Polygon([
+            Point(0, 0),
+            Point(0, 10),
+            Point(10, 10),
+            Point(10, 0),
+        ])
+        inner = Polygon([
+            Point(4, 4),
+            Point(4, 6),
+            Point(6, 6),
+            Point(6, 4)
+        ])
+        polygons = decompose.trapezoidal([square, inner])
+        self.assertEqual([p.points for p in polygons], [
+            [
+                Point(0.0, 0.0),
+                Point(0.0, 4.0),
+                Point(10.0, 4.0),
+                Point(10.0, 0.0)
+            ],
+            [
+                Point(0.0, 4.0),
+                Point(0.0, 6.0),
+                Point(4.0, 6.0),
+                Point(4.0, 4.0)
+            ],
+            [
+                Point(6.0, 4.0),
+                Point(6.0, 6.0),
+                Point(10.0, 6.0),
+                Point(10.0, 4.0)
+            ],
+            [
+                Point(0.0, 6.0),
+                Point(0.0, 10.0),
+                Point(10.0, 10.0),
+                Point(10.0, 6.0)
+            ]
+        ])
+
 
 def rect(a, b):
     return Polygon([a, Point(a.x, b.y), b, Point(b.x, a.y)])
