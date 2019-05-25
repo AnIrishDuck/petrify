@@ -1108,6 +1108,81 @@ class Polygon:
         """
         return Polygon(list(reversed(self.points)))
 
+    def is_convex(self):
+        """
+        Return True if the polynomial defined by the sequence of 2D
+        points is 'strictly convex':
+
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> tri.is_convex()
+        True
+        >>> indent = Polygon([  \
+            Point(0, 0),        \
+            Point(10, 0),       \
+            Point(5, 5),        \
+            Point(10, 10),      \
+            Point(0, 10)        \
+        ])
+        >>> indent.is_convex()
+        False
+
+        .. note::
+            "strictly convex" is defined as follows:
+
+            - points are valid
+            - side lengths are non-zero
+            - interior angles are strictly between zero and a straight angle
+            - the polygon does not intersect itself
+
+        """
+        # Adapted from https://stackoverflow.com/a/45372025
+        # The only change needed was to use our constant for TAU, which again
+        # proves its utility
+        # NOTES:  1.  Algorithm: the signed changes of the direction angles
+        #             from one side to the next side must be all positive or
+        #             all negative, and their sum must equal plus-or-minus
+        #             one full turn (2 pi radians). Also check for too few,
+        #             invalid, or repeated points.
+        #         2.  No check is explicitly done for zero internal angles
+        #             (180 degree direction-change angle) as this is covered
+        #             in other ways, including the `n < 3` check.
+        try:  # needed for any bad points or direction changes
+            # Check for too few points
+            if len(self.points) < 3:
+                return False
+            # Get starting information
+            old_x, old_y = self.points[-2].xy
+            new_x, new_y = self.points[-1].xy
+            new_direction = math.atan2(new_y - old_y, new_x - old_x)
+            angle_sum = 0.0
+            # Check each point (the side ending there, its angle) and accum. angles
+            for ndx, newpoint in enumerate(self.points):
+                # Update point coordinates and side directions, check side length
+                old_x, old_y, old_direction = new_x, new_y, new_direction
+                new_x, new_y = newpoint.xy
+                new_direction = math.atan2(new_y - old_y, new_x - old_x)
+                if old_x == new_x and old_y == new_y:
+                    return False  # repeated consecutive points
+                # Calculate & check the normalized direction-change angle
+                angle = new_direction - old_direction
+                if angle <= -tau / 2:
+                    angle += tau  # make it in half-open interval (-Pi, Pi]
+                elif angle > tau / 2:
+                    angle -= tau
+                if ndx == 0:  # if first time through loop, initialize orientation
+                    if angle == 0.0:
+                        return False
+                    orientation = 1.0 if angle > 0.0 else -1.0
+                else:  # if other time through loop, check orientation is stable
+                    if orientation * angle <= 0.0:  # not both pos. or both neg.
+                        return False
+                # Accumulate the direction-change angle
+                angle_sum += angle
+            # Check that the total number of full turns is plus-or-minus 1
+            return abs(round(angle_sum / tau)) == 1
+        except (ArithmeticError, TypeError, ValueError):
+            return False  # any exception means not a proper convex polygon
+
     def contains(self, p):
         """
         Tests whether a point lies within this polygon:
@@ -1148,6 +1223,41 @@ class ComplexPolygon:
         elif interior is not None and exterior is not None:
             self.interior = interior
             self.exterior = exterior
+
+    def to_clockwise(self):
+        """
+        Converts all sub-polygons to clockwise:
+
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> ComplexPolygon([tri]).to_clockwise()
+        ComplexPolygon([Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])])
+        >>> ComplexPolygon([tri.inverted()]).to_clockwise()
+        ComplexPolygon([Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])])
+
+        """
+        return ComplexPolygon(
+            exterior=[p.to_clockwise() for p in self.exterior],
+            interior=[p.to_clockwise() for p in self.interior],
+        )
+
+    def to_counterclockwise(self):
+        """
+        Converts all sub-polygons to counter-clockwise:
+
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> ComplexPolygon([tri]).to_counterclockwise()
+        ComplexPolygon([Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])])
+        >>> ComplexPolygon([tri.inverted()]).to_counterclockwise()
+        ComplexPolygon([Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])])
+
+        """
+        return ComplexPolygon(
+            exterior=[p.to_counterclockwise() for p in self.exterior],
+            interior=[p.to_counterclockwise() for p in self.interior],
+        )
+
+    def __repr__(self):
+        return "ComplexPolygon({0!r})".format([*self.exterior, *self.interior])
 
     def visualize(self, colors={}):
         """
