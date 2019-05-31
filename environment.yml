@@ -8,4 +8,6 @@ dependencies:
   - scipy
   - scikit-image
   - numpy
-  - pymesh
+  - pip
+  - pip:
+    - pymesh2
