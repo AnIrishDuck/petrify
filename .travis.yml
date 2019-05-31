@@ -4,9 +4,8 @@ python:
   - "3.6"
 matrix:
   include:
-    - python: 3.5
     - python: 3.6
-    - python: 3.6
+      env: NAME="cython-csg"
       install:
         - pip install cython
         - pip install -r requirements-cython-csg.txt
