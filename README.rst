@@ -20,7 +20,7 @@ Design Principles
 - **Immutable operation**. Immutable math is easier for novices to reason about.
   This library explicitly does not target strong real-time applications like
   games that demands mutability for performance.
-- **Pluggable engines**. CSG is copmlicated. Different engines have different
+- **Pluggable engines**. CSG is complicated. Different engines have different
   tradeoffs:
 
   - The pymesh engine is the default where the pymesh2_ library is installed. It
