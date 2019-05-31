@@ -4,12 +4,17 @@ python:
   - "3.6"
 matrix:
   include:
+    - python: 3.5
+    - python: 3.6
+    - python: 3.6
+      install:
+        - pip install cython
+        - pip install -r requirements-cython-csg.txt
     - python: 3.7
       dist: xenial
       sudo: true
 install:
   - pip install -r requirements.txt
-  - pip install -r requirements-cython-csg.txt
 script:
   - python -m unittest discover tests
   - bash run_examples.sh
