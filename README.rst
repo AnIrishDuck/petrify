@@ -22,6 +22,7 @@ Design Principles
   games that demands mutability for performance.
 - **Pluggable engines**. CSG is copmlicated. Different engines have different
   tradeoffs:
+
   - The pymesh engine is the default where the pymesh2_ library is installed. It
     uses the IGL engine, which is mature and quite fast. However, building
     pymesh with IGL support can be difficult for novices and in certain
