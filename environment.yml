@@ -8,6 +8,4 @@ dependencies:
   - scipy
   - scikit-image
   - numpy
-  - pip
-  - pip:
-    - petrify
+  - pymesh
