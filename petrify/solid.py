@@ -21,11 +21,11 @@ via CSG union and difference operations.
 
 """
 import math
-from csg import core, geom
 
 from . import plane, units
 from .space import Matrix, Point, Polygon, PlanarPolygon, Face, Basis, Vector
 from .geometry import tau, valid_scalar
+from . import engines
 
 def perpendicular(axis):
     "Return a vector that is perpendicular to the given axis."
@@ -75,7 +75,7 @@ class Node:
         if isinstance(other, Vector):
             return self.translate(other)
         else:
-            n = Node(from_pycsg(self.pycsg.union(other.pycsg)))
+            n = Node(engines.csg.union(self.polygons, other.polygons))
             n.parts = [self, other]
             return n
 
@@ -83,7 +83,7 @@ class Node:
         if isinstance(other, Vector):
             return self.scale(other)
         elif isinstance(other, Node):
-            n = Node(from_pycsg(self.pycsg.intersect(other.pycsg)))
+            n = Node(engines.csg.intersect(self.polygons, other.polygons))
             n.parts = [self, other]
             return n
         elif valid_scalar(other):
@@ -99,7 +99,7 @@ class Node:
             return NotImplemented
 
     def __sub__(self, other):
-        n = Node(from_pycsg(self.pycsg.subtract(other.pycsg)))
+        n = Node(engines.csg.subtract(self.polygons, other.polygons))
         n.original = self
         n.removal = other
         return n
@@ -201,10 +201,6 @@ class Node:
         """ Rotate this geometry around the given `axis` vector by `theta` radians. """
         return Transformed(self, Matrix.rotate_axis(theta, axis))
 
-    @property
-    def pycsg(self):
-        return to_pycsg(self.polygons)
-
 class Collection(Node):
     """
     Collection of multiple objects. Self-intersection is unsupported, but
@@ -288,18 +284,6 @@ class Extrusion(Node):
                      for la, lb in zip(lines, lines[1:] + [lines[0]])]
         return [p for p in polygons if p is not None]
 
-def from_pycsg(_csg):
-    def from_csg_polygon(csg):
-        points = [Point(v.pos.x, v.pos.y, v.pos.z) for v in csg.vertices]
-        return Polygon(points)
-    return [from_csg_polygon(p) for p in (_csg if isinstance(_csg, list) else _csg.toPolygons())]
-
-def to_pycsg(polygons):
-    def to_csg_polygon(polygon):
-        vertices = [geom.Vertex(geom.Vector(p.x, p.y, p.z)) for p in polygon.points]
-        return geom.Polygon(vertices)
-    return core.CSG.fromPolygons([to_csg_polygon(p) for p in polygons])
-
 class Transformed(Node):
     """
     Geometry that has had a matrix transform applied to it.
@@ -330,10 +314,7 @@ class Union(Node):
 
     """
     def __init__(self, parts):
-        whole = parts[0].pycsg
-        for part in parts[1:]:
-            whole = whole.union(part.pycsg)
-        super().__init__(from_pycsg(whole))
+        super().__init__(engines.csg.union(*(p.polygons for p in parts)))
         self.parts = parts
 
 class Box(Extrusion):

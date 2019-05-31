@@ -68,9 +68,9 @@ class TestInset(unittest.TestCase):
     def assertValidPoints(self, solid):
         for polygon in solid.polygons:
             for p in polygon.points:
-                self.assertIn(round(p.x, 2), [0, 1, 0.1, 0.9])
-                self.assertIn(round(p.y, 2), [0, 1, 0.1, 0.9])
-                self.assertIn(round(p.z, 2), [0, 1, 0.1, 0.9])
+                self.assertIn(round(p.x, 1), [0, 1, 0.1, 0.9])
+                self.assertIn(round(p.y, 1), [0, 1, 0.1, 0.9])
+                self.assertIn(round(p.z, 1), [0, 1, 0.1, 0.9])
 
     def test_partial_chamfer(self):
         cube = Box(Vector(0, 0, 0), Vector(1, 1, 1))

@@ -1,7 +1,7 @@
 import struct
-from csg.geom import Polygon, Vertex
+from ..space import Polygon, Point
 
-from ..solid import from_pycsg, Node
+from ..solid import Node
 from .. import units
 
 class STL:
@@ -35,7 +35,7 @@ class STL:
         """
         polygons = read_polys_from_stl_file(path)
         scale = units.conversion(scale)
-        return Node(from_pycsg(polygons)) * units.u.file * scale
+        return Node(polygons) * units.u.file * scale
 
     def write(self, solid):
         """
@@ -58,7 +58,7 @@ class STL:
         """
         units.assert_lengthy(solid)
         output = (solid / self.scale).m_as(units.u.file)
-        save_polys_to_stl_file(output.pycsg.toPolygons(), self.path)
+        save_polys_to_stl_file(output.polygons, self.path)
 
 class StlEndOfFileException(Exception):
     """Exception class for reaching the end of the STL file while reading."""
@@ -83,15 +83,15 @@ def _stl_write_facet(poly, f, binary=True):
     Writes a single triangle facet to the given STL file stream.
     binary - Save in binary format if True, else ASCII format.
     """
-    norm = poly.plane.normal
-    v0, v1, v2 = poly.vertices
+    norm = poly.plane.normal.xyz
+    v0, v1, v2 = poly.points
     if binary:
         data = struct.pack(
             '<3f 3f 3f 3f H',
             norm[0], norm[1], norm[2],
-            v0.pos[0], v0.pos[1], v0.pos[2],
-            v1.pos[0], v1.pos[1], v1.pos[2],
-            v2.pos[0], v2.pos[1], v2.pos[2],
+            v0.x, v0.y, v0.z,
+            v1.x, v1.y, v1.z,
+            v2.x, v2.y, v2.z,
             0
         )
         f.write(data)
@@ -123,13 +123,13 @@ def save_polys_to_stl_file(polys, filename, binary=True):
     # Convert all polygons to triangles.
     tris = []
     for poly in polys:
-        vlen = len(poly.vertices)
+        vlen = len(poly.points)
         for n in range(1,vlen-1):
             tris.append(
                 Polygon([
-                    poly.vertices[0],
-                    poly.vertices[n%vlen],
-                    poly.vertices[(n+1)%vlen],
+                    poly.points[0],
+                    poly.points[n%vlen],
+                    poly.points[(n+1)%vlen],
                 ])
             )
     if binary:
@@ -191,9 +191,9 @@ def _read_ascii_facet(f):
             return None
         except StlMalformedLineException:
             continue  # Skip to next facet.
-        v0 = Vertex(v0)
-        v1 = Vertex(v1)
-        v2 = Vertex(v2)
+        v0 = Point(*v0)
+        v1 = Point(*v1)
+        v2 = Point(*v2)
         return Polygon([v0, v1, v2])
 
 
@@ -204,9 +204,9 @@ def _read_binary_facet(f):
     """
     data = struct.unpack('<3f 3f 3f 3f H', f.read(4*4*3+2))
     normal = data[0:3]
-    v0 = Vertex(data[3:6])
-    v1 = Vertex(data[6:9])
-    v2 = Vertex(data[9:12])
+    v0 = Point(*data[3:6])
+    v1 = Point(*data[6:9])
+    v2 = Point(*data[9:12])
     return Polygon([v0, v1, v2])
 
 

@@ -5,7 +5,7 @@ setup(
     version='0.2.1',
     author='Frank Murphy, et al',
     author_email='fpmurphy@mtu.edu',
-    packages=['petrify', 'petrify.formats', 'petrify.machine'],
+    packages=['petrify', 'petrify.engines', 'petrify.formats', 'petrify.machine'],
     url='http://pypi.python.org/pypi/petrify/',
     license='LICENSE',
     description='a programmatic cad library',

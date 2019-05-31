@@ -1,5 +1,9 @@
-import random
+import sys, random
 from petrify.solid import tau, Union, Box, Vector, Point
+from petrify import engines
+
+if len(sys.argv) > 1:
+    engines.csg = getattr(engines, sys.argv[1])
 
 def spin(shape):
     return (
