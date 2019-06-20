@@ -2,9 +2,15 @@ import pint
 
 u = pint.UnitRegistry()
 u.define('file = [file]')
+u.define('layer = [layer]')
 
 def parse_unit(v):
     return getattr(u, v) if isinstance(v, str) else v
+
+def assert_speedy(u):
+    assert hasattr(u, 'magnitude'), "object does not have unit tag: {0!r}".format(u)
+    assert u.check('[length] / [time]'), "does not have length / time units: {0!r}".format(u)
+    return u
 
 def assert_lengthy(u):
     assert hasattr(u, 'magnitude'), "object does not have unit tag: {0!r}".format(u)

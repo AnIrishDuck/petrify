@@ -6,7 +6,17 @@ class Part:
         self.polygon = polygon
         self.tabs = tabs
         self.depth = depth
-        self.start = start
+        self.start = start or 0
+
+    def __mul__(self, v):
+        if not valid_scalar(v): return NotImplemented
+        return Part(
+            self.polygon * v,
+            [t * v for t in self.tabs],
+            self.depth * v,
+            self.start * v
+        )
+    __rmul__ = __mul__
 
 class Tab:
     def __init__(self, line, width):
@@ -22,3 +32,8 @@ class Tab:
         points = [l.intersect(point) for l in (self.a, self.b)]
         points = [p for p in points if p is not None]
         return points[0] if points else None
+
+    def __mul__(self, v):
+        if not valid_scalar(v): return NotImplemented
+        return Tab(self.line * v, self.width * v)
+    __rmul__ = __mul__

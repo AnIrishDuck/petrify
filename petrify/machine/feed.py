@@ -6,11 +6,25 @@ from .util import frange
 from ..plane import Line, LineSegment, Point, Vector
 from ..decompose import grouper
 
+from .. import units
+
 def bounding_lines(polygons, offset):
     return (
         l for p in polygons for l in p.offset(offset).segments()
         if l.v.y != 0
     )
+
+class Speed:
+    """
+    Configures machining `xy` and `z` feed rates:
+
+    >>> from petrify import u
+    >>> speed = Speed(900 * u.mm / u.minute, 300 * u.mm / u.minute)
+
+    """
+    def __init__(self, xy, z):
+        self.xy = units.assert_speedy(xy)
+        self.z = units.assert_speedy(z)
 
 class Steps:
     def __init__(self, top, bottom, step):

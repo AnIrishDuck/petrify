@@ -1,6 +1,7 @@
 import math
 import unittest
 
+from petrify import u
 from petrify.plane import tau, ComplexPolygon, Line, LineSegment, Point, Polygon, Vector
 from petrify.machine import (
     Engrave,
@@ -10,14 +11,15 @@ from petrify.machine import (
     Tab,
     LinearStepFeed,
     Machine,
-    Speed
+    Format
 )
-from petrify.machine.feed import batch_scanlines
+from petrify.machine.feed import batch_scanlines, Speed
 
-mpcnc = Machine(clearance=2.0)
-speeds = Speed(xy=900, z=200)
-tool = StraightTip(1, 0.5)
-feed = LinearStepFeed(0.5, 1.0)
+gspeed = u.mm / u.minute
+mpcnc = Machine(clearance=2.0 * u.mm, format=Format(u.mm, v = u.mm / u.minute))
+speeds = Speed(xy=900 * gspeed, z=200 * gspeed)
+tool = StraightTip(1, 0.5) * u.mm
+feed = LinearStepFeed(0.5, 1.0 * u.mm / u.layer)
 config = mpcnc.configure(feed, speeds, tool)
 
 def y(y, pairs):
