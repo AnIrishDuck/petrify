@@ -70,6 +70,10 @@ class Node:
     """
     def __init__(self, polygons):
         self.polygons = polygons
+        self.view_data = {}
+
+    def view(self, **data):
+        return View(self, **data)
 
     def __add__(self, other):
         if isinstance(other, Vector):
@@ -135,7 +139,7 @@ class Node:
         )
         return Box(origin, extent - origin)
 
-    def visualize(self, wireframe=False):
+    def visualize(self):
         """
         Create a `pythreejs`_ visualization of this geometry for use in
         interactive notebooks.
@@ -145,6 +149,8 @@ class Node:
         """
         import numpy as np
         import pythreejs as js
+
+        wireframe = self.view_data.get('wireframe', False)
 
         def triangles(polygon):
             points = polygon.points
@@ -212,7 +218,20 @@ class Collection(Node):
     ])
     """
     def __init__(self, nodes):
+        self.nodes = nodes
         super().__init__([p for n in nodes for p in n.polygons])
+
+class View(Node):
+    """
+    Apply view properties to geometry.
+
+    >>> v = View(Box(Point.origin, Vector(1, 1, 1)), wireframe=True)
+
+    """
+    def __init__(self, node, **data):
+        self.node = node
+        super().__init__(node.polygons)
+        self.view_data = data
 
 class Extrusion(Node):
     """
@@ -301,6 +320,7 @@ class Transformed(Node):
             for polygon in prior.polygons
         ]
         super().__init__(polygons)
+        self.view_data = prior.view_data
 
 class Union(Node):
     """
@@ -412,13 +432,16 @@ class Spun(Node):
             for p in polygon.points
         ])
 
-    def generate_polygons(self):
-        """ Calculates all polygons for this shape. """
+    def profiles(self):
         steps = len(self.turns) - 1
-        profiles = [
+        return [
             self.profile(polygon, tau * float(ix) / steps)
             for ix, polygon in enumerate(self.turns)
         ]
+
+    def generate_polygons(self):
+        """ Calculates all polygons for this shape. """
+        profiles = self.profiles()
 
         middle = [p
                   for a, b in zip(profiles, profiles[1:])

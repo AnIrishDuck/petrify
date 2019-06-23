@@ -1732,8 +1732,6 @@ class PlanarPolygon:
         lines = []
         line_colors = []
 
-        def xyz(p): return [p.x, p.y, 0]
-
         red = [1, 0, 0]
         green = [0, 1, 0]
         exterior = self.project(exterior=True)
@@ -1741,7 +1739,7 @@ class PlanarPolygon:
         for color, polygons in zip([green, red], [exterior, interior]):
             for polygon in polygons:
                 for segment in polygon.segments():
-                    lines.extend([xyz(segment.p1), xyz(segment.p2)])
+                    lines.extend([segment.p1, segment.p2])
                     line_colors.extend([color, color])
 
         lines = np.array(lines, dtype=np.float32)
