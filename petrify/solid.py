@@ -22,10 +22,9 @@ via CSG union and difference operations.
 """
 import math
 
-from . import plane, units
-from .space import Matrix, Point, Polygon, PlanarPolygon, Face, Basis, Vector
+from . import engines, plane, units, visualize
+from .space import _pmap, Matrix, Point, Polygon, PlanarPolygon, Face, Basis, Vector
 from .geometry import tau, valid_scalar
-from . import engines
 
 def perpendicular(axis):
     "Return a vector that is perpendicular to the given axis."
@@ -52,17 +51,17 @@ class Node:
 
     >>> box = Box(Vector(0, 0, 0), Vector(1, 1, 1))
     >>> (box * Vector(2, 1, 1)).envelope()
-    Box(Vector(0, 0, 0), Vector(2, 1, 1))
+    Box(Point(0, 0, 0), Vector(2, 1, 1))
     >>> (box + Vector(1, 0, 1)).envelope()
-    Box(Vector(1.0, 0.0, 1.0), Vector(1.0, 1.0, 1.0))
+    Box(Point(1.0, 0.0, 1.0), Vector(1.0, 1.0, 1.0))
 
     To support unit operations via `pint`, multiplication and division by a
     scalar are also supported:
 
     >>> (box * 2).envelope()
-    Box(Vector(0, 0, 0), Vector(2, 2, 2))
+    Box(Point(0, 0, 0), Vector(2, 2, 2))
     >>> (box / 2).envelope()
-    Box(Vector(0.0, 0.0, 0.0), Vector(0.5, 0.5, 0.5))
+    Box(Point(0.0, 0.0, 0.0), Vector(0.5, 0.5, 0.5))
     >>> from petrify import u
     >>> (box * u.mm).units
     <Unit('millimeter')>
@@ -108,6 +107,10 @@ class Node:
         n.removal = other
         return n
 
+    @property
+    def points(self):
+        return [x for p in self.polygons for x in p.points]
+
     def envelope(self):
         """
         Returns the axis-aligned bounding box for this shape:
@@ -123,30 +126,14 @@ class Node:
             Vector(0, 0, 1)                         \
         )
         >>> extruded.envelope()
-        Box(Vector(0, 0, 0), Vector(1, 2, 1))
+        Box(Point(0, 0, 0), Vector(1, 2, 1))
 
         """
-        points = [x for p in self.polygons for x in p.points]
-        origin = Vector(
-            min(p.x for p in points),
-            min(p.y for p in points),
-            min(p.z for p in points)
-        )
-        extent = Vector(
-            max(p.x for p in points),
-            max(p.y for p in points),
-            max(p.z for p in points)
-        )
+        origin = _pmap(Point, min, self.points)
+        extent = _pmap(Point, max, self.points)
         return Box(origin, extent - origin)
 
-    def visualize(self):
-        """
-        Create a `pythreejs`_ visualization of this geometry for use in
-        interactive notebooks.
-
-        .. _`pythreejs`: https://github.com/jupyter-widgets/pythreejs
-
-        """
+    def mesh(self):
         import numpy as np
         import pythreejs as js
 
@@ -180,10 +167,21 @@ class Node:
         )
 
         if not wireframe:
-            return geometry
+            material = material=js.MeshLambertMaterial(color='white')
+            return js.Mesh(geometry, material)
         else:
             material = js.MeshBasicMaterial(color='#00ff00', wireframe=True)
             return js.Mesh(geometry, material)
+
+    def render(self):
+        """
+        Create a `pythreejs`_ visualization of this geometry for use in
+        interactive notebooks.
+
+        .. _`pythreejs`: https://github.com/jupyter-widgets/pythreejs
+
+        """
+        return visualize.scene([self])
 
     def as_unit(self, unit):
         """
@@ -219,7 +217,10 @@ class Collection(Node):
     """
     def __init__(self, nodes):
         self.nodes = nodes
-        super().__init__([p for n in nodes for p in n.polygons])
+        super().__init__([p for n in nodes if hasattr(n, 'polygons') for p in n.polygons])
+
+    def render(self):
+        return visualize.scene(self.nodes)
 
 class View(Node):
     """
@@ -273,6 +274,9 @@ class Extrusion(Node):
         self.slices = slices
 
         super().__init__(self.generate_polygons())
+
+    def construction(self):
+        return Collection(self.slices)
 
     def generate_polygons(self):
         """ Calculates all polygons for this shape. """
@@ -438,6 +442,9 @@ class Spun(Node):
             self.profile(polygon, tau * float(ix) / steps)
             for ix, polygon in enumerate(self.turns)
         ]
+
+    def construction(self):
+        return Collection(self.profiles())
 
     def generate_polygons(self):
         """ Calculates all polygons for this shape. """

@@ -38,7 +38,7 @@ import types
 
 from pint.unit import _Unit
 
-from . import plane, decompose
+from . import plane, decompose, visualize
 from .geometry import Geometry, tau, valid_scalar
 
 class Vector:
@@ -417,6 +417,34 @@ class Polygon:
     def has_edge(self, edge):
         """ Returns true if this polygon contains the given `edge`. """
         return any(l == edge for l in self.segments())
+
+    def mesh(self):
+        import pythreejs as js
+        import numpy as np
+
+        lines = []
+        line_colors = []
+
+        color = [0, 1, 0]
+        for segment in self.segments():
+            lines.append([segment.p1, segment.p2])
+            line_colors.append([color, color])
+
+        lines = np.array(lines, dtype=np.float32)
+        line_colors = np.array(line_colors, dtype=np.float32)
+        geometry = js.LineSegmentsGeometry(
+            positions=lines,
+            colors=line_colors
+        )
+        material = js.LineMaterial(vertexColors='VertexColors', linewidth=1)
+        return js.LineSegments2(geometry, material)
+
+    def render(self):
+        """
+        Visualize this polygon in a Jupyter notebook.
+
+        """
+        return visualize.scene([self])
 
     def __repr__(self):
         return "Polygon({0!r})".format(self.points)
@@ -1706,6 +1734,12 @@ class PlanarPolygon:
         self.basis = basis
         self.polygon = polygon
 
+    @property
+    def points(self):
+        return [p for exterior in [True, False]
+                for polygon in self.project(exterior)
+                for p in polygon.points]
+
     def project(self, exterior=True):
         def simple(polygon):
             return Polygon([self.basis.project(p) for p in polygon.points])
@@ -1721,11 +1755,7 @@ class PlanarPolygon:
     def to_face(self, direction):
         return Face(self.basis, direction, self.polygon)
 
-    def visualize(self, colors={}):
-        """
-        Visualize this polygon in a Jupyter notebook.
-
-        """
+    def mesh(self, colors={}):
         import pythreejs as js
         import numpy as np
 
@@ -1752,6 +1782,13 @@ class PlanarPolygon:
         )
         material = js.LineBasicMaterial(vertexColors='VertexColors', linewidth=1)
         return js.LineSegments(geometry, material)
+
+    def render(self):
+        """
+        Visualize this polygon in a Jupyter notebook.
+
+        """
+        return visualize.scene([self])
 
 class Face(PlanarPolygon):
     """
@@ -1971,3 +2008,6 @@ def _intersect_plane_plane(A, B):
                         c1 * A.n.y + c2 * B.n.y,
                         c1 * A.n.z + c2 * B.n.z),
                  A.n.cross(B.n))
+
+def _pmap(Klass, f, it):
+    return Klass(f(v.x for v in it), f(v.y for v in it), f(v.z for v in it))
