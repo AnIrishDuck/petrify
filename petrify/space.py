@@ -310,7 +310,7 @@ class Vector:
                        self.y - d * normal.y,
                        self.z - d * normal.z)
 
-    def rotate_around(self, axis, theta):
+    def rotate(self, axis, theta):
         """
         Return a new vector rotated around `axis` by angle `theta`. Right hand
         rule applies.
@@ -724,11 +724,11 @@ class Matrix:
         return self
 
     @classmethod
-    def rotate_axis(cls, angle, axis):
+    def rotate_axis(cls, axis, angle):
         """
         A rotational transform:
 
-        >>> (Matrix.rotate_axis(tau / 4, Vector.basis.z) * Point(1, 0, 0)).rounded()
+        >>> (Matrix.rotate_axis(Vector.basis.z, tau / 4) * Point(1, 0, 0)).rounded()
         Point(0, 1, 0)
 
         """
@@ -909,7 +909,7 @@ class Quaternion:
     Multiplication can be performed on `Vector` instances to get the transformed
     vector or point:
 
-    >>> r = Quaternion.rotate_axis(tau / 4, Vector.basis.x);
+    >>> r = Quaternion.rotate_axis(Vector.basis.x, tau / 4);
     >>> (r * Vector(0, 1, 0)).rounded()
     Vector(0, 0, 1)
 
@@ -1028,8 +1028,8 @@ class Quaternion:
         self.z = 0
         return self
 
-    def rotate_axis(self, angle, axis):
-        self *= Quaternion.rotate_axis(angle, axis)
+    def rotate_axis(self, axis, angle):
+        self *= Quaternion.rotate_axis(axis, angle)
         return self
 
     def rotate_euler(self, heading, attitude, bank):
@@ -1128,7 +1128,7 @@ class Quaternion:
         return cls()
 
     @classmethod
-    def rotate_axis(cls, angle, axis):
+    def rotate_axis(cls, axis, angle):
         assert(isinstance(axis, Vector))
         axis = axis.normalized()
         s = math.sin(angle / 2)

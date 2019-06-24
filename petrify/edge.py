@@ -46,8 +46,8 @@ class EdgeChamfer(Node):
         assert(a_normal.angle(edge.v) == tau / 4)
         assert(b_normal.angle(edge.v) == tau / 4)
 
-        direction_a = b_normal.rotate_around(b_edge.v, a_normal.angle(b_normal) - tau / 4)
-        direction_b = a_normal.rotate_around(a_edge.v, b_normal.angle(a_normal) - tau / 4)
+        direction_a = b_normal.rotate(b_edge.v, a_normal.angle(b_normal) - tau / 4)
+        direction_b = a_normal.rotate(a_edge.v, b_normal.angle(a_normal) - tau / 4)
         a_inset = polygon_inset(a, a_edge, -direction_a.normalized() * amount)
         b_inset = polygon_inset(b, b_edge, -direction_b.normalized() * amount)
 

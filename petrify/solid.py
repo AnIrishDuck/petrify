@@ -201,9 +201,9 @@ class Node:
         """ Translate this geometry by the provided `translate` vector. """
         return Transformed(self, Matrix.translate(*delta.xyz))
 
-    def rotate_around(self, theta, axis):
+    def rotate(self, axis, theta):
         """ Rotate this geometry around the given `axis` vector by `theta` radians. """
-        return Transformed(self, Matrix.rotate_axis(theta, axis))
+        return Transformed(self, Matrix.rotate_axis(axis, theta))
 
 class Collection(Node):
     """
@@ -430,7 +430,7 @@ class Spun(Node):
         super().__init__(self.generate_polygons())
 
     def profile(self, polygon, angle):
-        bx = self.start.rotate_around(self.axis, angle)
+        bx = self.start.rotate(self.axis, angle)
         return Polygon([
             (p.x * bx + p.y * self.axis).point()
             for p in polygon.points

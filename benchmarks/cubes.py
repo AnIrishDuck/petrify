@@ -8,9 +8,9 @@ if len(sys.argv) > 1:
 def spin(shape):
     return (
         shape
-            .rotate_around(random.uniform(0, tau / 8), Vector.basis.x)
-            .rotate_around(random.uniform(0, tau / 8), Vector.basis.y)
-            .rotate_around(random.uniform(0, tau / 8), Vector.basis.z)
+            .rotate(Vector.basis.x, random.uniform(0, tau / 8))
+            .rotate(Vector.basis.y, random.uniform(0, tau / 8))
+            .rotate(Vector.basis.z, random.uniform(0, tau / 8))
     )
 
 def delta(): return random.uniform(0.75, 1.25)
