@@ -25,9 +25,14 @@ for several core petrify features:
 - Methods for defining advanced_ solids.
 - Combining_ multiple solids into a single complex solid.
 
-.. _solids: https://mybinder.org/v2/gh/anirishduck/petrify-docker/master?filepath=solids.ipynb
-.. _advanced: https://mybinder.org/v2/gh/anirishduck/petrify-docker/master?filepath=advanced.ipynb
-.. _Combining: https://mybinder.org/v2/gh/anirishduck/petrify-docker/master?filepath=csg.ipynb
+Have patience; notebooks on binder can take up to a minute to start. Due to a
+bug in pythreejs, you'll need to click "restart and run all" to see the relevant
+interactive visualizations.
+
+.. _binder: https://mybinder.org
+.. _solids: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=solids.ipynb
+.. _advanced: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=advanced.ipynb
+.. _Combining: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=csg.ipynb
 
 Design Principles
 -----------------
