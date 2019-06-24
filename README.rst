@@ -9,8 +9,25 @@ Petrify
     :target: https://petrify.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/anirishduck/petrify-docker/master?filepath=solids.ipynb
+
 A library for working with three-dimensional geometry. Designed for CAD / CAM
 applications.
+
+Online Demo
+-----------
+
+Thanks to the magic of binder_, you can try out petrify online. We have demos
+for several core petrify features:
+
+- Construction of many basic solids_.
+- Methods for defining advanced_ solids.
+- Combining_ multiple solids into a single complex solid.
+
+.. _solids: https://mybinder.org/v2/gh/anirishduck/petrify-docker/master?filepath=solids.ipynb
+.. _advanced: https://mybinder.org/v2/gh/anirishduck/petrify-docker/master?filepath=advanced.ipynb
+.. _Combining: https://mybinder.org/v2/gh/anirishduck/petrify-docker/master?filepath=csg.ipynb
 
 Design Principles
 -----------------
