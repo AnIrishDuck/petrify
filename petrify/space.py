@@ -5,6 +5,8 @@ Math utility library for common three-dimensional constructs:
 - :py:class:`Point`
 - :py:class:`Polygon`
 - :py:class:`Plane`
+- :py:class:`PlanarPolygon`
+- :py:class:`Face`
 - :py:class:`Quaternion`
 - :py:class:`Matrix`
 - :py:class:`Line`

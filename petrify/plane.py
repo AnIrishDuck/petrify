@@ -919,8 +919,11 @@ class Polygon:
     Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
 
     Supports scaling and translation:
+
     >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
     >>> tri * Vector(2, 3)
+    Polygon([Point(4, 0), Point(0, 0), Point(2, 3)])
+    >>> tri * Matrix.scale(2, 3)
     Polygon([Point(4, 0), Point(0, 0), Point(2, 3)])
     >>> tri + Vector(2, 1)
     Polygon([Point(4, 1), Point(2, 1), Point(3, 2)])
