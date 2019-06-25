@@ -225,8 +225,12 @@ class Collection(Node):
         self.nodes = nodes
         super().__init__([p for n in nodes if hasattr(n, 'polygons') for p in n.polygons])
 
+    def flatten(self):
+        return [child for n in self.nodes
+                for child in (n.flatten() if isinstance(n, Collection) else [n])]
+
     def render(self):
-        return visualize.scene(self.nodes)
+        return visualize.scene(self.flatten())
 
 class View(Node):
     """
