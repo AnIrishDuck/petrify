@@ -167,10 +167,12 @@ class Node:
         )
 
         if not wireframe:
-            material = material=js.MeshLambertMaterial(color='white')
+            color = self.view_data.get('color', 'white')
+            material = material=js.MeshLambertMaterial(color=color)
             return js.Mesh(geometry, material)
         else:
-            material = js.MeshBasicMaterial(color='#00ff00', wireframe=True)
+            color = self.view_data.get('color', '#00ff00')
+            material = js.MeshBasicMaterial(color=color, wireframe=True)
             return js.Mesh(geometry, material)
 
     def render(self):
