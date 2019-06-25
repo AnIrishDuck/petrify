@@ -207,6 +207,10 @@ class Node:
         """ Rotate this geometry around the given `axis` vector by `theta` radians. """
         return Transformed(self, Matrix.rotate_axis(axis, theta))
 
+    def rotate_at(self, origin, axis, theta):
+        """ Rotate this geometry about the given `origin` and `axis` by `theta` radians. """
+        return Transformed(self, Matrix.rotate_at(origin, axis, theta))
+
 class Collection(Node):
     """
     Collection of multiple objects. Self-intersection is unsupported, but

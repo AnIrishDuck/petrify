@@ -758,6 +758,22 @@ class Matrix:
         return self
 
     @classmethod
+    def rotate_at(cls, origin, axis, angle):
+        """
+        A rotational transform:
+
+        >>> rotation = Matrix.rotate_at(Point(1, 1, 1), Vector.basis.z, tau / 4)
+        >>> (rotation * Point(2, 1, 1)).rounded()
+        Point(1, 2, 1)
+
+        """
+        return (
+            Matrix.translate(*(origin).xyz) *
+            Matrix.rotate_axis(axis, angle) *
+            Matrix.translate(*(-origin).xyz)
+        )
+
+    @classmethod
     def rotate_euler(cls, heading, attitude, bank):
         # from http://www.euclideanspace.com/
         ch = math.cos(heading)
