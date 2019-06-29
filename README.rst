@@ -15,6 +15,12 @@ Petrify
 A library for working with three-dimensional geometry. Designed for CAD / CAM
 applications.
 
+To get started with this library, we recommend walking through the demos below.
+Each notebook contains links to our comprehensive class and method-level
+documentation_.
+
+.. _documentation: https://petrify.readthedocs.io/en/latest/?badge=latest
+
 Online Demo
 -----------
 
