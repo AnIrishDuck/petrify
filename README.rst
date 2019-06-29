@@ -10,7 +10,7 @@ Petrify
     :alt: Documentation Status
 
 .. image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/anirishduck/petrify-docker/master?filepath=solids.ipynb
+    :target: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/solids.ipynb
 
 A library for working with three-dimensional geometry. Designed for CAD / CAM
 applications.
@@ -36,9 +36,9 @@ bug in pythreejs, you'll need to click "restart and run all" to see the relevant
 interactive visualizations.
 
 .. _binder: https://mybinder.org
-.. _solids: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=solids.ipynb
-.. _advanced: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=advanced.ipynb
-.. _Combining: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=csg.ipynb
+.. _solids: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/solids.ipynb
+.. _advanced: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/advanced.ipynb
+.. _Combining: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/csg.ipynb
 
 Design Principles
 -----------------
