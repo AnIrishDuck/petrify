@@ -216,12 +216,21 @@ def read_polys_from_stl_file(filename):
     filename - Name fo the STL file to read from.
     """
     polygons = []
+    is_ascii = False
     with open(filename, 'rb') as f:
         line = f.readline(80)
         if line == "":
             return  # End of file.
         line = line.lstrip()
         if line[0:6].lower() == b"solid ":
+            for line in f:
+                if b"endsolid" in line:
+                    is_ascii = True
+                    break
+
+    with open(filename, 'rb') as f:
+        f.readline(80)
+        if is_ascii:
             # Reading ASCII STL file.
             while True:
                 poly = _read_ascii_facet(f)
