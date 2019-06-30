@@ -30,6 +30,7 @@ Contents
 
    petrify.units
    petrify.solid
+   petrify.formats
    petrify.edge
    petrify.space
    petrify.plane
