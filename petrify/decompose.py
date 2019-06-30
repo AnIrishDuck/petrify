@@ -23,7 +23,7 @@ def grouper(n, iterable, fillvalue=None):
 def yl(segment, y):
     return segment.intersect(Line(Point(0, y), Vector(1, 0)))
 
-def trapezoidal(polygons, min_area=0.0001):
+def trapezoidal(polygons, min_area=None):
     """
     Trapezoidal decomposition of a list of :py:class:`petrify.plane.Polygon`
     objects forming a complex polygon that can be concave, consist of many
@@ -65,7 +65,7 @@ def trapezoidal(polygons, min_area=0.0001):
         active = grouper(2, [a[1] for a in next_active])
         prior = level
 
-    return [Polygon(t) for t in trapezoids if trap_area(t) > min_area]
+    return [Polygon(t) for t in trapezoids if min_area is None or trap_area(t) > min_area]
 
 def tri_area(a, b, c):
     return abs((a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2)
