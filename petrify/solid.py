@@ -11,8 +11,6 @@ Creation of complex objects from humble building blocks:
     A series of profiles spun around an axis and connected together.
 :py:class:`Extrusion` :
     Complex layered objects with polygon slices.
-:py:class:`External` :
-    An external mesh loaded from an STL file.
 :py:class:`Node` :
     Arbitrary construction of geometry via polygons.
 
@@ -487,6 +485,8 @@ class Cylinder(PolygonExtrusion):
     `axis` :
         a :class:`petrify.space.Vector` that defines the axis the cylinder will
         be "spun about". The magnitude of the axis is the height of the cylinder.
+    `radius` :
+        the radius of the cylinder.
     `segments` :
         the number of quads to use when approximating the cylinder.
 
