@@ -1,14 +1,11 @@
 """
-**Experimental** SVG support.
+**Experimental** SVG read support.
 
 This currently only works with SVG paths devoid of problematic constructions:
 
 - usage of fill-rule resulting in a single non-terminated (with the `Z` command)
   path resulting in unfilled areas.
 - motion commands that move the "pen" without terminating the path.
-
-Its current primary three-dimensional purpose is generating
-:py:class:`petrify.solid.PathExtrusion` objects.
 
 """
 from svg.path import parse_path, Line, CubicBezier, QuadraticBezier, Arc
@@ -21,36 +18,6 @@ import re
 import xml.sax
 
 u = units.u
-
-class PathExtrusion(Node):
-    """
-    A SVG path extruded into three-dimensional space.
-
-    >>> from petrify import u
-    >>> from petrify.space import Plane, Point, Vector
-    >>> from petrify.solid import Basis
-    >>> paths = SVG.read('tests/fixtures/example.svg', u.inches / (90 * u.file))
-    >>> box = paths['rect'].m_as(u.inches)
-    >>> example = PathExtrusion(Basis.unit, box, Vector(0, 0, 1))
-
-    """
-    def __init__(self, basis, path, direction):
-        path = path.polygon()
-
-        def trapezoids(polygons):
-            return [t.simplify() for polygon in polygons for t in trapezoidal([polygon])]
-
-        interior = trapezoids(path.interior)
-        exterior = trapezoids(path.exterior)
-
-        interior = Union(
-            [PolygonExtrusion(PlanarPolygon(basis, p), direction) for p in interior]
-        )
-        exterior = Union(
-            [PolygonExtrusion(PlanarPolygon(basis, p), direction) for p in exterior]
-        )
-
-        super().__init__((exterior - interior).polygons)
 
 exp = re.compile('(.*)\((.*)\)')
 def parse_transform(s):
@@ -80,6 +47,10 @@ def from_complex(v):
 
 lines = [Line, CubicBezier, QuadraticBezier, Arc]
 class Path:
+    """
+    An individual path object within a SVG file.
+
+    """
     def __init__(self, transforms, data):
         self.transforms = transforms
         self.data = data
@@ -100,6 +71,26 @@ class Path:
         return self.transform * point
 
     def polygons(self, min_length = 1.0 * u.file):
+        """
+        Returns all the simple :class:`petrify.plane.Polygon` objects formed
+        from this path:
+
+        >>> from petrify import u
+        >>> paths = SVG.read('tests/fixtures/example.svg', u.inches / (90 * u.file))
+        >>> box = paths['rect'].m_as(u.inches)
+        >>> len(box.polygons())
+        2
+        >>> len(box.polygons()[0].segments())
+        4
+
+        Converts all curves to lines.
+
+        `min_length` :
+            The length used to linearize all curves. For example, a curve with
+            a length of 4.5 file units and a `min_length` of `2 * u.file` would
+            be broken into three line segments.
+
+        """
         parsed = self.parse()
         polygons = []
         current = []
@@ -123,6 +114,27 @@ class Path:
         return [p for p in polygons if p is not None]
 
     def polygon(self, min_length = 1.0 * u.file):
+        """
+        Returns a :class:`petrify.plane.ComplexPolygon` formed from this path:
+
+        >>> from petrify import u
+        >>> paths = SVG.read('tests/fixtures/example.svg', u.inches / (90 * u.file))
+        >>> box = paths['rect'].m_as(u.inches)
+        >>> len(box.polygon().segments())
+        8
+        >>> len(box.polygon().exterior)
+        1
+        >>> len(box.polygon().interior)
+        1
+
+        Converts all curves to lines.
+
+        `min_length` :
+            The length used to linearize all curves. For example, a curve with
+            a length of 4.5 file units and a `min_length` of `2 * u.file` would
+            be broken into three line segments.
+
+        """
         return ComplexPolygon(self.polygons(min_length))
 
 class Handler(xml.sax.ContentHandler):
@@ -150,6 +162,14 @@ class Handler(xml.sax.ContentHandler):
             self.stack.pop()
 
 class SVG:
+    """
+    Basic reader for the SVG file format:
+
+    >>> from petrify import u
+    >>> paths = SVG.read('tests/fixtures/example.svg', u.inches / (90 * u.file))
+    >>> box = paths['rect'].m_as(u.inches)
+
+    """
     @classmethod
     def read(cls, path, scale):
         parser = xml.sax.make_parser()

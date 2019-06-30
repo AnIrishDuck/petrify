@@ -4,6 +4,7 @@ Math utility library for common two-dimensional constructs:
 - :py:class:`Vector`
 - :py:class:`Point`
 - :py:class:`Polygon`
+- :py:class:`ComplexPolygon`
 - :py:class:`Matrix`
 - :py:class:`Line`
 - :py:class:`Ray`
@@ -1206,6 +1207,11 @@ class Polygon:
         return len(intersects) % 2 == 1
 
 class ComplexPolygon:
+    """
+    Represents a complex polygon. A complex polygon is composed of one or more
+    separate simple polygons, and may contain holes.
+
+    """
     def __init__(self, polygons=None, interior=None, exterior=None):
         if polygons is not None:
             self.interior = []
@@ -1263,12 +1269,27 @@ class ComplexPolygon:
         return "ComplexPolygon({0!r})".format([*self.exterior, *self.interior])
 
     def segments(self):
-        return (s for p in self.polygons() for s in p.segments())
+        return [s for p in self.polygons() for s in p.segments()]
 
     def polygons(self):
         return (*self.exterior, *self.interior)
 
     def offset(self, amount):
+        """
+        Finds the dynamic offset of this complex polygon by moving all edges by
+        a given `amount` perpendicular to their direction.
+
+        Any inner polygons are offset in the reverse direction to the outer
+        polygons:
+
+        >>> square = Polygon([Point(0, 0), Point(0, 1), Point(1, 1), Point(1, 0)])
+        >>> complex = ComplexPolygon([square + Vector(1, 1), square * 3])
+        >>> complex.offset(-0.1).interior
+        [Polygon([Point(0.9, 0.9), Point(0.9, 2.1), Point(2.1, 2.1), Point(2.1, 0.9)])]
+        >>> complex.offset(-0.1).exterior
+        [Polygon([Point(0.1, 0.1), Point(0.1, 2.9), Point(2.9, 2.9), Point(2.9, 0.1)])]
+
+        """
         def off(ps, v):
             polygons = [p.offset(v) for p in ps]
             return [p for p in polygons if p is not None]
