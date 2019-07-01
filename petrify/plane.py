@@ -308,7 +308,10 @@ class Vector:
 # i j k  2 5 8
 
 class Matrix:
-    """ A matrix that can be used to transform two-dimensional vectors. """
+    """
+    A matrix that can be used to transform two-dimensional vectors and points.
+
+    """
     __slots__ = list('abcefgijk')
 
     def __init__(self):
@@ -455,6 +458,13 @@ class Matrix:
 
     @classmethod
     def scale(cls, x, y):
+        """
+        A scale transform:
+
+        >>> Point(1, 1) * Matrix.scale(2, 3)
+        Point(2, 3)
+
+        """
         self = cls()
         self.a = x
         self.f = y
@@ -462,6 +472,13 @@ class Matrix:
 
     @classmethod
     def translate(cls, x, y):
+        """
+        Translates:
+
+        >>> Point(1, 1) * Matrix.translate(2, 3)
+        Point(3, 4)
+
+        """
         self = cls()
         self.c = x
         self.g = y
@@ -469,6 +486,13 @@ class Matrix:
 
     @classmethod
     def rotate(cls, angle):
+        """
+        Counter-clockwise rotational transform:
+
+        >>> (Point(1, 0) * Matrix.rotate(tau / 4)).round(2)
+        Point(0.0, 1.0)
+
+        """
         self = cls()
         s = math.sin(angle)
         c = math.cos(angle)

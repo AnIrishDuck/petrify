@@ -1685,9 +1685,9 @@ class Basis:
     >>> translated.project(plane.Point(2, 3))
     Point(2, 3, 2)
 
-    ..note ::
-        A :class:`Plane` has an infinite number of associated `Basis`
-        constructions.
+    .. note ::
+        Any given :class:`Plane` has an infinite number of associated
+        :class:`Basis` constructions.
 
     There are special `Basis` objects for commonly used bases:
 
@@ -1812,7 +1812,7 @@ class PlanarPolygon:
 
 class Face(PlanarPolygon):
     """
-    A `PlanarPolygon` with an associated polarity. `Face.Positive` polarity
+    A :class:`PlanarPolygon` with an associated polarity. `Face.Positive` polarity
     follows the right hand rule, `Face.Negative` is inverted.
 
     >>> tri= plane.Polygon([    \

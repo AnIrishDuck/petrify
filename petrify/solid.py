@@ -6,7 +6,7 @@ Creation of complex objects from humble building blocks:
 :py:class:`Cylinder` :
     A cylinder rotated around an origin and axis.
 :py:class:`PolygonExtrusion` :
-    Extrusion of a :class:`space.PlanarPolygon` into a three-dimensional shape.
+    Extrusion of a :class:`petrify.space.PlanarPolygon` into a three-dimensional shape.
 :py:class:`Spun` :
     A series of profiles spun around an axis and connected together.
 :py:class:`Extrusion` :
