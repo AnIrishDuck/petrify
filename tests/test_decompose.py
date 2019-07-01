@@ -67,8 +67,8 @@ class TestTrapezoid(unittest.TestCase):
         polygons = decompose.trapezoidal([inverted])
         self.assertEqual([p.points for p in polygons], [
             [Point(7.0, 0.0), Point(7.0, 2.0), Point(0.0, 2.0), Point(0.0, 0.0)],
-            [Point(4.0, 2.0), Point(4.0, 4.0), Point(2.0, 4.0), Point(2.0, 2.0)],
-            [Point(7.0, 2.0), Point(7.0, 4.0), Point(5.0, 4.0), Point(5.0, 2.0)]
+            [Point(2.0, 2.0), Point(2.0, 4.0), Point(4.0, 4.0), Point(4.0, 2.0)],
+            [Point(5.0, 2.0), Point(5.0, 4.0), Point(7.0, 4.0), Point(7.0, 2.0)]
         ])
 
     def test_embedded(self):
@@ -112,6 +112,23 @@ class TestTrapezoid(unittest.TestCase):
             ]
         ])
 
+
+    def test_v_counter(self):
+        v = Polygon([
+            Point(2, 0),
+            Point(0, 4),
+            Point(1, 4),
+            Point(2, 1),
+            Point(3, 4),
+            Point(4, 4),
+        ])
+
+        polygons = decompose.trapezoidal(v.to_counterclockwise().polygons())
+        self.assertEqual([p.points for p in polygons], [
+            [Point(1.5, 1.0), Point(2.5, 1.0), Point(2.0, 0.0)],
+            [Point(1.5, 1.0), Point(0.0, 4.0), Point(1.0, 4.0), Point(2.0, 1.0)],
+            [Point(2.0, 1.0), Point(3.0, 4.0), Point(4.0, 4.0), Point(2.5, 1.0)]
+        ])
 
 def rect(a, b):
     return Polygon([a, Point(a.x, b.y), b, Point(b.x, a.y)])

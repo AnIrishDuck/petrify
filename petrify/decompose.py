@@ -33,6 +33,7 @@ def trapezoidal(polygons, min_area=None):
         Currently assumes that no edges cross or repeat.
 
     """
+    polygons = [p.to_clockwise() for p in polygons]
     sliced = [Sliced(p.points) for p in polygons]
     order = {l: ix for p in sliced for ix, l in enumerate(p.segments())}
 
