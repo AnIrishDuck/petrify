@@ -12,6 +12,9 @@ Petrify
 .. image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/solids.ipynb
 
+.. image:: logo.png
+    :target: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/logo.ipynb
+
 A library for working with three-dimensional geometry. Designed for CAD / CAM
 applications.
 
