@@ -1,6 +1,6 @@
-=======
-Petrify
-=======
+.. image:: logo.png
+    :target: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/logo.ipynb
+    :alt: Petrify Logo
 
 .. image:: https://travis-ci.org/AnIrishDuck/petrify.svg?branch=master
     :target: https://travis-ci.org/AnIrishDuck/petrify
@@ -11,9 +11,6 @@ Petrify
 
 .. image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/solids.ipynb
-
-.. image:: logo.png
-    :target: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/logo.ipynb
 
 A library for working with three-dimensional geometry. Designed for CAD / CAM
 applications.
