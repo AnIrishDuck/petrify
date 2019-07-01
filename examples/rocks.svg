@@ -9,9 +9,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="300mm"
+   width="400mm"
    height="100mm"
-   viewBox="0 0 300 100"
+   viewBox="0 0 400 100"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
@@ -29,7 +29,7 @@
      inkscape:cx="482.85714"
      inkscape:cy="274.28571"
      inkscape:document-units="mm"
-     inkscape:current-layer="flowRoot4601"
+     inkscape:current-layer="flowRoot4640"
      showgrid="false"
      inkscape:window-width="1949"
      inkscape:window-height="1034"
@@ -63,11 +63,17 @@
          transform="matrix(1.2790533,0,0,1.2790533,265.91669,246.92285)"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          id="flowRoot4601">
-        <path
-           id="rocks"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Russo One';-inkscape-font-specification:'Russo One'"
-           d="m -71.321484,-133.04639 q 8.12,0.6 12.8,0.6 0.6,0 1,-0.4 0.4,-0.4 0.4,-1 v -1.4 h -8.6 q -2.72,0 -4.36,-1.64 -1.64,-1.64 -1.64,-4.36 v -1.4 q 0,-2.72 1.64,-4.36 1.64,-1.64 4.36,-1.64 h 13.6 v 5.2 h -11.2 q -0.6,0 -1,0.4 -0.4,0.4 -0.4,1 0,0.6 0.4,1 0.4,0.4 1,0.4 h 7.2 q 2.72,0 4.36,1.64 1.64,1.64 1.64,4.36 v 1.6 q 0,2.72 -1.64,4.36 -1.64,1.64 -4.36,1.64 -7.08,0 -15.2,-0.8 z m -16.184375,-2.8 v 8.4 h -7 v -28 h 7 v 14.2 h 3.2 l 4.4,-7.4 h 7.4 l -6,10.2 6,11 h -7.4 l -4.6,-8.4 z m -10.23125,8 q -7.480001,0.8 -13.200001,0.8 -2.72,0 -4.36,-1.64 -1.64,-1.64 -1.64,-4.36 v -9.2 q 0,-3 1.68,-4.68 1.72,-1.72 4.72,-1.72 h 12.800001 v 5.4 h -10.600001 q -1.6,0 -1.6,1.6 v 7.8 q 0,0.6 0.4,1 0.4,0.4 1,0.4 3.6,0 10.800001,-0.6 z m -22.434371,-5.6 q 0,3 -1.72,4.72 -1.68,1.68 -4.68,1.68 h -9.2 q -3,0 -4.72,-1.68 -1.68,-1.72 -1.68,-4.72 v -9.2 q 0,-3 1.68,-4.68 1.72,-1.72 4.72,-1.72 h 9.2 q 3,0 4.68,1.72 1.72,1.68 1.72,4.68 z m -7,-8.6 q 0,-1.6 -1.6,-1.6 h -4.8 q -1.6,0 -1.6,1.6 v 8 q 0,1.6 1.6,1.6 h 4.8 q 1.6,0 1.6,-1.6 z m -20.05625,-0.8 q -2.52,0 -5.2,1.2 v 14.2 h -7 v -21.2 h 6.2 l 0.4,2.6 q 3.44,-3 7.2,-3 h 1.8 v 6.2 z"
-           inkscape:connector-curvature="0" />
+        <g
+           aria-label="ROCKS"
+           transform="matrix(1.0198824,0,0,1.0198824,111.47745,228.50842)"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           id="flowRoot4640">
+          <path
+             id="rocks"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Russo One';-inkscape-font-specification:'Russo One'"
+             d="m -161.45367,-354.67412 q 10.96,0.6 14.84,0.6 0.92,0 1.44,-0.52 0.56,-0.56 0.56,-1.48 v -3.6 h -9.2 q -4.2,0 -6.12,-1.88 -1.88,-1.92 -1.88,-6.12 v -1.2 q 0,-4.2 1.88,-6.08 1.92,-1.92 6.12,-1.92 h 14.04 v 5.6 h -12.44 q -2.4,0 -2.4,2.4 v 0.8 q 0,2.4 2.4,2.4 h 7.2 q 3.92,0 5.76,1.84 1.84,1.84 1.84,5.76 v 2 q 0,3.92 -1.84,5.76 -1.84,1.84 -5.76,1.84 -2.04,0 -4.32,-0.08 l -3.68,-0.16 q -4.08,-0.2 -8.44,-0.56 z m -18.99125,5.8 h -7.2 v -28 h 7.2 v 11 h 3.6 l 6.24,-11 h 7.6 l -7.84,13.8 7.8,14.2 h -7.6 l -6.2,-11.4 h -3.6 z m -10.36563,-0.4 q -8.92,0.8 -14.8,0.8 -3.92,0 -5.76,-1.84 -1.84,-1.84 -1.84,-5.76 v -12.8 q 0,-4.2 1.88,-6.08 1.92,-1.92 6.12,-1.92 h 14.4 v 5.6 h -12.8 q -2.4,0 -2.4,2.4 v 12.8 q 0,0.92 0.52,1.48 0.56,0.52 1.4,0.52 0.84,0 1.84,0 1,-0.04 2.08,-0.08 1.08,-0.04 2.16,-0.08 1.12,-0.04 2.84,-0.16 1.76,-0.12 4.36,-0.28 z m -32.81875,-20 q 0,-2.4 -2.4,-2.4 h -6.8 q -2.4,0 -2.4,2.4 v 12.8 q 0,2.4 2.4,2.4 h 6.8 q 2.4,0 2.4,-2.4 z m 7.2,12.8 q 0,4.2 -1.92,6.12 -1.88,1.88 -6.08,1.88 h -10 q -4.2,0 -6.12,-1.88 -1.88,-1.92 -1.88,-6.12 v -12.8 q 0,-4.2 1.88,-6.08 1.92,-1.92 6.12,-1.92 h 10 q 4.2,0 6.08,1.92 1.92,1.88 1.92,6.08 z m -54.02812,-20.4 h 16.8 q 4.2,0 6.08,1.92 1.92,1.88 1.92,6.08 v 3.6 q 0,3.32 -1.12,5.16 -1.08,1.84 -3.48,2.44 l 5,8.8 h -7.8 l -4.6,-8.4 h -5.6 v 8.4 h -7.2 z m 17.6,8 q 0,-2.4 -2.4,-2.4 h -8 v 8.4 h 8 q 2.4,0 2.4,-2.4 z"
+             inkscape:connector-curvature="0" />
+        </g>
       </g>
     </g>
   </g>
