@@ -1,20 +1,28 @@
+import math
 from petrify.geometry import tau
 
 def scene(nodes):
     import pythreejs as js
-    from .space import _pmap, Point
+    from .space import _pmap, Point, Vector
 
     points = [p for n in nodes for p in n.points]
-    center = _pmap(Point, sum, points) / len(points)
+    start = _pmap(Point, min, points)
     end = _pmap(Point, max, points)
-    viewline = end - center
-    position = center + viewline * 3
+    center = (start + end) / 2
+
+    # This math shamelessly stolen from:
+    # https://github.com/jupyter-widgets/pythreejs/blob/master/js/src/_base/utils.js
+    fov = 50
+    r2 = max((point - center).magnitude_squared() for point in points)
+    delta = (1.5 * math.sqrt(r2)) / math.tan(0.5 * fov * math.pi / 180)
+    delta *= Vector(-1, -1, 1).normalized()
+    position = center + delta
     meshes = (n.mesh() for n in nodes)
 
     light = js.DirectionalLight(color='white', position=[3, 5, 1], intensity=0.5)
     c = js.PerspectiveCamera(
         position=position.xyz,
-        up=[0, 1, 0],
+        up=[0, 0, 1],
         children=[light]
     )
 
