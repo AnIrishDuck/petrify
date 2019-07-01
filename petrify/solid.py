@@ -173,7 +173,7 @@ class Node:
             material = js.MeshBasicMaterial(color=color, wireframe=True)
             return js.Mesh(geometry, material)
 
-    def render(self):
+    def render(self, **properties):
         """
         Create a `pythreejs`_ visualization of this geometry for use in
         interactive notebooks.
@@ -181,7 +181,7 @@ class Node:
         .. _`pythreejs`: https://github.com/jupyter-widgets/pythreejs
 
         """
-        return visualize.scene([self])
+        return visualize.scene([self], **properties)
 
     def as_unit(self, unit):
         """
@@ -227,8 +227,8 @@ class Collection(Node):
         return [child for n in self.nodes
                 for child in (n.flatten() if isinstance(n, Collection) else [n])]
 
-    def render(self):
-        return visualize.scene(self.flatten())
+    def render(self, **properties):
+        return visualize.scene(self.flatten(), **properties)
 
 class View(Node):
     """
@@ -407,10 +407,10 @@ class PolygonExtrusion(Extrusion):
     """
     def __init__(self, footprint, direction):
         self.footprint = footprint
-        bottom = self.footprint
-        top = PlanarPolygon(footprint.basis + direction, footprint.polygon)
+        self.bottom = self.footprint
+        self.top = PlanarPolygon(footprint.basis + direction, footprint.polygon)
 
-        super().__init__([bottom, top])
+        super().__init__([self.bottom, self.top])
 
 class Spun(Node):
     """
