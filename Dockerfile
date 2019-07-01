@@ -1,1 +1,1 @@
-FROM anirishduck/petrify:0.1
+FROM anirishduck/petrify:0.3
