@@ -66,7 +66,8 @@ def trapezoidal(polygons, min_area=None):
         active = grouper(2, [a[1] for a in next_active])
         prior = level
 
-    return [Polygon(t) for t in trapezoids if min_area is None or trap_area(t) > min_area]
+    simplified = [Polygon(t).simplify() for t in trapezoids if min_area is None or trap_area(t) > min_area]
+    return [p for p in simplified if p is not None and len(p.points) > 2]
 
 def tri_area(a, b, c):
     return abs((a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2)
