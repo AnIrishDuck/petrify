@@ -8,14 +8,6 @@ class TestParse(unittest.TestCase):
         shapes = SVG.read(open('tests/fixtures/example.svg'), 'mm')
         self.assertEqual(len(shapes['rect'].polygons()), 2)
 
-class TestExtrusion(unittest.TestCase):
-    def test_example(self):
-        paths = SVG.read('tests/fixtures/example.svg', 1 * u.inches / u.file)
-        box = paths['rect']
-        example = svg.PathExtrusion(Basis.unit, box, Vector(0, 0, 1))
-        self.assertEqual(len(box.polygon().interior), 1)
-        self.assertEqual(len(box.polygon().exterior), 1)
-
     def test_conversion(self):
         scale = 1 * u.inches / u.file
         paths = SVG.read('tests/fixtures/example.svg', scale)
