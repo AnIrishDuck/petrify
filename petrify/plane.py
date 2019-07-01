@@ -59,7 +59,6 @@ class Vector:
 
     """
     __slots__ = ['x', 'y']
-    __hash__ = None
 
     def __init__(self, x=0, y=0):
         assert valid_scalar(x) and valid_scalar(y)
