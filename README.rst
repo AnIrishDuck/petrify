@@ -49,7 +49,7 @@ Design Principles
   and manipulate solids, shapes, and other geometry.
 - **Immutable operation**. Immutable math is easier for most audiences to reason
   about. This library explicitly does not target strong real-time applications
-  like games that demands mutability for performance.
+  like games that demand mutability for performance.
 - **Pluggable engines**. CSG is complicated. Different engines have different
   tradeoffs:
 
