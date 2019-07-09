@@ -55,17 +55,20 @@ pymesh engine already installed::
 
 The above command will expose a notebook on port 8888 with the necessary volume
 mounts for persisting the `work` directory. The above command will include a
-`?token=<xxxxx>` query parameter you will need to authenticate with the server.
+:code:`?token=<xxxxx>` query parameter you will need to authenticate with the
+server.
+
+.. docker_: https://docker.com
 
 Installation
 ------------
 
-petrify is published online via pip:
+petrify is published online via pip::
 
   pip install petrify
 
 We strongly recommend using its visualization capabilities in combination with
-Jupyter_:
+Jupyter_::
 
   pip install notebook pythreejs
 
@@ -88,7 +91,11 @@ in Ubuntu or Debian environments::
 
   sudo apt-get install libcgal-dev
 
-Now, you can install using the normal PyMesh installation procedure_.
+Now, you can install using the normal PyMesh installation procedure_. In
+Linux-like environments, you can probably just install all the needed
+dependencies in the documentation, and then run::
+
+  pip install pymesh2
 
 .. _WSL: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 .. _CGAL: https://www.cgal.org/
