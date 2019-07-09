@@ -1736,8 +1736,9 @@ Basis.xz = Basis(Point.origin, Vector.basis.x, Vector.basis.z)
 
 class PlanarPolygon:
     """
-    A possibly-complex two-dimensional polygon embedded in three-dimensional
-    space via a :class:`Basis`:
+    A two-dimensional :class:`petrify.plane.Polygon` or
+    :class:`petrify.plane.ComplexPolygon` embedded in three-dimensional space
+    via a :class:`Basis`:
 
     >>> tri = plane.Polygon([   \
         plane.Point(0, 0),      \
