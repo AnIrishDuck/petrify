@@ -47,9 +47,9 @@ Design Principles
 
 - **Novice focus**. This library should make it as easy as possible to build
   and manipulate solids, shapes, and other geometry.
-- **Immutable operation**. Immutable math is easier for novices to reason about.
-  This library explicitly does not target strong real-time applications like
-  games that demands mutability for performance.
+- **Immutable operation**. Immutable math is easier for most audiences to reason
+  about. This library explicitly does not target strong real-time applications
+  like games that demands mutability for performance.
 - **Pluggable engines**. CSG is complicated. Different engines have different
   tradeoffs:
 
