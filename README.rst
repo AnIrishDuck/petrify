@@ -115,7 +115,7 @@ in Ubuntu or Debian environments::
 
 Now, you can install using the normal PyMesh installation procedure_. In
 Linux-like environments, you can probably just install all the needed
-dependencies in the documentation, and then run::
+library dependencies in the documentation, and then run::
 
   pip install pymesh2
 
