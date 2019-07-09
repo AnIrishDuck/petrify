@@ -77,9 +77,8 @@ pymesh engine already installed::
     anirishduck/petrify
 
 The above command will expose a notebook on port 8888 with the necessary volume
-mounts for persisting the `work` directory. The above command will include a
-:code:`?token=<xxxxx>` query parameter you will need to authenticate with the
-server.
+mounts for persisting the `work` directory. The server will output a
+:code:`?token=<xxxxx>` query parameter you will need for authentication.
 
 .. _docker: https://docker.com
 
