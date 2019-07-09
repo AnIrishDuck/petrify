@@ -30,6 +30,7 @@ for several core petrify features:
 - Construction of many basic solids_.
 - Methods for defining advanced_ solids.
 - Combining_ multiple solids into a single complex solid.
+- Setting visual_ properties on solids to create the above logo.
 
 Have patience; notebooks on binder can take up to a minute to start. Due to a
 bug in pythreejs, you'll need to click "restart and run all" to see the relevant
@@ -39,6 +40,72 @@ interactive visualizations.
 .. _solids: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/solids.ipynb
 .. _advanced: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/advanced.ipynb
 .. _Combining: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/csg.ipynb
+.. _visual: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/logo.ipynb
+
+Docker
+------
+
+We recommend using petrify inside our prepackaged docker_ image. This image
+has all the necessary libraries for running a Jupyter notebook server, and the
+pymesh engine already installed::
+
+  docker run -it -p 8888:8888 \
+    -v $(pwd)/notebooks:/home/jovyan/work \
+    anirishduck/petrify
+
+The above command will expose a notebook on port 8888 with the necessary volume
+mounts for persisting the `work` directory. The above command will include a
+`?token=<xxxxx>` query parameter you will need to authenticate with the server.
+
+Installation
+------------
+
+petrify is published online via pip:
+
+  pip install petrify
+
+We strongly recommend using its visualization capabilities in combination with
+Jupyter_:
+
+  pip install notebook pythreejs
+
+While petrify is functional from this point, you almost certainly want to
+install a more powerful engine than the default pycsg one. See our csg_ example
+for more detail on why; read on to learn how.
+
+.. _Jupyter: https://jupyter.org/
+.. _csg: https://github.com/AnIrishDuck/petrify/blob/master/examples/csg.ipynb
+
+pymesh2
+=======
+
+pymesh is the most mature driver, but also has the most complicated installation
+procedure. We currently only recommend this installation in a Linux-like
+environment. You can also use WSL_ if on Windows, or a VM on OSX.
+
+You will need to build pymesh with CGAL_ support to use this engine. To install
+in Ubuntu or Debian environments::
+
+  sudo apt-get install libcgal-dev
+
+Now, you can install using the normal PyMesh installation procedure_.
+
+.. _WSL: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+.. _CGAL: https://www.cgal.org/
+.. _MacPorts: https://www.macports.org/
+.. _procedure: https://pymesh.readthedocs.io/en/latest/installation.html
+
+cython-csg
+==========
+
+Installation of cython-csg requires a working build of cython, which should be
+available on most major platforms::
+
+  pip install cython
+
+From here, the installation of cython-csg should be entirely automated::
+
+  pip install cython-csg
 
 Design Principles
 -----------------
