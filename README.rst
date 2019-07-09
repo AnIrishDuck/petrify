@@ -54,9 +54,9 @@ Design Principles
   tradeoffs:
 
   - The pymesh engine is the default where the pymesh2_ library is installed. It
-    uses the IGL engine, which is mature and quite fast. However, building
-    pymesh with IGL support can be difficult for novices and in certain
-    environments (like Windows).
+    uses the CGAL CSG engine, which is mature and quite fast. However, building
+    pymesh with CGAL support can be difficult for novices and in certain
+    environments (like Windows and OSX).
   - cython-csg is relatively fast, but still requires a cython build toolchain.
   - pycsg is a pure-python implementation. It is obviously quite slow, but works
     everywhere python does. For example, pure python environments like pyiodide_
