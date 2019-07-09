@@ -33,8 +33,8 @@ for several core petrify features:
 - Setting visual_ properties on solids to create the above logo.
 
 Have patience; notebooks on binder can take up to a minute to start. Due to a
-bug in pythreejs, you'll need to click "restart and run all" to see the relevant
-interactive visualizations.
+(possible) bug in pythreejs, you'll need to click "restart and run all" to see
+the relevant interactive visualizations.
 
 .. _binder: https://mybinder.org
 .. _solids: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/solids.ipynb
