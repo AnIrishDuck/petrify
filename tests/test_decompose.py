@@ -21,6 +21,16 @@ class TestTrapezoid(unittest.TestCase):
             ],
         ])
 
+    def test_double_diamond(self):
+        diamond = Polygon([
+            Point(1, 0),
+            Point(2, 1),
+            Point(1, 2),
+            Point(0, 1),
+        ])
+        double = [diamond, diamond + Point(3, 0.1)]
+        polygons = decompose.trapezoidal(double)
+
     def test_complex(self):
         f = Polygon([
             Point(0, 0),

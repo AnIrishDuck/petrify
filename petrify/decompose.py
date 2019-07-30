@@ -2,10 +2,41 @@
 Utility methods for decomposition of polygons into simpler polygons.
 
 """
-from .plane import tau, Point, Polygon, LineSegment, Line, Ray, Vector
+from petrify import space
+from .plane import tau, LineSegment, Line, Ray
+from . import plane
 import heapq, itertools
 
-class Sliced(Polygon):
+# LineSegment stores a point and a vector. Thanks to floating point math,
+# \exist p1, p2 in Point2 where p1 + (p2 - p1) != p2
+# In other words, we need to store the exact endpoint instead of the offset for
+# proper floating point comparison. See the double diamond test for an example.
+class ExactSegment:
+    def __init__(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
+        self.p = self.p1
+        self.v = self.p2 - self.p1
+
+    def intersect(self, other):
+        return other._intersect_line2(self)
+
+    def _u_in(self, u):
+        return u >= 0.0 and u <= 1.0
+
+    def _intersect_line2(self, other):
+        return plane._intersect_line2_line2(self, other)
+
+    def __repr__(self):
+        return "{0!r} => {1!r}".format(self.p1, self.p2)
+
+    def __hash__(self):
+        return hash((self.p1, self.p2))
+
+    def __eq__(self, other):
+        return (self.p1, self.p2) == (other.p1, other.p2)
+
+class Sliced(plane.Polygon):
     def __init__(self, points):
         super().__init__(points)
         self.heap = [(min(l.p1.y, l.p2.y), l) for l in self.segments()]
@@ -16,12 +47,16 @@ class Sliced(Polygon):
         self.heap = self.heap[len(output):]
         return [pair[1] for pair in output if pair[1].p1.y != y or pair[1].p2.y != y]
 
+    def segments(self):
+        pairs = zip(self.points, self.points[1:] + [self.points[0]])
+        return [ExactSegment(p1, p2) for p1, p2 in pairs]
+
 def grouper(n, iterable, fillvalue=None):
     args = [iter(iterable)] * n
     return itertools.zip_longest(fillvalue=fillvalue, *args)
 
 def yl(segment, y):
-    return segment.intersect(Line(Point(0, y), Vector(1, 0)))
+    return segment.intersect(Line(plane.Point(0, y), plane.Vector(1, 0)))
 
 def trapezoidal(polygons, min_area=None):
     """
@@ -66,7 +101,8 @@ def trapezoidal(polygons, min_area=None):
         active = grouper(2, [a[1] for a in next_active])
         prior = level
 
-    simplified = [Polygon(t).simplify() for t in trapezoids if min_area is None or trap_area(t) > min_area]
+    simplified = [plane.Polygon(t).simplify() for t in trapezoids
+                  if min_area is None or trap_area(t) > min_area]
     return [p for p in simplified if p is not None and len(p.points) > 2]
 
 def tri_area(a, b, c):
@@ -128,7 +164,7 @@ def recreate_polygons(segments):
 
     """
     valid = set(segments)
-    backwards = set(LineSegment(l.p2, l.p1) for l in segments)
+    backwards = set(space.LineSegment(l.p2, l.p1) for l in segments)
 
     for segment in segments:
         if segment in backwards:
@@ -155,7 +191,7 @@ def recreate_polygons(segments):
             if p2 == first:
                 p2 = None
 
-        polygons.append(Polygon(polygon))
+        polygons.append(space.Polygon(polygon))
         assert(size != len(valid))
         size = len(valid)
 
