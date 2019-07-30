@@ -163,8 +163,9 @@ def recreate_polygons(segments):
         Currently assumes no polygons share points.
 
     """
+    Polygon = space.Polygon if isinstance(segments[0], space.LineSegment) else plane.Polygon
     valid = set(segments)
-    backwards = set(space.LineSegment(l.p2, l.p1) for l in segments)
+    backwards = set(type(l)(l.p2, l.p1) for l in segments)
 
     for segment in segments:
         if segment in backwards:
@@ -191,7 +192,7 @@ def recreate_polygons(segments):
             if p2 == first:
                 p2 = None
 
-        polygons.append(space.Polygon(polygon))
+        polygons.append(Polygon(polygon))
         assert(size != len(valid))
         size = len(valid)
 
