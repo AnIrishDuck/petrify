@@ -383,6 +383,8 @@ class Polygon:
     A linear cycle of coplanar convex points:
 
     >>> triangle = Polygon([Point(0, 0, 0), Point(0, 2, 0), Point(1, 1, 0)])
+    >>> triangle.plane
+    Plane(Vector(0.0, 0.0, -1.0), 0.0)
 
     """
 
