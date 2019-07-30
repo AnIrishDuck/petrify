@@ -244,7 +244,7 @@ class View(Node):
 
 class Extrusion(Node):
     """
-    A three-dimensional object built from rings of :class:`space.PlanarPolygon`
+    A three-dimensional object built from rings of :class:`petrify.space.PlanarPolygon`
     objects with the same number of points at each ring:
 
     >>> parallelogram = plane.Polygon([  \
@@ -268,7 +268,7 @@ class Extrusion(Node):
     connect each ring, and the bottom and top layers then complete the shape.
 
     `rings` :
-        A list of :class:`space.PlanarPolygon` objects defining each ring of
+        A list of :class:`petrify.space.PlanarPolygon` objects defining each ring of
         the final shape.
 
     """
@@ -398,10 +398,10 @@ class PolygonExtrusion(Extrusion):
     >>> extruded = PolygonExtrusion(planar, Vector(0, 0, 1))
 
     `footprint` :
-        a :py:class:`space.PlanarPolygon` object describing a the polygon
+        a :py:class:`petrify.space.PlanarPolygon` object describing a the polygon
         that will be extruded in the given `direction`
     `direction` :
-        A :class:`space.Vector` defining which direction the polygon will be
+        A :class:`petrify.space.Vector` defining which direction the polygon will be
         linearly extruded into.
 
     """
