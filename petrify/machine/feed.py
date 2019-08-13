@@ -23,8 +23,12 @@ class Speed:
 
     """
     def __init__(self, xy, z):
-        self.xy = units.assert_speedy(xy)
-        self.z = units.assert_speedy(z)
+        self.xy = xy
+        self.z = z
+
+    def to(self, format):
+        return Speed(self.xy.m_as(format.xy), self.z.m_as(format.z))
+
 
 class Steps:
     def __init__(self, top, bottom, step):

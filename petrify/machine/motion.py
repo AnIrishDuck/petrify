@@ -115,17 +115,19 @@ class CutSteps(Cut):
 
     def commands(self):
         m = self.configuration.machine
-        s = self.configuration.speeds
+        s = self.configuration.speeds.to(m.format)
+
+        clearance = m.clearance.m_as(self.configuration.units)
 
         for step in self.steps:
             for p in self.passes:
                 path = p.path
-                yield (self, Motion(z=m.clearance, f=s.z))
+                yield (self, Motion(z=clearance, f=s.z))
                 yield (self, Motion(x=path[0].x, y=path[0].y, f=s.xy))
                 yield (self, Motion(z=step, f=s.z))
                 for point in path[1:]:
                     yield (self, Motion(x=point.x, y=point.y, f=s.xy))
-                yield (self, Motion(z=m.clearance, f=s.z))
+                yield (self, Motion(z=clearance, f=s.z))
 
 class Batch(Cut):
     def __init__(self, phases):

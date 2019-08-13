@@ -72,7 +72,7 @@ class Configuration:
         return self._tool.m_as(self.units)
 
     def cut(self, shape):
-        shape = shape.m_as(self.machine.units)
+        shape = shape.m_as(self.machine.format.units)
         if isinstance(shape, Pocket):
             return self.feed.pocket(self, shape)
         elif isinstance(shape, Part):
