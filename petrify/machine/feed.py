@@ -153,6 +153,7 @@ class LinearStepFeed:
         all_paths =  []
         active = None
         for outline in off.polygons():
+            outline = outline.to_counterclockwise()
             paths = [PlanarToolpath(outline.points[0])]
             for line in outline.segments():
                 for tab in part.tabs:
@@ -178,7 +179,8 @@ class LinearStepFeed:
             p.path = [*polygon.points, polygon.points[0]]
             return p
 
-        toolpaths = [path(polygon) for polygon in engrave.polygon.polygons()]
+        toolpaths = [path(polygon.to_counterclockwise())
+                     for polygon in engrave.polygon.polygons()]
         toolpaths = sorted(toolpaths, key=lambda p: p.path[0].x)
 
         steps = Steps(-engrave.depth, -engrave.depth, -self.dz)
