@@ -1,4 +1,5 @@
 from ..plane import ComplexPolygon
+from ..geometry import valid_scalar
 
 class Part:
     def __init__(self, polygon, tabs, depth, start=None):

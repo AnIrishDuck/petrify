@@ -622,6 +622,10 @@ class Line(Geometry):
         if not self.v:
             raise AttributeError('Line has zero-length vector')
 
+    def __mul__(self, v):
+        return self.__class__(self.p * v, self.v * v)
+    __rmul__ = __mul__
+
     def __neg__(self):
         return self.__class__(self.p2, self.p1)
 
