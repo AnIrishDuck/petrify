@@ -1,3 +1,4 @@
+from ..geometry import tau
 from ..plane import Line, LineSegment, Point, Vector
 
 class PlanarToolpath:
@@ -72,6 +73,7 @@ class Cut:
             f.write('\n')
 
     def visualize(self, colors={}):
+        from ..space import Vector
         import pythreejs as js
         import numpy as np
 
@@ -82,9 +84,18 @@ class Cut:
         for parent, command in self.commands():
             if isinstance(command, Motion):
                 updated = prior.merge(command)
+                pv = Vector(*prior.xyz)
+                uv = Vector(*updated.xyz)
+                delta = pv - uv
+                start = (uv + pv) / 2
                 lines.extend([prior.xyz, updated.xyz])
+                a1 = delta.rotate(Vector(0, 0, 1), tau / 16) * 0.1
+                a2 = delta.rotate(Vector(0, 0, 1), -tau / 16) * 0.1
+                lines.extend([start, (a1 + start).xyz, start, (a2 + start).xyz])
                 prior = updated
                 color = getattr(parent, 'color', [0, 1, 0])
+                line_colors.extend([color, color])
+                line_colors.extend([color, color])
                 line_colors.extend([color, color])
 
         lines = np.array(lines, dtype=np.float32)
