@@ -1317,14 +1317,8 @@ class ComplexPolygon:
         [Polygon([Point(0.1, 0.1), Point(0.1, 2.9), Point(2.9, 2.9), Point(2.9, 0.1)])]
 
         """
-        def off(ps, v):
-            polygons = [p.offset(v) for p in ps]
-            return [p for p in polygons if p is not None]
-
-        return ComplexPolygon(
-            interior=off(self.interior, -amount),
-            exterior=off(self.exterior, amount)
-        )
+        from . import engines
+        return engines.offset.offset(self, amount)
 
     def __mul__(self, v):
         return ComplexPolygon(
