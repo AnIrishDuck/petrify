@@ -43,7 +43,13 @@ from pint.unit import _Unit
 from . import plane, decompose, visualize
 from .geometry import Geometry, tau, valid_scalar
 
-class Vector:
+class Spatial:
+    @property
+    def embedding(self):
+        from petrify import space
+        return space
+
+class Vector(Spatial):
     """
     A three-dimensional vector supporting all corresponding built-in math
     operators:
@@ -378,7 +384,7 @@ Vector.bx = Vector.basis.x
 Vector.by = Vector.basis.y
 Vector.bz = Vector.basis.z
 
-class Polygon:
+class Polygon(Spatial):
     """
     A linear cycle of coplanar convex points:
 
@@ -1321,7 +1327,7 @@ class Point(Vector, Geometry):
 
 Point.origin = Point(0, 0, 0)
 
-class Line:
+class Line(Spatial):
     """
     An infinite line:
 
@@ -1361,6 +1367,12 @@ class Line:
         # XXX This is annoying.
         #if not self.v:
         #    raise AttributeError('Line has zero-length vector')
+
+    def __hash__(self):
+        return hash((self.p, self.v))
+
+    def __eq__(self, other):
+        return (self.p, self.v) == (self.p, self.v)
 
     def __copy__(self):
         return self.__class__(self.p, self.v)
@@ -1435,6 +1447,9 @@ class Ray(Line):
         return u >= 0.0
 
 class LineSegment(Line):
+    def __hash__(self):
+        return hash((self.p, self.v))
+
     def __repr__(self):
         return 'LineSegment({0!r}, {1!r})'.format(self.p, self.p2)
 

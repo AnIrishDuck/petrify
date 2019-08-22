@@ -4,7 +4,8 @@
 import math
 import numbers
 
-tau = math.pi * 2
+quantum = 0.000001
+tau = _math.pi * 2
 
 def valid_scalar(v):
     """

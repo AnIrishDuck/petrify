@@ -39,7 +39,13 @@ from . import units
 from .geometry import Geometry, tau, valid_scalar
 from .solver import solve_matrix
 
-class Vector:
+class Planar:
+    @property
+    def embedding(self):
+        from petrify import plane
+        return plane
+
+class Vector(Planar):
     """
     A two-dimensional vector supporting all corresponding built-in math
     operators:
@@ -582,7 +588,7 @@ class Point(Vector, Geometry):
         if c:
             return c._swap()
 
-class Line(Geometry):
+class Line(Geometry, Planar):
     """
     Represents an infinite line:
 
@@ -939,7 +945,7 @@ def _connect_circle_circle(A, B):
     return LineSegment(Point(A.c.x + s1 * v.x * A.r, A.c.y + s1 * v.y * A.r),
                         Point(B.c.x + s2 * v.x * B.r, B.c.y + s2 * v.y * B.r))
 
-class Polygon:
+class Polygon(Planar):
     """
     A two-dimensional polygon:
 
