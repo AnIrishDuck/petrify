@@ -64,3 +64,67 @@ def segments(segments, line_width=1):
     )
     material = js.LineMaterial(vertexColors='VertexColors', linewidth=line_width)
     return js.LineSegments2(geometry, material)
+
+class Grid:
+    def __init__(self, basis, ticks, count):
+        self.basis = basis
+        self.ticks = sorted(ticks)
+        self.count = count
+
+    @property
+    def points(self):
+        return []
+
+    def mesh(self):
+        from petrify.space import LineSegment, Point
+
+        count = self.count
+        origin = self.basis.origin
+
+        top = self.ticks[-1]
+
+        def halfgrid(c, s, ticks):
+            return (
+                LineSegment(
+                    origin + (c * -count * top) + s * ix,
+                    origin + (c * count * top) + s * ix
+                )
+                for ix in range(-ticks, ticks + 1)
+            )
+
+        def grid(t):
+            return (
+                *halfgrid(self.basis.bx, self.basis.by * t, int(count * (top / t))),
+                *halfgrid(self.basis.by, self.basis.bx * t, int(count * (top / t)))
+            )
+
+        n = self.basis.bx.cross(self.basis.by)
+
+
+        def parts(t):
+            zs = (n * ix * t for ix in range(0, int(count * (top / t)) + 1))
+            axis = (
+                LineSegment(
+                    Point(*(z - (self.basis.bx * 0.1))),
+                    Point(*(z + (self.basis.bx * 0.1)))
+                ) for z in zs
+            )
+            return (*axis, *grid(t))
+
+        def decay():
+            v = 0.5
+            while True:
+                yield v
+                v = v / 2
+
+        def all_grid():
+            for (tick, color) in reversed(list(zip(reversed(self.ticks), decay()))):
+                for l in parts(tick):
+                    yield (l, [color, color, color])
+
+        parts = (
+            (LineSegment(origin, origin + (n * count)), [0.5, 0.5, 0.5]),
+            *all_grid()
+        )
+
+        return segments(parts)
