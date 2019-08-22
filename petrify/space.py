@@ -433,25 +433,9 @@ class Polygon(Spatial):
         return any(l == edge for l in self.segments())
 
     def mesh(self):
-        import pythreejs as js
-        import numpy as np
-
-        lines = []
-        line_colors = []
-
-        color = [0, 1, 0]
-        for segment in self.segments():
-            lines.append([segment.p1, segment.p2])
-            line_colors.append([color, color])
-
-        lines = np.array(lines, dtype=np.float32)
-        line_colors = np.array(line_colors, dtype=np.float32)
-        geometry = js.LineSegmentsGeometry(
-            positions=lines,
-            colors=line_colors
+        return visualize.segments(
+            ((l, [0, 1, 0]) for l in self.segments())
         )
-        material = js.LineMaterial(vertexColors='VertexColors', linewidth=1)
-        return js.LineSegments2(geometry, material)
 
     def render(self):
         """
@@ -1475,6 +1459,13 @@ class LineSegment(Line):
                 (self.p2 == other.p1 and self.p1 == other.p2)
             )
         raise RuntimeError("Cannot compute on: " + repr(other))
+
+    @property
+    def points(self):
+        return [self.p1, self.p2]
+
+    def mesh(self):
+        return visualize.segments([(self, [0, 1, 0])])
 
     def flipped(self):
         return LineSegment(self.p2, -self.v)

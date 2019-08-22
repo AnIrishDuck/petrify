@@ -44,3 +44,23 @@ def scene(nodes, **properties):
     )
 
     return renderer
+
+def segments(segments, line_width=1):
+    import pythreejs as js
+    import numpy as np
+
+    lines = []
+    line_colors = []
+
+    for (segment, color) in segments:
+        lines.append([segment.p1, segment.p2])
+        line_colors.append([color, color])
+
+    lines = np.array(lines, dtype=np.float32)
+    line_colors = np.array(line_colors, dtype=np.float32)
+    geometry = js.LineSegmentsGeometry(
+        positions=lines,
+        colors=line_colors
+    )
+    material = js.LineMaterial(vertexColors='VertexColors', linewidth=line_width)
+    return js.LineSegments2(geometry, material)
