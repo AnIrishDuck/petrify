@@ -1,7 +1,8 @@
 import unittest
 
-from petrify import decompose
+from petrify import decompose, space
 from petrify.plane import Point, LineSegment, Polygon
+from petrify.solid import Node, Cylinder
 
 class TestTrapezoid(unittest.TestCase):
     def test_square(self):
@@ -151,7 +152,7 @@ class TestFragmentation(unittest.TestCase):
         ]
 
         segments = [l for p in polygons for l in p.segments()]
-        fragments = decompose.fragment(segments)
+        fragments = [LineSegment(l.p1, l.p2) for l in decompose.fragment(segments)]
         self.assertEqual(set(fragments) - set(segments), set([
             LineSegment(Point(1, 0), Point(1, 1)),
             LineSegment(Point(1, 1), Point(1, 2))
@@ -170,7 +171,7 @@ class TestFragmentation(unittest.TestCase):
         ]
 
         segments = [l for p in polygons for l in p.segments()]
-        fragments = decompose.fragment(segments)
+        fragments = [LineSegment(l.p1, l.p2) for l in decompose.fragment(segments)]
         self.assertEqual(set(fragments) - set(segments), set([
             LineSegment(Point(0, 1), Point(1, 1)),
             LineSegment(Point(1, 1), Point(2, 1)),
@@ -195,11 +196,10 @@ class TestPolygons(unittest.TestCase):
             rect(Point(1, 0), Point(2, 2))
         ]
 
-        segments = [l for p in polygons for l in p.segments()]
-        polygon, = decompose.recreate_polygons(decompose.fragment(segments))
+        polygon, = decompose.rebuild(polygons)
         self.assertEqual(reset(polygon, Point(0, 0)), [
             Point(0, 0), Point(0, 1), Point(1, 1),
-            Point(1, 2), Point(2, 2), Point(2, 0), Point(1, 0)
+            Point(1, 2), Point(2, 2), Point(2, 0)
         ])
 
     def test_multi_frag(self):
@@ -211,11 +211,53 @@ class TestPolygons(unittest.TestCase):
         ]
 
         segments = [l for p in polygons for l in p.segments()]
-        polygon, = decompose.recreate_polygons(decompose.fragment(segments))
+        polygon, = decompose.rebuild(polygons)
         self.assertEqual(reset(polygon, Point(0, 0)), [
             Point(0, 0),
-            Point(0, 1), Point(0, 2), Point(1, 2), Point(1, 1),
+            Point(0, 2), Point(1, 2), Point(1, 1),
             Point(2, 1), Point(2, 2), Point(3, 2), Point(3, 1),
-            Point(4, 1), Point(4, 2), Point(5, 2), Point(5, 1),
+            Point(4, 1), Point(4, 2), Point(5, 2),
             Point(5, 0),
         ])
+
+segments = 5
+class Tube(Node):
+    def __init__(self, inner_diameter, outer_diameter, height):
+        self.outer = Cylinder(
+            space.Point.origin,
+            space.Vector(0, 0, height),
+            outer_diameter / 2,
+            segments = segments
+        )
+
+        self.inner = Cylinder(
+            space.Point.origin,
+            space.Vector(0, 0, height),
+            inner_diameter / 2,
+            segments = segments
+        )
+
+        super().__init__((self.outer - self.inner).polygons)
+
+class TestRecreation(unittest.TestCase):
+    def test_ring_recreation(self):
+        port = 2.65
+        outer = 2.28
+        inner = 2.22
+        wall = 0.125
+
+        smaller = Tube(inner - wall * 2, inner, 1.5)
+        bigger = Tube(inner - wall * 2, outer, 1.5) + space.Vector(0, 0, 1.5 - wall)
+
+        holster_top = Tube(inner - wall, port + wall * 2, 0.75)
+        holster = Tube(port, port + wall * 2, 1.25) + holster_top.translate(space.Vector(0, 0, 1.0))
+
+        adaptor = smaller + holster + bigger
+
+        polygons = [p for p in adaptor.polygons if p.plane.normal.snap(0.1) == space.Vector.basis.z]
+        middle = [p for p in polygons if p.points[0].z == 1.75]
+        recreated = decompose.rebuild(middle)
+
+        self.assertEqual(len(recreated), 2)
+        for polygon in recreated:
+            self.assertEqual(len(polygon.segments()), segments)
