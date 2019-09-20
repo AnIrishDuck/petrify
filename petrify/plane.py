@@ -587,6 +587,7 @@ class Point(Vector, Geometry):
         c = _connect_point2_circle(self, other)
         if c:
             return c._swap()
+Point.origin = Point(0, 0)
 
 class Line(Geometry, Planar):
     """

@@ -20,7 +20,7 @@ via CSG union and difference operations.
 """
 import math
 
-from . import engines, plane, units, visualize
+from . import engines, plane, shape, units, visualize
 from .space import _pmap, Matrix, Point, Polygon, PlanarPolygon, Face, Basis, Vector
 from .geometry import tau, valid_scalar
 
@@ -366,12 +366,10 @@ class Box(Extrusion):
         self.origin = origin
         self.extent = extent = origin + size
 
-        footprint = plane.Polygon([plane.Point(x, y) for x, y in [
-            [origin.x, origin.y],
-            [origin.x, extent.y],
-            [extent.x, extent.y],
-            [extent.x, origin.y]
-        ]])
+        footprint = shape.Rectangle(
+            plane.Point(*self.origin.xy),
+            plane.Vector(*self.extent.xy)
+        )
         bz = Vector.basis.z
         bottom = PlanarPolygon(Basis.xy + bz * origin.z, footprint)
         top = PlanarPolygon(Basis.xy + bz * extent.z, footprint)
@@ -497,12 +495,7 @@ class Cylinder(PolygonExtrusion):
         self.axis = axis
         self.radius = radius
 
-        angles = list(tau * float(a) / segments for a in range(segments))
-        circle = plane.Polygon([
-            plane.Point(math.cos(theta) * radius, math.sin(theta) * radius)
-            for theta in angles
-        ])
-
+        circle = shape.Circle(plane.Point(0, 0), radius, segments)
         bx = perpendicular(axis).normalized()
         by = bx.cross(axis).normalized()
         bottom = PlanarPolygon(Basis(origin, bx, by), circle)
