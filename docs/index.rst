@@ -31,6 +31,7 @@ Contents
    petrify.units
    petrify.solid
    petrify.formats
+   petrify.shape
    petrify.edge
    petrify.space
    petrify.plane

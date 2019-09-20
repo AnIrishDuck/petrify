@@ -1,3 +1,12 @@
+"""
+Basic representations of common two-dimensional shapes:
+
+:py:class:`Rectangle` :
+    An axis-aligned rectangle.
+:py:class:`Circle` :
+    A planar circle with a defined origin and radius.
+
+"""
 import math
 
 from .plane import Polygon, Point, Vector
