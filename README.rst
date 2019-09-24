@@ -12,8 +12,8 @@
 .. image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/anirishduck/petrify/master?filepath=examples/solids.ipynb
 
-A library for working with three-dimensional geometry. Designed for CAD / CAM
-applications.
+A library for constructing, importing, visualizing, modifying, and exporting
+three-dimensional geometry and toolpaths. Designed for CAD / CAM applications.
 
 To get started with this library, we recommend walking through the demos below.
 Each notebook contains links to our comprehensive class and method-level
