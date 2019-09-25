@@ -39,6 +39,10 @@ from . import units
 from .geometry import Geometry, tau, valid_scalar
 from .solver import solve_matrix
 
+def operate(op, self, other):
+    if valid_scalar(other):
+        return self.__class__(op(self.x, other), op(self.y, other))
+
 class Planar:
     @property
     def embedding(self):
@@ -182,40 +186,25 @@ class Vector2(Planar):
     __rmul__ = __mul__
 
     def __div__(self, other):
-        assert type(other) in (int, float)
-        return Vector(operator.div(self.x, other),
-                       operator.div(self.y, other))
-
+        return operate(operator.div, self, other)
 
     def __rdiv__(self, other):
-        assert type(other) in (int, float)
-        return Vector(operator.div(other, self.x),
-                       operator.div(other, self.y))
+        return operate(operator.div, self, other)
 
     def __floordiv__(self, other):
-        assert type(other) in (int, float)
-        return Vector(operator.floordiv(self.x, other),
-                       operator.floordiv(self.y, other))
-
+        return operate(operator.floordiv, self, other)
 
     def __rfloordiv__(self, other):
-        assert type(other) in (int, float)
-        return Vector(operator.floordiv(other, self.x),
-                       operator.floordiv(other, self.y))
+        return operate(operator.floordiv, self, other)
 
     def __truediv__(self, other):
-        assert type(other) in (int, float)
-        return Vector(operator.truediv(self.x, other),
-                       operator.truediv(self.y, other))
-
+        return operate(operator.truediv, self, other)
 
     def __rtruediv__(self, other):
-        assert type(other) in (int, float)
-        return Vector(operator.truediv(other, self.x),
-                       operator.truediv(other, self.y))
+        return operate(operator.truediv, self, other)
 
     def __neg__(self):
-        return Vector(-self.x, -self.y)
+        return self.__class__(-self.x, -self.y)
 
     __pos__ = __copy__
 
@@ -239,8 +228,7 @@ class Vector2(Planar):
         """
         d = self.magnitude()
         if d:
-            return Vector(self.x / d,
-                           self.y / d)
+            return self.__class__(self.x / d, self.y / d)
         return self.copy()
 
     def dot(self, other):
@@ -255,7 +243,7 @@ class Vector2(Planar):
                self.y * other.y
 
     def cross(self):
-        return Vector(self.y, -self.x)
+        return self.__class__(self.y, -self.x)
 
     def reflected(self, normal):
         """
@@ -271,8 +259,8 @@ class Vector2(Planar):
         # assume normal is normalized
         assert isinstance(normal, Vector)
         d = 2 * (self.x * normal.x + self.y * normal.y)
-        return Vector(self.x - d * normal.x,
-                      self.y - d * normal.y)
+        return self.__class__(self.x - d * normal.x,
+                              self.y - d * normal.y)
 
     def angle(self, other):
         """
