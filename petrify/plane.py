@@ -530,7 +530,12 @@ Matrix = Matrix2
 
 class Point2(Vector, Geometry):
     """
-    A close cousin of :py:class:`Vector2` used to represent points.
+    A close cousin of :py:class:`Vector2` used to represent points:
+
+    >>> Point(1, 1) + Vector(2, 3)
+    Point(3, 4)
+    >>> Point(1, 2) * 2
+    Point(2, 4)
 
     """
     def __repr__(self):
