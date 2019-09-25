@@ -1,17 +1,17 @@
 """
 Math utility library for common three-dimensional constructs:
 
-- :py:class:`Vector`
-- :py:class:`Point`
-- :py:class:`Polygon`
+- :py:class:`Vector3`
+- :py:class:`Point3`
+- :py:class:`Polygon3`
+- :py:class:`Matrix3`
+- :py:class:`Line3`
+- :py:class:`Ray3`
+- :py:class:`LineSegment3`
 - :py:class:`Plane`
 - :py:class:`PlanarPolygon`
 - :py:class:`Face`
 - :py:class:`Quaternion`
-- :py:class:`Matrix`
-- :py:class:`Line`
-- :py:class:`Ray`
-- :py:class:`LineSegment`
 
 The `pint`_ library can be used to specify dimensions:
 
@@ -49,7 +49,7 @@ class Spatial:
         from petrify import space
         return space
 
-class Vector(Spatial):
+class Vector3(Spatial):
     """
     A three-dimensional vector supporting all corresponding built-in math
     operators:
@@ -380,11 +380,12 @@ class Vector(Spatial):
         def z(self): return Vector(0, 0, 1)
     basis = Basis()
 
+Vector = Vector3
 Vector.bx = Vector.basis.x
 Vector.by = Vector.basis.y
 Vector.bz = Vector.basis.z
 
-class Polygon(Spatial):
+class Polygon3(Spatial):
     """
     A linear cycle of coplanar convex points:
 
@@ -446,12 +447,13 @@ class Polygon(Spatial):
 
     def __repr__(self):
         return "Polygon({0!r})".format(self.points)
+Polygon = Polygon3
 
 # a b c d
 # e f g h
 # i j k l
 # m n o p
-class Matrix:
+class Matrix3:
     """
     A matrix that can be used to perform common transformations on
     three-dimensional points and vectors:
@@ -914,6 +916,7 @@ class Matrix:
                 w = (mat[4] - mat[1] ) / s
 
         return Quaternion(w, x, y, z)
+Matrix = Matrix3
 
 class Quaternion:
     """
@@ -1252,7 +1255,7 @@ class Quaternion:
         Q.z = q1.z * ratio1 + q2.z * ratio2
         return Q
 
-class Point(Vector, Geometry):
+class Point3(Vector, Geometry):
     """
     A close cousin of :py:class:`petrify.space.Vector`, used to represent a
     point instead of a transform.
@@ -1309,9 +1312,10 @@ class Point(Vector, Geometry):
         """ The vector formed from the origin to this point. """
         return Vector(self.x, self.y, self.z)
 
+Point = Point3
 Point.origin = Point(0, 0, 0)
 
-class Line(Spatial):
+class Line3(Spatial):
     """
     An infinite line:
 
@@ -1417,8 +1421,9 @@ class Line(Spatial):
         c = _connect_line3_plane(self, other)
         if c:
             return c
+Line = Line3
 
-class Ray(Line):
+class Ray3(Line):
     """
     A :py:class:`Line` with a fixed origin that continues indefinitely in the given
     direction.
@@ -1429,8 +1434,9 @@ class Ray(Line):
 
     def _u_in(self, u):
         return u >= 0.0
+Ray = Ray3
 
-class LineSegment(Line):
+class LineSegment3(Line):
     def __hash__(self):
         return hash((self.p, self.v))
 
@@ -1484,6 +1490,7 @@ class LineSegment(Line):
         raise RuntimeError("Cannot compute on: " + repr(other))
 
     length = property(lambda self: abs(self.v))
+LineSegment = LineSegment3
 
 class Sphere:
     """

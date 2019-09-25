@@ -1,14 +1,14 @@
 """
 Math utility library for common two-dimensional constructs:
 
-- :py:class:`Vector`
-- :py:class:`Point`
-- :py:class:`Polygon`
-- :py:class:`ComplexPolygon`
-- :py:class:`Matrix`
-- :py:class:`Line`
-- :py:class:`Ray`
-- :py:class:`LineSegment`
+- :py:class:`Vector2`
+- :py:class:`Point2`
+- :py:class:`Polygon2`
+- :py:class:`ComplexPolygon2`
+- :py:class:`Matrix2`
+- :py:class:`Line2`
+- :py:class:`Ray2`
+- :py:class:`LineSegment2`
 
 The `pint`_ library can be used to specify dimensions:
 
@@ -45,7 +45,7 @@ class Planar:
         from petrify import plane
         return plane
 
-class Vector(Planar):
+class Vector2(Planar):
     """
     A two-dimensional vector supporting all corresponding built-in math
     operators:
@@ -308,12 +308,13 @@ class Vector(Planar):
         def snap(v):
             return round(v / grid) * grid
         return self.__class__(snap(self.x), snap(self.y))
+Vector = Vector2
 
 # a b c  0 3 6
 # e f g  1 4 7
 # i j k  2 5 8
 
-class Matrix:
+class Matrix2:
     """
     A matrix that can be used to transform two-dimensional vectors and points.
 
@@ -536,11 +537,12 @@ class Matrix:
             tmp.k = d * (self.a*self.f - self.b*self.e)
 
             return tmp
+Matrix = Matrix2
 
 
-class Point(Vector, Geometry):
+class Point2(Vector, Geometry):
     """
-    A close cousin of :py:class:`Vector` used to represent points.
+    A close cousin of :py:class:`Vector2` used to represent points.
 
     """
     def __repr__(self):
@@ -587,9 +589,10 @@ class Point(Vector, Geometry):
         c = _connect_point2_circle(self, other)
         if c:
             return c._swap()
+Point = Point2
 Point.origin = Point(0, 0)
 
-class Line(Geometry, Planar):
+class Line2(Geometry, Planar):
     """
     Represents an infinite line:
 
@@ -714,8 +717,9 @@ class Line(Geometry, Planar):
 
     def _connect_circle(self, other):
         return _connect_circle_line2(other, self)
+Line = Line2
 
-class Ray(Line):
+class Ray2(Line):
     """
     Represents a line with an origin point that extends forever:
 
@@ -728,8 +732,9 @@ class Ray(Line):
 
     def _u_in(self, u):
         return u >= 0.0
+Ray = Ray2
 
-class LineSegment(Line):
+class LineSegment2(Line):
     """
     Represents a line segment:
 
@@ -756,6 +761,7 @@ class LineSegment(Line):
         return self
 
     length = property(lambda self: abs(self.v))
+LineSegment = LineSegment2
 
 class Circle(Geometry):
     __slots__ = ['c', 'r']
@@ -946,7 +952,7 @@ def _connect_circle_circle(A, B):
     return LineSegment(Point(A.c.x + s1 * v.x * A.r, A.c.y + s1 * v.y * A.r),
                         Point(B.c.x + s2 * v.x * B.r, B.c.y + s2 * v.y * B.r))
 
-class Polygon(Planar):
+class Polygon2(Planar):
     """
     A two-dimensional polygon:
 
@@ -1239,8 +1245,9 @@ class Polygon(Planar):
         intersects = (l.intersect(test) for l in self.segments())
         intersects = set(i for i in intersects if i is not None)
         return len(intersects) % 2 == 1
+Polygon = Polygon2
 
-class ComplexPolygon:
+class ComplexPolygon2:
     """
     Represents a complex polygon. A complex polygon is composed of one or more
     separate simple polygons, and may contain holes.
@@ -1338,3 +1345,4 @@ class ComplexPolygon:
             interior=[p + v for p in self.interior],
             exterior=[p + v for p in self.exterior]
         )
+ComplexPolygon = ComplexPolygon2
