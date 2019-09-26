@@ -16,9 +16,9 @@ Math utility library for common three-dimensional constructs:
 The `pint`_ library can be used to specify dimensions:
 
 >>> from petrify import u
->>> p = Point(50, 25, 50) * u.mm
+>>> p = Point3(50, 25, 50) * u.mm
 >>> p.to('m')
-<Quantity(Point(0.05, 0.025, 0.05), 'meter')>
+<Quantity(Point3(0.05, 0.025, 0.05), 'meter')>
 
 Many methods are nominally supported when wrapped with `pint`. We recommend
 you only use units when exporting and importing data, and pick a canonical unit
@@ -41,6 +41,7 @@ import types
 from pint.unit import _Unit
 
 from . import plane, decompose, visualize
+from .plane import Point2, Polygon2, Vector2
 from .geometry import Geometry, tau, valid_scalar
 
 class Spatial:
@@ -54,30 +55,30 @@ class Vector3(Spatial):
     A three-dimensional vector supporting all corresponding built-in math
     operators:
 
-    >>> Vector(1, 2, 3) + Vector(2, 2, 2)
-    Vector(3, 4, 5)
-    >>> Vector(1, 2, 3) - Vector(2, 2, 2)
-    Vector(-1, 0, 1)
-    >>> Vector(1, 0, 1) * 5
-    Vector(5, 0, 5)
-    >>> Vector(1, 0, 1) / 5
-    Vector(0.2, 0.0, 0.2)
-    >>> Vector(1, 1, 1) == Vector(1, 1, 1)
+    >>> Vector3(1, 2, 3) + Vector3(2, 2, 2)
+    Vector3(3, 4, 5)
+    >>> Vector3(1, 2, 3) - Vector3(2, 2, 2)
+    Vector3(-1, 0, 1)
+    >>> Vector3(1, 0, 1) * 5
+    Vector3(5, 0, 5)
+    >>> Vector3(1, 0, 1) / 5
+    Vector3(0.2, 0.0, 0.2)
+    >>> Vector3(1, 1, 1) == Vector3(1, 1, 1)
     True
 
     In addition to many other specialized vector operations.
 
     Defines convenience `.basis` members for commonly used basis vectors:
 
-    >>> Vector.basis.x; Vector.bx
-    Vector(1, 0, 0)
-    Vector(1, 0, 0)
-    >>> Vector.basis.y; Vector.by
-    Vector(0, 1, 0)
-    Vector(0, 1, 0)
-    >>> Vector.basis.z; Vector.bz
-    Vector(0, 0, 1)
-    Vector(0, 0, 1)
+    >>> Vector3.basis.x; Vector3.bx
+    Vector3(1, 0, 0)
+    Vector3(1, 0, 0)
+    >>> Vector3.basis.y; Vector3.by
+    Vector3(0, 1, 0)
+    Vector3(0, 1, 0)
+    >>> Vector3.basis.z; Vector3.bz
+    Vector3(0, 0, 1)
+    Vector3(0, 0, 1)
 
     """
 
@@ -94,13 +95,13 @@ class Vector3(Spatial):
     copy = __copy__
 
     def __repr__(self):
-        return 'Vector({0!r}, {1!r}, {2!r})'.format(*self.xyz)
+        return 'Vector3({0!r}, {1!r}, {2!r})'.format(*self.xyz)
 
     def __hash__(self):
         return hash((self.x, self.y, self.z))
 
     def __eq__(self, other):
-        if isinstance(other, Vector):
+        if isinstance(other, Vector3):
             return self.x == other.x and \
                    self.y == other.y and \
                    self.z == other.z
@@ -138,26 +139,26 @@ class Vector3(Spatial):
             raise AttributeError(name)
 
     def __add__(self, other):
-        if isinstance(other, Vector):
+        if isinstance(other, Vector3):
             # Vector + Vector -> Vector
             # Vector + Point -> Point
             # Point + Point -> Vector
             if self.__class__ is other.__class__:
-                _class = Vector
+                _class = Vector3
             else:
-                _class = Point
+                _class = Point3
             return _class(self.x + other.x,
                           self.y + other.y,
                           self.z + other.z)
         else:
             assert hasattr(other, '__len__') and len(other) == 3
-            return Vector(self.x + other[0],
+            return Vector3(self.x + other[0],
                            self.y + other[1],
                            self.z + other[2])
     __radd__ = __add__
 
     def __iadd__(self, other):
-        if isinstance(other, Vector):
+        if isinstance(other, Vector3):
             self.x += other.x
             self.y += other.y
             self.z += other.z
@@ -168,32 +169,32 @@ class Vector3(Spatial):
         return self
 
     def __sub__(self, other):
-        if isinstance(other, Vector):
+        if isinstance(other, Vector3):
             # Vector - Vector -> Vector
             # Vector - Point -> Point
             # Point - Point -> Vector
             if self.__class__ is other.__class__:
-                _class = Vector
+                _class = Vector3
             else:
-                _class = Point
-            return Vector(self.x - other.x,
+                _class = Point3
+            return Vector3(self.x - other.x,
                            self.y - other.y,
                            self.z - other.z)
         else:
             assert hasattr(other, '__len__') and len(other) == 3
-            return Vector(self.x - other[0],
+            return Vector3(self.x - other[0],
                            self.y - other[1],
                            self.z - other[2])
 
 
     def __rsub__(self, other):
-        if isinstance(other, Vector):
-            return Vector(other.x - self.x,
+        if isinstance(other, Vector3):
+            return Vector3(other.x - self.x,
                            other.y - self.y,
                            other.z - self.z)
         else:
             assert hasattr(other, '__len__') and len(other) == 3
-            return Vector(other.x - self[0],
+            return Vector3(other.x - self[0],
                            other.y - self[1],
                            other.z - self[2])
 
@@ -212,45 +213,45 @@ class Vector3(Spatial):
 
     def __div__(self, other):
         assert type(other) in (int, float)
-        return Vector(operator.div(self.x, other),
+        return Vector3(operator.div(self.x, other),
                        operator.div(self.y, other),
                        operator.div(self.z, other))
 
 
     def __rdiv__(self, other):
         assert type(other) in (int, float)
-        return Vector(operator.div(other, self.x),
+        return Vector3(operator.div(other, self.x),
                        operator.div(other, self.y),
                        operator.div(other, self.z))
 
     def __floordiv__(self, other):
         assert type(other) in (int, float)
-        return Vector(operator.floordiv(self.x, other),
+        return Vector3(operator.floordiv(self.x, other),
                        operator.floordiv(self.y, other),
                        operator.floordiv(self.z, other))
 
 
     def __rfloordiv__(self, other):
         assert type(other) in (int, float)
-        return Vector(operator.floordiv(other, self.x),
+        return Vector3(operator.floordiv(other, self.x),
                        operator.floordiv(other, self.y),
                        operator.floordiv(other, self.z))
 
     def __truediv__(self, other):
         assert type(other) in (int, float)
-        return Vector(operator.truediv(self.x, other),
+        return Vector3(operator.truediv(self.x, other),
                        operator.truediv(self.y, other),
                        operator.truediv(self.z, other))
 
 
     def __rtruediv__(self, other):
         assert type(other) in (int, float)
-        return Vector(operator.truediv(other, self.x),
+        return Vector3(operator.truediv(other, self.x),
                        operator.truediv(other, self.y),
                        operator.truediv(other, self.z))
 
     def __neg__(self):
-        return Vector(-self.x,
+        return Vector3(-self.x,
                         -self.y,
                         -self.z)
 
@@ -280,7 +281,7 @@ class Vector3(Spatial):
         """ Returns a vector with the same direction but unit (1) length. """
         d = self.magnitude()
         if d:
-            return Vector(self.x / d,
+            return Vector3(self.x / d,
                            self.y / d,
                            self.z / d)
         return self.copy()
@@ -294,15 +295,15 @@ class Vector3(Spatial):
 
     def dot(self, other):
         """ The dot product of this vector and the `other`. """
-        assert isinstance(other, Vector)
+        assert isinstance(other, Vector3)
         return self.x * other.x + \
                self.y * other.y + \
                self.z * other.z
 
     def cross(self, other):
         """ The cross product of this vector and the `other`. """
-        assert isinstance(other, Vector)
-        return Vector(self.y * other.z - self.z * other.y,
+        assert isinstance(other, Vector3)
+        return Vector3(self.y * other.z - self.z * other.y,
                        -self.x * other.z + self.z * other.x,
                        self.x * other.y - self.y * other.x)
 
@@ -314,9 +315,9 @@ class Vector3(Spatial):
             Assumes the given `normal` has unit (1) length.
         """
         # assume normal is normalized
-        assert isinstance(normal, Vector)
+        assert isinstance(normal, Vector3)
         d = 2 * (self.x * normal.x + self.y * normal.y + self.z * normal.z)
-        return Vector(self.x - d * normal.x,
+        return Vector3(self.x - d * normal.x,
                        self.y - d * normal.y,
                        self.z - d * normal.z)
 
@@ -338,7 +339,7 @@ class Vector3(Spatial):
         ct = math.cos(theta)
         st = math.sin(theta) / r
         dt = (u*x + v*y + w*z) * (1 - ct) / r2
-        return Vector((u * dt + x * ct + (-w * y + v * z) * st),
+        return Vector3((u * dt + x * ct + (-w * y + v * z) * st),
                        (v * dt + y * ct + ( w * x - u * z) * st),
                        (w * dt + z * ct + (-v * x + u * y) * st))
 
@@ -357,8 +358,8 @@ class Vector3(Spatial):
         """
         Snaps this vector to a `grid`:
 
-        >>> Vector(1.15, 1.15, 0.9).snap(0.25)
-        Vector(1.25, 1.25, 1.0)
+        >>> Vector3(1.15, 1.15, 0.9).snap(0.25)
+        Vector3(1.25, 1.25, 1.0)
 
         """
         def snap(v):
@@ -367,31 +368,31 @@ class Vector3(Spatial):
 
     def point(self):
         """ Convert this vector into a point. """
-        return Point(self.x, self.y, self.z)
+        return Point3(self.x, self.y, self.z)
 
     class Basis:
         @property
-        def x(self): return Vector(1, 0, 0)
+        def x(self): return Vector3(1, 0, 0)
 
         @property
-        def y(self): return Vector(0, 1, 0)
+        def y(self): return Vector3(0, 1, 0)
 
         @property
-        def z(self): return Vector(0, 0, 1)
+        def z(self): return Vector3(0, 0, 1)
     basis = Basis()
 
 Vector = Vector3
-Vector.bx = Vector.basis.x
-Vector.by = Vector.basis.y
-Vector.bz = Vector.basis.z
+Vector3.bx = Vector3.basis.x
+Vector3.by = Vector3.basis.y
+Vector3.bz = Vector3.basis.z
 
 class Polygon3(Spatial):
     """
     A linear cycle of coplanar convex points:
 
-    >>> triangle = Polygon([Point(0, 0, 0), Point(0, 2, 0), Point(1, 1, 0)])
+    >>> triangle = Polygon3([Point3(0, 0, 0), Point3(0, 2, 0), Point3(1, 1, 0)])
     >>> triangle.plane
-    Plane(Vector(0.0, 0.0, -1.0), 0.0)
+    Plane(Vector3(0.0, 0.0, -1.0), 0.0)
 
     """
 
@@ -400,23 +401,23 @@ class Polygon3(Spatial):
         self.plane = Plane(*points[0:3])
 
     def inverted(self):
-        return Polygon(list(reversed(self.points)))
+        return Polygon3(list(reversed(self.points)))
 
     def segments(self):
         """ Returns all line segments composing this polygon's edges. """
         paired = zip(self.points, self.points[1:] + [self.points[0]])
-        return [LineSegment(a, b) for a, b in paired]
+        return [LineSegment3(a, b) for a, b in paired]
 
     def simplify(self, tolerance = 0.0001):
         """
         Remove any duplicate points, within a certain `tolerance`:
 
-        >>> Polygon([Point(1, 1, 0), Point(2, 0, 0), Point(0, 0, 0), Point(1, 1, 0)]).simplify()
-        Polygon([Point(2, 0, 0), Point(0, 0, 0), Point(1, 1, 0)])
+        >>> Polygon3([Point3(1, 1, 0), Point3(2, 0, 0), Point3(0, 0, 0), Point3(1, 1, 0)]).simplify()
+        Polygon3([Point3(2, 0, 0), Point3(0, 0, 0), Point3(1, 1, 0)])
 
         Returns `None` if the resulting simplification would create a point:
 
-        >>> Polygon([Point(1, 1, 0), Point(2, 0, 0), Point(0, 0, 0)]).simplify(100) is None
+        >>> Polygon3([Point3(1, 1, 0), Point3(2, 0, 0), Point3(0, 0, 0)]).simplify(100) is None
         True
 
         """
@@ -427,7 +428,7 @@ class Polygon3(Spatial):
             if snapped != prior:
                 points.append(point)
                 prior = snapped
-        return Polygon(points) if len(points) > 2 else None
+        return Polygon3(points) if len(points) > 2 else None
 
     def has_edge(self, edge):
         """ Returns true if this polygon contains the given `edge`. """
@@ -446,7 +447,7 @@ class Polygon3(Spatial):
         return visualize.scene([self])
 
     def __repr__(self):
-        return "Polygon({0!r})".format(self.points)
+        return "Polygon3({0!r})".format(self.points)
 Polygon = Polygon3
 
 # a b c d
@@ -458,8 +459,8 @@ class Matrix3:
     A matrix that can be used to perform common transformations on
     three-dimensional points and vectors:
 
-    >>> Matrix.scale(*Vector(1, 2, 1).xyz) * Point(1, 1, 1)
-    Point(1, 2, 1)
+    >>> Matrix3.scale(*Vector3(1, 2, 1).xyz) * Point3(1, 1, 1)
+    Point3(1, 2, 1)
 
     """
     __slots__ = list('abcdefghijklmnop')
@@ -470,7 +471,7 @@ class Matrix3:
         self.i = self.j = self.l = self.m = self.n = self.o = 0
 
     def __copy__(self):
-        M = Matrix()
+        M = Matrix3()
         M.a = self.a
         M.b = self.b
         M.c = self.c
@@ -492,7 +493,7 @@ class Matrix3:
     copy = __copy__
 
     def __repr__(self):
-        return ('Matrix([% 8.2f % 8.2f % 8.2f % 8.2f\n'  \
+        return ('Matrix3([% 8.2f % 8.2f % 8.2f % 8.2f\n'  \
                 '         % 8.2f % 8.2f % 8.2f % 8.2f\n'  \
                 '         % 8.2f % 8.2f % 8.2f % 8.2f\n'  \
                 '         % 8.2f % 8.2f % 8.2f % 8.2f])') \
@@ -516,7 +517,7 @@ class Matrix3:
          self.d, self.h, self.l, self.p) = L
 
     def __mul__(self, other):
-        if isinstance(other, Matrix):
+        if isinstance(other, Matrix3):
             # Caching repeatedly accessed attributes in local variables
             # apparently increases performance by 20%.  Attrib: Will McGugan.
             Aa = self.a
@@ -551,7 +552,7 @@ class Matrix3:
             Bn = other.n
             Bo = other.o
             Bp = other.p
-            C = Matrix()
+            C = Matrix3()
             C.a = Aa * Ba + Ab * Be + Ac * Bi + Ad * Bm
             C.b = Aa * Bb + Ab * Bf + Ac * Bj + Ad * Bn
             C.c = Aa * Bc + Ab * Bg + Ac * Bk + Ad * Bo
@@ -569,18 +570,18 @@ class Matrix3:
             C.o = Am * Bc + An * Bg + Ao * Bk + Ap * Bo
             C.p = Am * Bd + An * Bh + Ao * Bl + Ap * Bp
             return C
-        elif isinstance(other, Point):
+        elif isinstance(other, Point3):
             A = self
             B = other
-            P = Point(0, 0, 0)
+            P = Point3(0, 0, 0)
             P.x = A.a * B.x + A.b * B.y + A.c * B.z + A.d
             P.y = A.e * B.x + A.f * B.y + A.g * B.z + A.h
             P.z = A.i * B.x + A.j * B.y + A.k * B.z + A.l
             return P
-        elif isinstance(other, Vector):
+        elif isinstance(other, Vector3):
             A = self
             B = other
-            V = Vector(0, 0, 0)
+            V = Vector3(0, 0, 0)
             V.x = A.a * B.x + A.b * B.y + A.c * B.z
             V.y = A.e * B.x + A.f * B.y + A.g * B.z
             V.z = A.i * B.x + A.j * B.y + A.k * B.z
@@ -591,7 +592,7 @@ class Matrix3:
             return other
 
     def __imul__(self, other):
-        assert isinstance(other, Matrix)
+        assert isinstance(other, Matrix3)
         # Caching repeatedly accessed attributes in local variables
         # apparently increases performance by 20%.  Attrib: Will McGugan.
         Aa = self.a
@@ -647,7 +648,7 @@ class Matrix3:
     def transform(self, other):
         A = self
         B = other
-        P = Point(0, 0, 0)
+        P = Point3(0, 0, 0)
         P.x = A.a * B.x + A.b * B.y + A.c * B.z + A.d
         P.y = A.e * B.x + A.f * B.y + A.g * B.z + A.h
         P.z = A.i * B.x + A.j * B.y + A.k * B.z + A.l
@@ -686,8 +687,8 @@ class Matrix3:
         """
         The identity transform:
 
-        >>> Matrix.identity() * Point(1, 1, 1)
-        Point(1.0, 1.0, 1.0)
+        >>> Matrix3.identity() * Point3(1, 1, 1)
+        Point3(1.0, 1.0, 1.0)
 
         """
         self = cls()
@@ -698,8 +699,8 @@ class Matrix3:
         """
         A scale transform:
 
-        >>> Matrix.scale(*Vector(1, 2, 1).xyz) * Point(1, 1, 1)
-        Point(1, 2, 1)
+        >>> Matrix3.scale(*Vector3(1, 2, 1).xyz) * Point3(1, 1, 1)
+        Point3(1, 2, 1)
 
         """
         self = cls()
@@ -713,8 +714,8 @@ class Matrix3:
         """
         A translation transform:
 
-        >>> Matrix.translate(*Vector(1, 2, 1).xyz) * Point(1, 1, 1)
-        Point(2.0, 3.0, 2.0)
+        >>> Matrix3.translate(*Vector3(1, 2, 1).xyz) * Point3(1, 1, 1)
+        Point3(2.0, 3.0, 2.0)
 
         """
         self = cls()
@@ -728,11 +729,11 @@ class Matrix3:
         """
         A rotational transform:
 
-        >>> (Matrix.rotate_axis(Vector.basis.z, tau / 4) * Point(1, 0, 0)).rounded()
-        Point(0, 1, 0)
+        >>> (Matrix3.rotate_axis(Vector3.basis.z, tau / 4) * Point3(1, 0, 0)).rounded()
+        Point3(0, 1, 0)
 
         """
-        assert(isinstance(axis, Vector))
+        assert(isinstance(axis, Vector3))
         vector = axis.normalized()
         x = vector.x
         y = vector.y
@@ -760,15 +761,15 @@ class Matrix3:
         """
         A rotational transform:
 
-        >>> rotation = Matrix.rotate_at(Point(1, 1, 1), Vector.basis.z, tau / 4)
-        >>> (rotation * Point(2, 1, 1)).rounded()
-        Point(1, 2, 1)
+        >>> rotation = Matrix3.rotate_at(Point3(1, 1, 1), Vector3.basis.z, tau / 4)
+        >>> (rotation * Point3(2, 1, 1)).rounded()
+        Point3(1, 2, 1)
 
         """
         return (
-            Matrix.translate(*(origin).xyz) *
-            Matrix.rotate_axis(axis, angle) *
-            Matrix.translate(*(-origin).xyz)
+            Matrix3.translate(*(origin).xyz) *
+            Matrix3.rotate_axis(axis, angle) *
+            Matrix3.translate(*(-origin).xyz)
         )
 
     @classmethod
@@ -843,7 +844,7 @@ class Matrix3:
               * (self.c * self.h - self.g * self.d))
 
     def inverse(self):
-        tmp = Matrix()
+        tmp = Matrix3()
         d = self.determinant();
 
         if abs(d) < 0.001:
@@ -923,12 +924,12 @@ class Quaternion:
     Quaternions are composable representations of three-dimensional rotation
     operations.
 
-    Multiplication can be performed on `Vector` instances to get the transformed
+    Multiplication can be performed on `Vector3` instances to get the transformed
     vector or point:
 
-    >>> r = Quaternion.rotate_axis(Vector.basis.x, tau / 4);
-    >>> (r * Vector(0, 1, 0)).rounded()
-    Vector(0, 0, 1)
+    >>> r = Quaternion.rotate_axis(Vector3.basis.x, tau / 4);
+    >>> (r * Vector3(0, 1, 0)).rounded()
+    Vector3(0, 0, 1)
 
     """
 
@@ -973,7 +974,7 @@ class Quaternion:
             Q.z =  Ax * By - Ay * Bx + Az * Bw + Aw * Bz
             Q.w = -Ax * Bx - Ay * By - Az * Bz + Aw * Bw
             return Q
-        elif isinstance(other, Vector):
+        elif isinstance(other, Vector3):
             w = self.w
             x = self.x
             y = self.y
@@ -1092,9 +1093,9 @@ class Quaternion:
         angle = 2 * math.acos(self.w)
         s = math.sqrt(1 - self.w ** 2)
         if s < 0.001:
-            return angle, Vector(1, 0, 0)
+            return angle, Vector3(1, 0, 0)
         else:
-            return angle, Vector(self.x / s, self.y / s, self.z / s)
+            return angle, Vector3(self.x / s, self.y / s, self.z / s)
 
     def get_euler(self):
         t = self.x * self.y + self.z * self.w
@@ -1127,7 +1128,7 @@ class Quaternion:
         yw = self.y * self.w
         zz = self.z ** 2
         zw = self.z * self.w
-        M = Matrix()
+        M = Matrix3()
         M.a = 1 - 2 * (yy + zz)
         M.b = 2 * (xy - zw)
         M.c = 2 * (xz + yw)
@@ -1146,7 +1147,7 @@ class Quaternion:
 
     @classmethod
     def rotate_axis(cls, axis, angle):
-        assert(isinstance(axis, Vector))
+        assert(isinstance(axis, Vector3))
         axis = axis.normalized()
         s = math.sin(angle / 2)
         Q = cls()
@@ -1255,20 +1256,20 @@ class Quaternion:
         Q.z = q1.z * ratio1 + q2.z * ratio2
         return Q
 
-class Point3(Vector, Geometry):
+class Point3(Vector3, Geometry):
     """
-    A close cousin of :py:class:`petrify.space.Vector`, used to represent a
+    A close cousin of :py:class:`petrify.space.Vector3`, used to represent a
     point instead of a transform.
 
     Defines a convenience `.origin` attribute for this commonly-used point:
 
-    >>> Point.origin
-    Point(0, 0, 0)
+    >>> Point3.origin
+    Point3(0, 0, 0)
 
     """
 
     def __repr__(self):
-        return 'Point({0!r}, {1!r}, {2!r})'.format(*self.xyz)
+        return 'Point3({0!r}, {1!r}, {2!r})'.format(*self.xyz)
 
     def intersect(self, other):
         """
@@ -1290,7 +1291,7 @@ class Point3(Vector, Geometry):
 
     def _connect_point3(self, other):
         if self != other:
-            return LineSegment(other, self)
+            return LineSegment3(other, self)
         return None
 
     def _connect_line3(self, other):
@@ -1310,41 +1311,41 @@ class Point3(Vector, Geometry):
 
     def vector(self):
         """ The vector formed from the origin to this point. """
-        return Vector(self.x, self.y, self.z)
+        return Vector3(self.x, self.y, self.z)
 
 Point = Point3
-Point.origin = Point(0, 0, 0)
+Point3.origin = Point3(0, 0, 0)
 
 class Line3(Spatial):
     """
     An infinite line:
 
-    >>> Line(Point(0, 0, 0), Vector(1, 1, 1))
-    Line(Point(0, 0, 0), Vector(1, 1, 1))
-    >>> Line(Point(0, 0, 0), Point(1, 1, 1))
-    Line(Point(0, 0, 0), Vector(1, 1, 1))
+    >>> Line3(Point3(0, 0, 0), Vector3(1, 1, 1))
+    Line3(Point3(0, 0, 0), Vector3(1, 1, 1))
+    >>> Line3(Point3(0, 0, 0), Point3(1, 1, 1))
+    Line3(Point3(0, 0, 0), Vector3(1, 1, 1))
 
     """
     __slots__ = ['p', 'v']
 
     def __init__(self, *args):
         if len(args) == 3:
-            assert isinstance(args[0], Point) and \
-                   isinstance(args[1], Vector) and \
+            assert isinstance(args[0], Point3) and \
+                   isinstance(args[1], Vector3) and \
                    valid_scalar(args[2])
             self.p = args[0].copy()
             self.v = args[1] * args[2] / abs(args[1])
         elif len(args) == 2:
-            if isinstance(args[0], Point) and isinstance(args[1], Point):
+            if isinstance(args[0], Point3) and isinstance(args[1], Point3):
                 self.p = args[0].copy()
                 self.v = args[1] - args[0]
-            elif isinstance(args[0], Point) and isinstance(args[1], Vector):
+            elif isinstance(args[0], Point3) and isinstance(args[1], Vector3):
                 self.p = args[0].copy()
                 self.v = args[1].copy()
             else:
                 raise AttributeError('%r' % (args,))
         elif len(args) == 1:
-            if isinstance(args[0], Line):
+            if isinstance(args[0], Line3):
                 self.p = args[0].p.copy()
                 self.v = args[0].v.copy()
             else:
@@ -1368,10 +1369,10 @@ class Line3(Spatial):
     copy = __copy__
 
     def __repr__(self):
-        return 'Line({0!r}, {1!r})'.format(self.p, self.v)
+        return 'Line3({0!r}, {1!r})'.format(self.p, self.v)
 
     p1 = property(lambda self: self.p)
-    p2 = property(lambda self: Point(self.p.x + self.v.x,
+    p2 = property(lambda self: Point3(self.p.x + self.v.x,
                                       self.p.y + self.v.y,
                                       self.p.z + self.v.z))
 
@@ -1386,10 +1387,10 @@ class Line3(Spatial):
         """
         Find the point where this line intersects the `other` plane or sphere:
 
-        >>> l = Line(Point(0, 0, 0), Vector(1, 1, 1));
-        >>> p = Plane(Vector(0, 0, 1), 2);
+        >>> l = Line3(Point3(0, 0, 0), Vector3(1, 1, 1));
+        >>> p = Plane(Vector3(0, 0, 1), 2);
         >>> l.intersect(p)
-        Point(2.0, 2.0, 2.0)
+        Point3(2.0, 2.0, 2.0)
 
         """
         return other._intersect_line3(self)
@@ -1423,25 +1424,25 @@ class Line3(Spatial):
             return c
 Line = Line3
 
-class Ray3(Line):
+class Ray3(Line3):
     """
-    A :py:class:`Line` with a fixed origin that continues indefinitely in the given
+    A :py:class:`Line3` with a fixed origin that continues indefinitely in the given
     direction.
 
     """
     def __repr__(self):
-        return 'Ray({0!r}, {1!r})'.format(self.p, self.v)
+        return 'Ray3({0!r}, {1!r})'.format(self.p, self.v)
 
     def _u_in(self, u):
         return u >= 0.0
 Ray = Ray3
 
-class LineSegment3(Line):
+class LineSegment3(Line3):
     def __hash__(self):
         return hash((self.p, self.v))
 
     def __repr__(self):
-        return 'LineSegment({0!r}, {1!r})'.format(self.p, self.p2)
+        return 'LineSegment3({0!r}, {1!r})'.format(self.p, self.p2)
 
     def _u_in(self, u):
         return u >= 0.0 and u <= 1.0
@@ -1459,7 +1460,7 @@ class LineSegment3(Line):
         return self
 
     def __eq__(self, other):
-        if isinstance(other, LineSegment):
+        if isinstance(other, LineSegment3):
             return (
                 (self.p1 == other.p1 and self.p2 == other.p2) or
                 (self.p2 == other.p1 and self.p1 == other.p2)
@@ -1474,7 +1475,7 @@ class LineSegment3(Line):
         return visualize.segments([(self, [0, 1, 0])])
 
     def flipped(self):
-        return LineSegment(self.p2, -self.v)
+        return LineSegment3(self.p2, -self.v)
 
     def endpoints(self):
         return [self.p1, self.p2]
@@ -1483,9 +1484,9 @@ class LineSegment3(Line):
         return self.p1 == p or self.p2 == p
 
     def touches(self, other):
-        if isinstance(other, Point):
+        if isinstance(other, Point3):
             return self.has_endpoint(other)
-        if isinstance(other, LineSegment):
+        if isinstance(other, LineSegment3):
             return self.has_endpoint(other.p1) or self.has_endpoint(other.p2)
         raise RuntimeError("Cannot compute on: " + repr(other))
 
@@ -1496,14 +1497,14 @@ class Sphere:
     """
     A perfect sphere with the provided `center` and `radius`:
 
-    >>> Sphere(Point(0, 0, 0), 1.0)
-    Sphere(Point(0, 0, 0), 1.0)
+    >>> Sphere(Point3(0, 0, 0), 1.0)
+    Sphere(Point3(0, 0, 0), 1.0)
 
     """
     __slots__ = ['c', 'r']
 
     def __init__(self, center, radius):
-        assert isinstance(center, Point) and valid_scalar(radius)
+        assert isinstance(center, Point3) and valid_scalar(radius)
         self.c = center.copy()
         self.r = radius
 
@@ -1561,28 +1562,28 @@ class Plane:
 
     Can be constructed with three coplanar points:
 
-    >>> Plane(Point(0, 0, 0), Point(1, 0, 0), Point(0, 1, 0))
-    Plane(Vector(0.0, 0.0, 1.0), 0.0)
+    >>> Plane(Point3(0, 0, 0), Point3(1, 0, 0), Point3(0, 1, 0))
+    Plane(Vector3(0.0, 0.0, 1.0), 0.0)
 
     Or an origin point and two basis vectors:
-    >>> Plane(Point(0, 0, 0), Vector.basis.x, Vector.basis.y)
-    Plane(Vector(0.0, 0.0, 1.0), 0.0)
+    >>> Plane(Point3(0, 0, 0), Vector3.basis.x, Vector3.basis.y)
+    Plane(Vector3(0.0, 0.0, 1.0), 0.0)
 
     Or a normal and solution scalar / point:
 
-    >>> Plane(Vector.basis.z, 0)
-    Plane(Vector(0.0, 0.0, 1.0), 0)
-    >>> Plane(Vector.basis.z, Point.origin)
-    Plane(Vector(0.0, 0.0, 1.0), 0.0)
+    >>> Plane(Vector3.basis.z, 0)
+    Plane(Vector3(0.0, 0.0, 1.0), 0)
+    >>> Plane(Vector3.basis.z, Point3.origin)
+    Plane(Vector3(0.0, 0.0, 1.0), 0.0)
 
     `Plane` also defines convenience methods for commonly used origin planes:
 
     >>> Plane.xy
-    Plane(Vector(0.0, 0.0, 1.0), 0.0)
+    Plane(Vector3(0.0, 0.0, 1.0), 0.0)
     >>> Plane.xz
-    Plane(Vector(0.0, 1.0, 0.0), 0.0)
+    Plane(Vector3(0.0, 1.0, 0.0), 0.0)
     >>> Plane.yz
-    Plane(Vector(1.0, 0.0, 0.0), 0.0)
+    Plane(Vector3(1.0, 0.0, 0.0), 0.0)
 
     """
     # n.p = k, where n is normal, p is point on plane, k is constant scalar
@@ -1590,23 +1591,23 @@ class Plane:
 
     def __init__(self, *args):
         if len(args) == 3:
-            if isinstance(args[0], Point):
-                if all(isinstance(a, Point) for a in args[1:]):
+            if isinstance(args[0], Point3):
+                if all(isinstance(a, Point3) for a in args[1:]):
                     self.n = (args[1] - args[0]).cross(args[2] - args[0])
                     self.n.normalize()
-                elif all(isinstance(a, Vector) for a in args[1:]):
+                elif all(isinstance(a, Vector3) for a in args[1:]):
                     self.n = args[1].cross(args[2])
                     self.n.normalize()
                 else:
                     raise TypeError('Cannot instantiate Vector from {0!r}'.format(args))
                 self.k = self.n.dot(args[0])
         elif len(args) == 2:
-            if not isinstance(args[0], Vector):
+            if not isinstance(args[0], Vector3):
                 raise TypeError('Cannot instantiate Vector from {0!r}'.format(args))
             self.n = args[0].normalized()
-            if isinstance(args[0], Vector) and isinstance(args[1], Point):
+            if isinstance(args[0], Vector3) and isinstance(args[1], Point3):
                 self.k = self.n.dot(args[1])
-            elif isinstance(args[0], Vector) and valid_scalar(args[1]):
+            elif isinstance(args[0], Vector3) and valid_scalar(args[1]):
                 self.k = args[1]
             else:
                 raise TypeError('Cannot instantiate Vector from {0!r}'.format(args))
@@ -1628,11 +1629,11 @@ class Plane:
     def _get_point(self):
         # Return an arbitrary point on the plane
         if self.n.z:
-            return Point(0., 0., self.k / self.n.z)
+            return Point3(0., 0., self.k / self.n.z)
         elif self.n.y:
-            return Point(0., self.k / self.n.y, 0.)
+            return Point3(0., self.k / self.n.y, 0.)
         else:
-            return Point(self.k / self.n.x, 0., 0.)
+            return Point3(self.k / self.n.x, 0., 0.)
 
     def _apply_transform(self, t):
         p = t * self._get_point()
@@ -1643,10 +1644,10 @@ class Plane:
         """
         Find the point where this plane intersects the `other` line or plane:
 
-        >>> Plane(Vector(0, 1, 0), 1).intersect(Plane(Vector(1, 0, 0), 2))
-        Line(Point(2.0, 1.0, 0.0), Vector(0.0, 0.0, 1.0))
-        >>> Plane(Vector(0, 0, 1), 2).intersect(Line(Point(0, 0, 0), Vector(1, 1, 1)))
-        Point(2.0, 2.0, 2.0)
+        >>> Plane(Vector3(0, 1, 0), 1).intersect(Plane(Vector3(1, 0, 0), 2))
+        Line3(Point3(2.0, 1.0, 0.0), Vector3(0.0, 0.0, 1.0))
+        >>> Plane(Vector3(0, 0, 1), 2).intersect(Line3(Point3(0, 0, 0), Vector3(1, 1, 1)))
+        Point3(2.0, 2.0, 2.0)
 
         """
         return other._intersect_plane(self)
@@ -1680,27 +1681,27 @@ class Plane:
     @property
     def normal(self): return self.n
 
-Plane.xy = Plane(Vector(0.0, 0.0, 1.0), 0.0)
-Plane.xz = Plane(Vector(0.0, 1.0, 0.0), 0.0)
-Plane.yz = Plane(Vector(1.0, 0.0, 0.0), 0.0)
+Plane.xy = Plane(Vector3(0.0, 0.0, 1.0), 0.0)
+Plane.xz = Plane(Vector3(0.0, 1.0, 0.0), 0.0)
+Plane.yz = Plane(Vector3(1.0, 0.0, 0.0), 0.0)
 
 class Basis:
     """
     Embeds a two-dimensional space into a three-dimensional space:
 
-    >>> basis = Basis(Point(1, 0, 0), Vector.basis.y, Vector.basis.z)
-    >>> basis.project(plane.Point(2, 3))
-    Point(1, 2, 3)
-    >>> basis.project(plane.Vector(-2, -3))
-    Vector(1, -2, -3)
+    >>> basis = Basis(Point3(1, 0, 0), Vector3.basis.y, Vector3.basis.z)
+    >>> basis.project(Point2(2, 3))
+    Point3(1, 2, 3)
+    >>> basis.project(Vector2(-2, -3))
+    Vector3(1, -2, -3)
 
     Can be translated:
 
-    >>> translated = basis.xy + Vector(0, 0, 2)
+    >>> translated = basis.xy + Vector3(0, 0, 2)
     >>> translated
-    Basis(Point(0, 0, 2), Vector(1, 0, 0), Vector(0, 1, 0))
-    >>> translated.project(plane.Point(2, 3))
-    Point(2, 3, 2)
+    Basis(Point3(0, 0, 2), Vector3(1, 0, 0), Vector3(0, 1, 0))
+    >>> translated.project(Point2(2, 3))
+    Point3(2, 3, 2)
 
     .. note ::
         Any given :class:`Plane` has an infinite number of associated
@@ -1709,26 +1710,26 @@ class Basis:
     There are special `Basis` objects for commonly used bases:
 
     >>> Basis.unit
-    Basis(Point(0, 0, 0), Vector(1, 0, 0), Vector(0, 1, 0))
+    Basis(Point3(0, 0, 0), Vector3(1, 0, 0), Vector3(0, 1, 0))
     >>> Basis.xy
-    Basis(Point(0, 0, 0), Vector(1, 0, 0), Vector(0, 1, 0))
+    Basis(Point3(0, 0, 0), Vector3(1, 0, 0), Vector3(0, 1, 0))
     >>> Basis.yz
-    Basis(Point(0, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1))
+    Basis(Point3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1))
     >>> Basis.xz
-    Basis(Point(0, 0, 0), Vector(1, 0, 0), Vector(0, 0, 1))
+    Basis(Point3(0, 0, 0), Vector3(1, 0, 0), Vector3(0, 0, 1))
 
     """
     def __init__(self, origin, bx, by):
-        assert isinstance(origin, Point)
-        assert isinstance(bx, Vector)
-        assert isinstance(by, Vector)
+        assert isinstance(origin, Point3)
+        assert isinstance(bx, Vector3)
+        assert isinstance(by, Vector3)
         assert bx.angle(by) > 0
         self.origin = origin
         self.bx = bx
         self.by = by
 
     def __add__(self, v):
-        if not isinstance(v, Vector): return NotImplemented
+        if not isinstance(v, Vector3): return NotImplemented
         return Basis(self.origin + v, self.bx, self.by)
 
     def __repr__(self):
@@ -1746,25 +1747,25 @@ class Basis:
     def normal(self):
         return self.bx.cross(self.by)
 
-Basis.unit = Basis(Point.origin, Vector.basis.x, Vector.basis.y)
+Basis.unit = Basis(Point3.origin, Vector3.basis.x, Vector3.basis.y)
 Basis.xy = Basis.unit
-Basis.yz = Basis(Point.origin, Vector.basis.y, Vector.basis.z)
-Basis.xz = Basis(Point.origin, Vector.basis.x, Vector.basis.z)
+Basis.yz = Basis(Point3.origin, Vector3.basis.y, Vector3.basis.z)
+Basis.xz = Basis(Point3.origin, Vector3.basis.x, Vector3.basis.z)
 
 class PlanarPolygon:
     """
-    A two-dimensional :class:`petrify.plane.Polygon` or
-    :class:`petrify.plane.ComplexPolygon` embedded in three-dimensional space
+    A two-dimensional :class:`petrify.plane.Polygon2` or
+    :class:`petrify.plane.ComplexPolygon2` embedded in three-dimensional space
     via a :class:`Basis`:
 
-    >>> tri = plane.Polygon([   \
-        plane.Point(0, 0),      \
-        plane.Point(0, 2),      \
-        plane.Point(1, 1)       \
+    >>> tri = plane.Polygon2([   \
+        plane.Point2(0, 0),      \
+        plane.Point2(0, 2),      \
+        plane.Point2(1, 1)       \
     ])
     >>> triangle = PlanarPolygon(Basis.xy, tri)
     >>> triangle.project()
-    [Polygon([Point(0, 0, 0), Point(0, 2, 0), Point(1, 1, 0)])]
+    [Polygon3([Point3(0, 0, 0), Point3(0, 2, 0), Point3(1, 1, 0)])]
 
     """
 
@@ -1780,7 +1781,7 @@ class PlanarPolygon:
 
     def project(self, exterior=True):
         def simple(polygon):
-            return Polygon([self.basis.project(p) for p in polygon.points])
+            return Polygon3([self.basis.project(p) for p in polygon.points])
 
         if isinstance(self.polygon, plane.Polygon):
             return [simple(self.polygon)] if exterior else []
@@ -1833,10 +1834,10 @@ class Face(PlanarPolygon):
     A :class:`PlanarPolygon` with an associated polarity. `Face.Positive` polarity
     follows the right hand rule, `Face.Negative` is inverted.
 
-    >>> tri= plane.Polygon([    \
-        plane.Point(0, 0),      \
-        plane.Point(0, 2),      \
-        plane.Point(1, 1)       \
+    >>> tri= Polygon2([    \
+        Point2(0, 0),      \
+        Point2(0, 2),      \
+        Point2(1, 1)       \
     ])
     >>> triangle = Face(Basis.xy, Face.Positive, tri)
 
@@ -1846,11 +1847,11 @@ class Face(PlanarPolygon):
 
     def __init__(self, basis, direction, polygon):
         assert direction in [Face.Positive, Face.Negative]
-        a = basis.normal().angle(Vector.basis.x)
+        a = basis.normal().angle(Vector3.basis.x)
         if a == tau / 4:
-            a = basis.normal().angle(Vector.basis.y)
+            a = basis.normal().angle(Vector3.basis.y)
             if a == tau / 4:
-                a = basis.normal().angle(Vector.basis.z)
+                a = basis.normal().angle(Vector3.basis.z)
         inverted = a > tau / 4
         if inverted ^ (direction == Face.Negative):
             polygon = polygon.to_counterclockwise()
@@ -1878,7 +1879,7 @@ def _connect_point3_line3(P, L):
          (P.z - L.p.z) * L.v.z) / d
     if not L._u_in(u):
         u = max(min(u, 1.0), 0.0)
-    return LineSegment(P, Point(L.p.x + u * L.v.x,
+    return LineSegment3(P, Point3(L.p.x + u * L.v.x,
                                   L.p.y + u * L.v.y,
                                   L.p.z + u * L.v.z))
 
@@ -1886,12 +1887,12 @@ def _connect_point3_sphere(P, S):
     v = P - S.c
     v.normalize()
     v *= S.r
-    return LineSegment(P, Point(S.c.x + v.x, S.c.y + v.y, S.c.z + v.z))
+    return LineSegment3(P, Point3(S.c.x + v.x, S.c.y + v.y, S.c.z + v.z))
 
 def _connect_point3_plane(p, plane):
     n = plane.n.normalized()
     d = p.dot(plane.n) - plane.k
-    return LineSegment(p, Point(p.x - n.x * d, p.y - n.y * d, p.z - n.z * d))
+    return LineSegment3(p, Point3(p.x - n.x * d, p.y - n.y * d, p.z - n.z * d))
 
 def _connect_line3_line3(A, B):
     assert A.v and B.v
@@ -1903,7 +1904,7 @@ def _connect_line3_line3(A, B):
     denom = A.v.magnitude_squared() * d4343 - d4321 ** 2
     if denom == 0:
         # Parallel, connect an endpoint with a line
-        if isinstance(B, Ray) or isinstance(B, LineSegment):
+        if isinstance(B, Ray3) or isinstance(B, LineSegment3):
             return _connect_point3_line3(B.p, A)._swap()
         # No endpoint (or endpoint is on A), possibly choose arbitrary
         # point on line.
@@ -1915,10 +1916,10 @@ def _connect_line3_line3(A, B):
     ub = (d1343 + d4321 * ua) / d4343
     if not B._u_in(ub):
         ub = max(min(ub, 1.0), 0.0)
-    return LineSegment(Point(A.p.x + ua * A.v.x,
+    return LineSegment3(Point3(A.p.x + ua * A.v.x,
                                A.p.y + ua * A.v.y,
                                A.p.z + ua * A.v.z),
-                        Point(B.p.x + ub * B.v.x,
+                        Point3(B.p.x + ub * B.v.x,
                                B.p.y + ub * B.v.y,
                                B.p.z + ub * B.v.z))
 
@@ -1931,7 +1932,7 @@ def _connect_line3_plane(L, P):
     if not L._u_in(u):
         # intersects out of range, choose nearest endpoint
         u = max(min(u, 1.0), 0.0)
-        return _connect_point3_plane(Point(L.p.x + u * L.v.x,
+        return _connect_point3_plane(Point3(L.p.x + u * L.v.x,
                                             L.p.y + u * L.v.y,
                                             L.p.z + u * L.v.z), P)
     # Intersection
@@ -1945,11 +1946,11 @@ def _connect_sphere_line3(S, L):
          (S.c.z - L.p.z) * L.v.z) / d
     if not L._u_in(u):
         u = max(min(u, 1.0), 0.0)
-    point = Point(L.p.x + u * L.v.x, L.p.y + u * L.v.y, L.p.z + u * L.v.z)
+    point = Point3(L.p.x + u * L.v.x, L.p.y + u * L.v.y, L.p.z + u * L.v.z)
     v = (point - S.c)
     v.normalize()
     v *= S.r
-    return LineSegment(Point(S.c.x + v.x, S.c.y + v.y, S.c.z + v.z),
+    return LineSegment3(Point3(S.c.x + v.x, S.c.y + v.y, S.c.z + v.z),
                         point)
 
 def _connect_sphere_sphere(A, B):
@@ -1965,10 +1966,10 @@ def _connect_sphere_sphere(A, B):
         s1,s2 = +1, -1
 
     v.normalize()
-    return LineSegment(Point(A.c.x + s1* v.x * A.r,
+    return LineSegment3(Point3(A.c.x + s1* v.x * A.r,
                                A.c.y + s1* v.y * A.r,
                                A.c.z + s1* v.z * A.r),
-                        Point(B.c.x + s2* v.x * B.r,
+                        Point3(B.c.x + s2* v.x * B.r,
                                B.c.y + s2* v.y * B.r,
                                B.c.z + s2* v.z * B.r))
 
@@ -1980,7 +1981,7 @@ def _connect_sphere_plane(S, P):
     v = p2 - S.c
     v.normalize()
     v *= S.r
-    return LineSegment(Point(S.c.x + v.x, S.c.y + v.y, S.c.z + v.z),
+    return LineSegment3(Point3(S.c.x + v.x, S.c.y + v.y, S.c.z + v.z),
                         p2)
 
 def _connect_plane_plane(A, B):
@@ -2013,10 +2014,10 @@ def _intersect_line3_sphere(L, S):
         u1 = max(min(u1, 1.0), 0.0)
     if not L._u_in(u2):
         u2 = max(min(u2, 1.0), 0.0)
-    return LineSegment(Point(L.p.x + u1 * L.v.x,
+    return LineSegment3(Point3(L.p.x + u1 * L.v.x,
                                L.p.y + u1 * L.v.y,
                                L.p.z + u1 * L.v.z),
-                        Point(L.p.x + u2 * L.v.x,
+                        Point3(L.p.x + u2 * L.v.x,
                                L.p.y + u2 * L.v.y,
                                L.p.z + u2 * L.v.z))
 
@@ -2028,7 +2029,7 @@ def _intersect_line3_plane(L, P):
     u = (P.k - P.n.dot(L.p)) / d
     if not L._u_in(u):
         return None
-    return Point(L.p.x + u * L.v.x,
+    return Point3(L.p.x + u * L.v.x,
                   L.p.y + u * L.v.y,
                   L.p.z + u * L.v.z)
 
@@ -2042,7 +2043,7 @@ def _intersect_plane_plane(A, B):
         return None
     c1 = (A.k * n2_m - B.k * n1d2) / det
     c2 = (B.k * n1_m - A.k * n1d2) / det
-    return Line(Point(c1 * A.n.x + c2 * B.n.x,
+    return Line3(Point3(c1 * A.n.x + c2 * B.n.x,
                         c1 * A.n.y + c2 * B.n.y,
                         c1 * A.n.z + c2 * B.n.z),
                  A.n.cross(B.n))

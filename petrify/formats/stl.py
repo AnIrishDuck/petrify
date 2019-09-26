@@ -1,5 +1,5 @@
 import struct
-from ..space import Polygon, Point
+from ..space import Polygon3, Point3
 
 from ..solid import Node
 from .. import units
@@ -42,9 +42,9 @@ class STL:
         Save a :class:`petrify.solid.Node` to a STL-formatted file.
 
         >>> from petrify import u
-        >>> from petrify.solid import Box, Point, Vector
+        >>> from petrify.solid import Box, Point3, Vector3
         >>> from tempfile import NamedTemporaryFile
-        >>> b = Box(Point.origin, Vector(1, 1, 1))
+        >>> b = Box(Point3.origin, Vector3(1, 1, 1))
         >>> with NamedTemporaryFile() as fp: \
             STL(fp.name, 1 * u.mm / u.file).write(b.as_unit('inches'))
 
@@ -53,7 +53,7 @@ class STL:
         >>> STL('/tmp/error.stl', 1 * u.mm / u.file).write(b)
         Traceback (most recent call last):
         ...
-        AssertionError: object does not have unit tag: Box(Point(0, 0, 0), Vector(1, 1, 1))
+        AssertionError: object does not have unit tag: Box(Point3(0, 0, 0), Vector3(1, 1, 1))
 
         """
         units.assert_lengthy(solid)
@@ -126,7 +126,7 @@ def save_polys_to_stl_file(polys, filename, binary=True):
         vlen = len(poly.points)
         for n in range(1,vlen-1):
             tris.append(
-                Polygon([
+                Polygon3([
                     poly.points[0],
                     poly.points[n%vlen],
                     poly.points[(n+1)%vlen],
@@ -191,10 +191,10 @@ def _read_ascii_facet(f):
             return None
         except StlMalformedLineException:
             continue  # Skip to next facet.
-        v0 = Point(*v0)
-        v1 = Point(*v1)
-        v2 = Point(*v2)
-        return Polygon([v0, v1, v2])
+        v0 = Point3(*v0)
+        v1 = Point3(*v1)
+        v2 = Point3(*v2)
+        return Polygon3([v0, v1, v2])
 
 
 def _read_binary_facet(f):
@@ -204,10 +204,10 @@ def _read_binary_facet(f):
     """
     data = struct.unpack('<3f 3f 3f 3f H', f.read(4*4*3+2))
     normal = data[0:3]
-    v0 = Point(*data[3:6])
-    v1 = Point(*data[6:9])
-    v2 = Point(*data[9:12])
-    return Polygon([v0, v1, v2])
+    v0 = Point3(*data[3:6])
+    v1 = Point3(*data[6:9])
+    v2 = Point3(*data[9:12])
+    return Polygon3([v0, v1, v2])
 
 
 def read_polys_from_stl_file(filename):
