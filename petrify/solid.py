@@ -169,6 +169,10 @@ class Node:
         if not wireframe:
             color = self.view_data.get('color', 'white')
             material = material=js.MeshLambertMaterial(color=color)
+            opacity = self.view_data.get('opacity')
+            if opacity is not None:
+                material.opacity = opacity
+                material.transparent = True
             return js.Mesh(geometry, material)
         else:
             color = self.view_data.get('color', '#00ff00')
