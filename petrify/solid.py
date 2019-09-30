@@ -374,7 +374,7 @@ class Box(Extrusion):
 
         footprint = shape.Rectangle(
             Point2(*self.origin.xy),
-            Vector2(*self.extent.xy)
+            Vector2(*size.xy)
         )
         bz = Vector3.basis.z
         bottom = PlanarPolygon(Basis.xy + bz * origin.z, footprint)
