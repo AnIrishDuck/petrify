@@ -22,6 +22,7 @@ class Point:
             return Point3(*args)
         else:
             return Notimplemented
+Point.origin = Point3.origin
 
 class Vector:
     """
@@ -43,6 +44,7 @@ class Vector:
             return Vector3(*args)
         else:
             return Notimplemented
+Vector.basis = Vector3.basis
 
 def embedding_from(args):
     embeds = list(set(a.embedding for a in args))
