@@ -1,4 +1,4 @@
-ENV VERSION 0.7
+ARG VERSION=0.7
 
 FROM anirishduck/petrify:$VERSION
 
