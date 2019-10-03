@@ -24,8 +24,8 @@ documentation_.
 Online Demo
 -----------
 
-Thanks to the magic of binder_, you can try out petrify online. We have demos
-for several core petrify features:
+Thanks to the magic of binder_, you can try out petrify online. We have
+interactive demos for several core petrify features:
 
 - Construction of many basic solids_.
 - Methods for defining advanced_ solids.
