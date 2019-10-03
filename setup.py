@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='petrify',
-    version='0.8.0',
+    version='0.8.1',
     author='Frank Murphy, et al',
     author_email='fpmurphy@mtu.edu',
     packages=['petrify', 'petrify.engines', 'petrify.formats', 'petrify.machine'],
