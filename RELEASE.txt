@@ -10,8 +10,10 @@
 
   python -m twine upload dist/petrify-0.$VERSION.0.tar.gz
 
-- push to master:
+- push to master and tag:
 
+  git tag $VERSION
+  git push origin $VERSION
   git push origin master
 
 - build and push docker image:
@@ -19,5 +21,4 @@
   docker build . --cache-from xxxx -t anirishduck/petrify:0.$VERSION
 
 - update Dockerfile with new tag version.
-- push to master
 - smoketest demos
