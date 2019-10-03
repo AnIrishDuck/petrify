@@ -2,8 +2,9 @@ ARG VERSION=0.7
 
 FROM anirishduck/petrify:$VERSION
 
-RUN git clone https://github.com/AnIrishDuck/petrify.git \
-    && git checkout $VERSION \
+RUN cd /tmp \
+    && git clone https://github.com/AnIrishDuck/petrify.git \
+    && cd petrify && git checkout $VERSION \
     && rm -r ${HOME}/examples && mkdir -p ${HOME}/examples \
     && cp ./examples/*.ipynb ${HOME}/examples \
     && cp ./examples/*.svg ${HOME}/examples \
