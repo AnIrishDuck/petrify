@@ -1,4 +1,6 @@
 - update setup.py version.
+- update Dockerfile with new tag version.
+- create version commit.
 - export $VERSION environment variable:
 
   VERSION=xxxx
@@ -19,7 +21,7 @@
 
 - build and push docker image:
 
-  docker build . --cache-from xxxx -t anirishduck/petrify:0.$VERSION
+  docker build . --cache-from xxxx -t anirishduck/petrify:$VERSION
+  docker push anirishduck/petrify:$VERSION
 
-- update Dockerfile with new tag version.
 - smoketest demos
