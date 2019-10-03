@@ -1,4 +1,5 @@
-- update setup.py version:
+- update setup.py version.
+- export $VERSION environment variable:
 
   VERSION=xxxx
 
@@ -8,7 +9,7 @@
 
 - upload distribution to pypi:
 
-  python -m twine upload dist/petrify-0.$VERSION.0.tar.gz
+  python -m twine upload dist/petrify-$VERSION.tar.gz
 
 - push to master and tag:
 

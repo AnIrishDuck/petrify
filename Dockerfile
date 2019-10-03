@@ -1,4 +1,4 @@
-ARG VERSION=0.7
+ARG VERSION=0.8.0
 
 FROM anirishduck/petrify:$VERSION
 
