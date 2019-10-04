@@ -50,6 +50,10 @@ class Spatial:
         from petrify import space
         return space
 
+def operate(op, self, other):
+    if valid_scalar(other):
+        return self.__class__(op(self.x, other), op(self.y, other), op(self.z, other))
+
 class Vector3(Spatial):
     """
     A three-dimensional vector supporting all corresponding built-in math
@@ -102,7 +106,8 @@ class Vector3(Spatial):
 
     def __eq__(self, other):
         if isinstance(other, Vector3):
-            return self.x == other.x and \
+            return self.__class__ == other.__class__ and \
+                   self.x == other.x and \
                    self.y == other.y and \
                    self.z == other.z
         else:
@@ -152,9 +157,9 @@ class Vector3(Spatial):
                           self.z + other.z)
         else:
             assert hasattr(other, '__len__') and len(other) == 3
-            return Vector3(self.x + other[0],
-                           self.y + other[1],
-                           self.z + other[2])
+            return self.__class__(self.x + other[0],
+                                  self.y + other[1],
+                                  self.z + other[2])
     __radd__ = __add__
 
     def __iadd__(self, other):
@@ -177,26 +182,15 @@ class Vector3(Spatial):
                 _class = Vector3
             else:
                 _class = Point3
-            return Vector3(self.x - other.x,
-                           self.y - other.y,
-                           self.z - other.z)
+            return _class(self.x - other.x,
+                          self.y - other.y,
+                          self.z - other.z)
         else:
             assert hasattr(other, '__len__') and len(other) == 3
-            return Vector3(self.x - other[0],
-                           self.y - other[1],
-                           self.z - other[2])
+            return self.__class__(self.x - other[0],
+                                  self.y - other[1],
+                                  self.z - other[2])
 
-
-    def __rsub__(self, other):
-        if isinstance(other, Vector3):
-            return Vector3(other.x - self.x,
-                           other.y - self.y,
-                           other.z - self.z)
-        else:
-            assert hasattr(other, '__len__') and len(other) == 3
-            return Vector3(other.x - self[0],
-                           other.y - self[1],
-                           other.z - self[2])
 
     def __mul__(self, other):
         if isinstance(other, _Unit):
@@ -211,49 +205,21 @@ class Vector3(Spatial):
 
     __rmul__ = __mul__
 
-    def __div__(self, other):
-        assert type(other) in (int, float)
-        return Vector3(operator.div(self.x, other),
-                       operator.div(self.y, other),
-                       operator.div(self.z, other))
-
-
-    def __rdiv__(self, other):
-        assert type(other) in (int, float)
-        return Vector3(operator.div(other, self.x),
-                       operator.div(other, self.y),
-                       operator.div(other, self.z))
-
     def __floordiv__(self, other):
-        assert type(other) in (int, float)
-        return Vector3(operator.floordiv(self.x, other),
-                       operator.floordiv(self.y, other),
-                       operator.floordiv(self.z, other))
+        return operate(operator.floordiv, self, other)
 
 
     def __rfloordiv__(self, other):
-        assert type(other) in (int, float)
-        return Vector3(operator.floordiv(other, self.x),
-                       operator.floordiv(other, self.y),
-                       operator.floordiv(other, self.z))
+        return operate(operator.floordiv, other, self)
 
     def __truediv__(self, other):
-        assert type(other) in (int, float)
-        return Vector3(operator.truediv(self.x, other),
-                       operator.truediv(self.y, other),
-                       operator.truediv(self.z, other))
-
+        return operate(operator.truediv, self, other)
 
     def __rtruediv__(self, other):
-        assert type(other) in (int, float)
-        return Vector3(operator.truediv(other, self.x),
-                       operator.truediv(other, self.y),
-                       operator.truediv(other, self.z))
+        return operate(operator.truediv, other, self)
 
     def __neg__(self):
-        return Vector3(-self.x,
-                        -self.y,
-                        -self.z)
+        return self.__class__(-self.x, -self.y, -self.z)
 
     __pos__ = __copy__
 
@@ -278,13 +244,14 @@ class Vector3(Spatial):
         return self
 
     def normalized(self):
-        """ Returns a vector with the same direction but unit (1) length. """
-        d = self.magnitude()
-        if d:
-            return Vector3(self.x / d,
-                           self.y / d,
-                           self.z / d)
-        return self.copy()
+        """
+        Returns a vector with the same direction but unit (1) length:
+
+        >>> Vector(0, 0, 5).normalized()
+        Vector3(0.0, 0.0, 1.0)
+
+        """
+        return self / self.magnitude()
 
     def rounded(self, place=None):
         """
@@ -314,12 +281,12 @@ class Vector3(Spatial):
         .. note::
             Assumes the given `normal` has unit (1) length.
         """
-        # assume normal is normalized
         assert isinstance(normal, Vector3)
+        assert normal.magnitude_squared() == 1
         d = 2 * (self.x * normal.x + self.y * normal.y + self.z * normal.z)
-        return Vector3(self.x - d * normal.x,
-                       self.y - d * normal.y,
-                       self.z - d * normal.z)
+        return self.__class__(self.x - d * normal.x,
+                              self.y - d * normal.y,
+                              self.z - d * normal.z)
 
     def rotate(self, axis, theta):
         """
@@ -1259,7 +1226,10 @@ class Quaternion:
 class Point3(Vector3, Geometry):
     """
     A close cousin of :py:class:`petrify.space.Vector3`, used to represent a
-    point instead of a transform.
+    point instead of a transform:
+
+    >>> Point3(1, 2, 3) + Vector3(1, 1, 1)
+    Point3(2, 3, 4)
 
     Defines a convenience `.origin` attribute for this commonly-used point:
 
