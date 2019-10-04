@@ -98,3 +98,23 @@ def arc(center, radius, start, end, segments=10):
     angles = frange(start, end, (end - start) / (segments - 1), inclusive=True)
     return [Point2(math.cos(theta), math.sin(theta)) * radius + Vector2(*center.xy)
             for theta in angles]
+
+def fillet(a, b, c, r, segments=10):
+    """
+    Creates a smooth circular fillet from an ordered triplet of points that
+    define a corner:
+
+    >>> points = fillet(Point2(1, 0), Point2(0, 0), Point2(0, 1), 0.5, segments = 3)
+    >>> [p.snap(0.1) for p in points]
+    [Point2(1.0, 0.0), Point2(0.5, 0.0), Point2(0.1, 0.1), Point2(0.0, 0.5), Point2(0.0, 1.0)]
+
+    """
+    def clock(v):
+        return ((-1 if v.y < 0 else 1) * math.acos(v.x / v.magnitude())) % math.tau
+
+    angle = (b-a).angle(b-c)
+    dv = (a-b).normalized()
+    dba = -dv.cross()
+    dbc = -(b-c).normalized().cross()
+    center = b + (dv * r / math.tan(angle / 2)) + (dba * r)
+    return [a, *arc(center, r, clock(-dba), clock(-dbc), segments), c]
