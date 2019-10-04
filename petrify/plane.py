@@ -270,7 +270,9 @@ class Vector2(Planar):
         True
 
         """
-        return math.acos(self.dot(other) / (self.magnitude()*other.magnitude()))
+        ratio = self.dot(other) / (self.magnitude()*other.magnitude())
+        ratio = max(-1.0, min(1.0, ratio))
+        return math.acos(ratio)
 
     def project(self, other):
         """ Return one vector projected on the vector other """
