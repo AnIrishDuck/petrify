@@ -7,6 +7,12 @@ def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(plane))
     return tests
 
+class TestVector(unittest.TestCase):
+    def test_angle(self):
+        a = Vector(0.11176897466954505, 0.056949137058031396)
+        b = Vector(0.016835599543175706, 0.008578166424744738)
+        a.angle(b)
+
 class TestPolygon(unittest.TestCase):
     def test_star_contain(self):
         # taken from https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/fill-rule
