@@ -28,3 +28,16 @@ class TestFillet(unittest.TestCase):
         ]
 
         self.assertEqual(actual, expected)
+
+    def test_fillet_square_inversion(self):
+        points = [Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)]
+        a = [point.snap(1.0/256)
+             for a, b, c in zip(points, [*points[1:], *points[:1]], [*points[2:], *points[:2]])
+             for point in list(shape.fillet(a, b, c, 0.25, segments=3))]
+
+        points = list(reversed(points))
+        b = [point.snap(1.0/256)
+             for a, b, c in zip(points, [*points[1:], *points[:1]], [*points[2:], *points[:2]])
+             for point in list(shape.fillet(a, b, c, 0.25, segments=3))]
+
+        self.assertEqual(set(a), set(b))
