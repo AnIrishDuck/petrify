@@ -1239,6 +1239,17 @@ class Polygon2(Planar):
         intersects = (l.intersect(test) for l in self.segments())
         intersects = set(i for i in intersects if i is not None)
         return len(intersects) % 2 == 1
+
+    def shift(self, n):
+        """
+        Shift the points in this polygon by `n`:
+
+        >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
+        >>> tri.shift(1)
+        Polygon2([Point2(0, 0), Point2(1, 1), Point2(2, 0)])
+
+        """
+        return Polygon([*self.points[n:], *self.points[:n]])
 Polygon = Polygon2
 
 class ComplexPolygon2:
