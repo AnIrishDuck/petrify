@@ -106,15 +106,19 @@ def fillet(a, b, c, r, segments=10):
 
     >>> points = fillet(Point2(1, 0), Point2(0, 0), Point2(0, 1), 0.5, segments = 3)
     >>> [p.snap(0.1) for p in points]
-    [Point2(1.0, 0.0), Point2(0.5, 0.0), Point2(0.1, 0.1), Point2(0.0, 0.5), Point2(0.0, 1.0)]
+    [Point2(0.5, 0.0), Point2(0.1, 0.1), Point2(0.0, 0.5)]
 
     """
     def clock(v):
-        return ((-1 if v.y < 0 else 1) * math.acos(v.x / v.magnitude())) % math.tau
+        return ((-1 if v.y < 0 else 1) * math.acos(v.x / v.magnitude()))
 
     angle = (b-a).angle(b-c)
     dv = (a-b).normalized()
-    dba = -dv.cross()
-    dbc = -(b-c).normalized().cross()
+    sign = -1 if Polygon2([a, b, c]).clockwise() else 1
+    dba = (sign * dv).cross()
+    dbc = (sign * (b-c)).normalized().cross()
+
+    start = clock(-dba)
+    final = start + (sign * (-dba).angle(-dbc))
     center = b + (dv * r / math.tan(angle / 2)) + (dba * r)
-    return [a, *arc(center, r, clock(-dba), clock(-dbc), segments), c]
+    return arc(center, r, start, final, segments)
