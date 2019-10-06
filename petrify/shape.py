@@ -49,7 +49,7 @@ class Circle(Polygon2):
 
     """
 
-    def __init__(self, origin, radius, segments):
+    def __init__(self, origin, radius, segments=10):
         self.origin = origin
         self.radius = radius
 
