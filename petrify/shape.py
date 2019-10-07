@@ -18,7 +18,7 @@ import math
 from geomdl import BSpline
 from geomdl import utilities
 
-from .plane import Polygon2, Point2, Vector2
+from .plane import ComplexPolygon2, Polygon2, Point2, Vector2
 from .geometry import tau
 from .machine.util import frange
 
@@ -137,3 +137,81 @@ def fillet(a, b, c, r, segments=10):
     final = start + (sign * (-dba).angle(-dbc))
     center = b + (dv * r / math.tan(angle / 2)) + (dba * r)
     return arc(center, r, start, final, segments)
+
+def character(face, c):
+    face.set_char_size(48 * 64)
+    face.load_char(c)
+    points = [(p[0], p[1]) for p in face.glyph.outline.points]
+
+    start, end = 0, 0
+
+    slot = face.glyph
+    outline = slot.outline
+
+    shapes = []
+    for i in range(len(outline.contours)):
+        end    = outline.contours[i]
+        points = outline.points[start:end+1]
+        points.append(points[0])
+        tags   = outline.tags[start:end+1]
+        tags.append(tags[0])
+
+        segments = [ [points[0],], ]
+        for j in range(1, len(points) ):
+            segments[-1].append(points[j])
+            if tags[j] & (1 << 0) and j < (len(points)-1):
+                segments.append( [points[j],] )
+
+        verts = [points[0], ]
+        for segment in segments:
+            points = [Point2(*t) for t in segment]
+            if len(segment) == 2:
+                verts.extend(segment[1:])
+            elif len(segment) == 3:
+                verts.extend(bezier(points[0], points[1], points[1], points[2]))#segment[1:])
+            elif len(segment) == 4:
+                verts.extend(bezier(points[0], points[1], points[2], points[3]))
+            else:
+                # TODO - curves to join start and end
+                verts.append(segment[1])
+                for i in range(1,len(segment)-2):
+                    A,B = segment[i], segment[i+1]
+                    C = ((A[0]+B[0])/2.0, (A[1]+B[1])/2.0)
+                    verts.extend(bezier(Point2(*A), Point2(*C), Point2(*C), Point2(*B)))
+                verts.append(segment[-1])
+        shapes.append(verts)
+        start = end+1
+
+    return ComplexPolygon2([Polygon2([Point2(*xy) / (48 * 64) for xy in vs]) for vs in shapes])
+
+class Text(ComplexPolygon2):
+    """
+    Using a `Face` provided by the freetype-py_ bindings, generate a
+    :py:class:`~petrify.plane.ComplexPolygon2` for the corresponding
+    text:
+
+    >>> from freetype import Face
+    >>> face = Face('./tests/fixtures/RussoOne.ttf')
+    >>> polygon = Text(face, 'petrify')
+
+    """
+    def __init__(self, face, text):
+        self.text = text
+        face.set_char_size(48 * 64)
+        slot = face.glyph
+
+        x, y = 0, 0
+        previous = 0
+        polygons = []
+        for c in text:
+            face.load_char(c)
+            kerning = face.get_kerning(previous, c)
+            x += (kerning.x >> 6)
+            polygons.append(character(face, c) + Vector2(x, 0) / 48)
+            x += (slot.advance.x >> 6)
+            previous = c
+
+        super().__init__(
+            interior=[p for c in polygons for p in c.interior],
+            exterior=[p for c in polygons for p in c.exterior]
+        )
