@@ -71,7 +71,19 @@ def bezier(a, b, c, d, segments=10):
     >>> [p.snap(1.0) for p in points]
     [Point2(0.0, 0.0), Point2(4.0, 1.0), Point2(6.0, 4.0), Point2(10.0, 5.0)]
 
+    You can also use relative :py:class:`~petrify.plane.Vector` controls instead
+    of absolute points:
+
+    >>> points = bezier(Point2(0, 0), Vector2(5, 0), Vector2(-5, 0), Point2(10, 5), 4)
+    >>> [p.snap(1.0) for p in points]
+    [Point2(0.0, 0.0), Point2(4.0, 1.0), Point2(6.0, 4.0), Point2(10.0, 5.0)]
+
     """
+
+    if b.__class__ == Vector2:
+        b = a + b
+    if c.__class__ == Vector2:
+        c = d + c
     r = BSpline.Curve()
 
     # Set up the Bezier curve
