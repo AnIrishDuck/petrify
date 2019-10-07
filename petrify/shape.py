@@ -41,6 +41,9 @@ class Rectangle(Polygon2):
             Point2(extent.x, origin.y)
         ])
 
+    def __repr__(self):
+        return "Rectangle({0!r}, {1!r})".format(self.origin, self.size)
+
 class Circle(Polygon2):
     """
     Approximates a perfect circle with a finite number of line segments:

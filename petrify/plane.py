@@ -1250,6 +1250,23 @@ class Polygon2(Planar):
 
         """
         return Polygon([*self.points[n:], *self.points[:n]])
+
+    def envelope(self):
+        """
+        Returns the bounding :py:class:`~petrify.shape.Rectangle` around this
+        polygon:
+
+        >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
+        >>> tri.envelope()
+        Rectangle(Point2(0, 0), Vector2(2, 1))
+
+        """
+        from .shape import Rectangle
+        sx = min(p.x for p in self.points)
+        sy = min(p.y for p in self.points)
+        ex = max(p.x for p in self.points)
+        ey = max(p.y for p in self.points)
+        return Rectangle(Point2(sx, sy), Vector2(ex-sx, ey-sy))
 Polygon = Polygon2
 
 class ComplexPolygon2:
@@ -1350,4 +1367,19 @@ class ComplexPolygon2:
             interior=[p + v for p in self.interior],
             exterior=[p + v for p in self.exterior]
         )
+
+    def envelope(self):
+        """
+        Returns the bounding :py:class:`~petrify.shape.Rectangle` around this
+        polygon:
+
+        >>> square = Polygon2([Point2(0, 0), Point2(0, 1), Point2(1, 1), Point2(1, 0)])
+        >>> complex = ComplexPolygon2([square + Vector2(1, 1), square * 3])
+        >>> square.envelope()
+        Rectangle(Point2(0, 0), Vector2(1, 1))
+
+        """
+        from .shape import Rectangle
+        rectangles = Polygon2([p for polygon in self.polygons() for p in polygon.envelope().points])
+        return rectangles.envelope()
 ComplexPolygon = ComplexPolygon2
