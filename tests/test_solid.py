@@ -1,6 +1,6 @@
 import doctest, unittest
 from petrify import plane, solid
-from petrify.solid import tau, Vector, Basis, PlanarPolygon, Extrusion
+from petrify.solid import tau, Point, Vector, Basis, PlanarPolygon, Extrusion
 
 class TestUtilities(unittest.TestCase):
     def test_perpendicular(self):
@@ -73,6 +73,8 @@ class TestNode(unittest.TestCase):
 
         combined = a - b.translate(Vector(0, 0, -0.25))
         self.assertTrue(len(combined.polygons) > len(a.polygons) + len(b.polygons))
+
+        self.assertEqual((a - Vector(1, 2, 3)).envelope().origin, Point(-1, -2, -3))
 
     def test_division(self):
         a = solid.Box(Vector(0, 0, 0), Vector(2, 2, 2))

@@ -77,10 +77,12 @@ class Node:
     def __add__(self, other):
         if isinstance(other, Vector3):
             return self.translate(other)
-        else:
+        elif isinstance(other, Node):
             n = Node(engines.csg.union(self.polygons, other.polygons))
             n.parts = [self, other]
             return n
+        else:
+            return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, Vector3):
@@ -102,10 +104,15 @@ class Node:
             return NotImplemented
 
     def __sub__(self, other):
-        n = Node(engines.csg.subtract(self.polygons, other.polygons))
-        n.original = self
-        n.removal = other
-        return n
+        if isinstance(other, Vector3):
+            return self.translate(-other)
+        elif isinstance(other, Node):
+            n = Node(engines.csg.subtract(self.polygons, other.polygons))
+            n.original = self
+            n.removal = other
+            return n
+        else:
+            return NotImplemented
 
     @property
     def points(self):
