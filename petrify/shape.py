@@ -5,6 +5,8 @@ Basic representations of common two-dimensional shapes:
     An axis-aligned rectangle.
 :py:class:`Circle` :
     A planar circle with a defined origin and radius.
+:py:class:`Text` :
+    The shapes formed from a line of text.
 
 Also contains convenience methods for creating complex polygons:
 
@@ -12,6 +14,8 @@ Also contains convenience methods for creating complex polygons:
     a semi-circular arc of points
 :py:func:`bezier` :
     a bezier curve with specified control points
+:py:func:`fillet` :
+    a filleted corner with a specified radius from three points
 
 """
 import math
@@ -186,7 +190,7 @@ def character(face, c):
 
 class Text(ComplexPolygon2):
     """
-    Using a `Face` provided by the freetype-py_ bindings, generate a
+    Using a :class:`Face` provided by the freetype-py_ bindings, generate a
     :py:class:`~petrify.plane.ComplexPolygon2` for the corresponding
     text:
 
@@ -194,6 +198,7 @@ class Text(ComplexPolygon2):
     >>> face = Face('./tests/fixtures/RussoOne.ttf')
     >>> polygon = Text(face, 'petrify')
 
+    .. _`freetype-py`: https://pypi.org/project/freetype-py/
     """
     def __init__(self, face, text):
         self.text = text
