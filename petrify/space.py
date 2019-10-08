@@ -1225,7 +1225,7 @@ class Quaternion:
 
 class Point3(Vector3, Geometry):
     """
-    A close cousin of :py:class:`petrify.space.Vector3`, used to represent a
+    A close cousin of :py:class:`~petrify.space.Vector3`, used to represent a
     point instead of a transform:
 
     >>> Point3(1, 2, 3) + Vector3(1, 1, 1)
@@ -1724,8 +1724,8 @@ Basis.xz = Basis(Point3.origin, Vector3.basis.x, Vector3.basis.z)
 
 class PlanarPolygon:
     """
-    A two-dimensional :class:`petrify.plane.Polygon2` or
-    :class:`petrify.plane.ComplexPolygon2` embedded in three-dimensional space
+    A two-dimensional :class:`~petrify.plane.Polygon2` or
+    :class:`~petrify.plane.ComplexPolygon2` embedded in three-dimensional space
     via a :class:`Basis`:
 
     >>> tri = plane.Polygon2([   \

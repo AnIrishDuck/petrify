@@ -72,7 +72,7 @@ class Path:
 
     def polygons(self, min_length = 1.0 * u.file):
         """
-        Returns all the simple :class:`petrify.plane.Polygon` objects formed
+        Returns all the simple :class:`~petrify.plane.Polygon` objects formed
         from this path:
 
         >>> from petrify import u
@@ -115,7 +115,7 @@ class Path:
 
     def polygon(self, min_length = 1.0 * u.file):
         """
-        Returns a :class:`petrify.plane.ComplexPolygon` formed from this path:
+        Returns a :class:`~petrify.plane.ComplexPolygon` formed from this path:
 
         >>> from petrify import u
         >>> paths = SVG.read('tests/fixtures/example.svg', u.inches / (90 * u.file))

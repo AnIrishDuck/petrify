@@ -6,7 +6,7 @@ Creation of complex objects from humble building blocks:
 :py:class:`Cylinder` :
     A cylinder rotated around an origin and axis.
 :py:class:`PolygonExtrusion` :
-    Extrusion of a :class:`petrify.space.PlanarPolygon` into a three-dimensional shape.
+    Extrusion of a :class:`~petrify.space.PlanarPolygon` into a three-dimensional shape.
 :py:class:`Spun` :
     A series of profiles spun around an axis and connected together.
 :py:class:`Extrusion` :
@@ -257,7 +257,7 @@ class View(Node):
 
 class Extrusion(Node):
     """
-    A three-dimensional object built from rings of :class:`petrify.space.PlanarPolygon`
+    A three-dimensional object built from rings of :class:`~petrify.space.PlanarPolygon`
     objects with the same number of points at each ring:
 
     >>> parallelogram = Polygon2([  \
@@ -281,7 +281,7 @@ class Extrusion(Node):
     connect each ring, and the bottom and top layers then complete the shape.
 
     `rings` :
-        A list of :class:`petrify.space.PlanarPolygon` objects defining each ring of
+        A list of :class:`~petrify.space.PlanarPolygon` objects defining each ring of
         the final shape.
 
     """
@@ -369,9 +369,9 @@ class Box(Extrusion):
     >>> cube = Box(Point3.origin, Vector3(1, 1, 1))
 
     `origin` :
-        a :class:`petrify.space.Point3` defining the origin of this box.
+        a :class:`~petrify.space.Point3` defining the origin of this box.
     `size` :
-        a :class:`petrify.space.Vector3` of the box's size.
+        a :class:`~petrify.space.Vector3` of the box's size.
 
     """
 
@@ -409,10 +409,10 @@ class PolygonExtrusion(Extrusion):
     >>> extruded = PolygonExtrusion(planar, Vector3(0, 0, 1))
 
     `footprint` :
-        a :py:class:`petrify.space.PlanarPolygon` object describing a the polygon
+        a :py:class:`~petrify.space.PlanarPolygon` object describing a the polygon
         that will be extruded in the given `direction`
     `direction` :
-        A :class:`petrify.space.Vector3` defining which direction the polygon will be
+        A :class:`~petrify.space.Vector3` defining which direction the polygon will be
         linearly extruded into.
 
     """
@@ -492,9 +492,9 @@ class Cylinder(PolygonExtrusion):
     simulate a circular shape.
 
     `origin` :
-        a :class:`petrify.space.Point3` defining the origin of this cylinder.
+        a :class:`~petrify.space.Point3` defining the origin of this cylinder.
     `axis` :
-        a :class:`petrify.space.Vector3` that defines the axis the cylinder will
+        a :class:`~petrify.space.Vector3` that defines the axis the cylinder will
         be "spun about". The magnitude of the axis is the height of the cylinder.
     `radius` :
         the radius of the cylinder.

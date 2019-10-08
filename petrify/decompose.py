@@ -74,7 +74,7 @@ def yl(segment, y):
 
 def trapezoidal(polygons, min_area=None):
     """
-    Trapezoidal decomposition of a list of :py:class:`petrify.plane.Polygon`
+    Trapezoidal decomposition of a list of :py:class:`~petrify.plane.Polygon`
     objects forming a complex polygon that can be concave, consist of many
     disjoint rejoins, and contain holes.
 

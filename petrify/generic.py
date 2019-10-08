@@ -5,7 +5,7 @@ from .space import Point3, Polygon3, Vector3
 class Point:
     """
     A generic constructor that chooses the correct variant of
-    :py:`petrify.plane.Point2` or :py:`petrify.space.Point3` based on argument
+    :py:`~petrify.plane.Point2` or :py:`~petrify.space.Point3` based on argument
     count:
 
     >>> Point(1, 2)
@@ -27,7 +27,7 @@ Point.origin = Point3.origin
 class Vector:
     """
     A generic constructor that chooses the correct variant of
-    :py:`petrify.plane.Vector2` or :py:`petrify.space.Vector3` based on argument
+    :py:`~petrify.plane.Vector2` or :py:`~petrify.space.Vector3` based on argument
     count:
 
     >>> Vector(1, 2)
@@ -62,7 +62,7 @@ def create(Klass2, Klass3, e, args):
 class Polygon:
     """
     A generic constructor that chooses the correct variant of
-    :py:`petrify.plane.Polygon2` or :py:`petrify.space.Polygon3` based on
+    :py:`~petrify.plane.Polygon2` or :py:`~petrify.space.Polygon3` based on
     the embedding of the passed arguments:
 
     >>> Polygon([Point(0, 0), Point(1, 0), Point(1, 1)])

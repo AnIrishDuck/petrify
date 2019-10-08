@@ -23,7 +23,7 @@ class STL:
     @classmethod
     def read(cls, path, scale):
         """
-        Read a :class:`petrify.solid.Node` from a STL-formatted file:
+        Read a :class:`~petrify.solid.Node` from a STL-formatted file:
 
         >>> from petrify import u
         >>> e = STL.read('tests/fixtures/svg.stl', 1 * u.inch / u.file)
@@ -39,7 +39,7 @@ class STL:
 
     def write(self, solid):
         """
-        Save a :class:`petrify.solid.Node` to a STL-formatted file.
+        Save a :class:`~petrify.solid.Node` to a STL-formatted file.
 
         >>> from petrify import u
         >>> from petrify.solid import Box, Point3, Vector3
