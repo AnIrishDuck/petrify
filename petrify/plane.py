@@ -999,7 +999,12 @@ class Polygon2(Planar):
 
         Returns `None` if the resulting simplification would create a point:
 
-        >>> Polygon2([Point2(1, 1), Point2(2, 0), Point2(0, 0), Point2(1, 1)]).simplify(100) is None
+        >>> Polygon2([
+        ...     Point2(1, 1),
+        ...     Point2(2, 0),
+        ...     Point2(0, 0),
+        ...     Point2(1, 1)
+        ... ]).simplify(100) is None
         True
 
         """
@@ -1154,13 +1159,13 @@ class Polygon2(Planar):
         >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
         >>> tri.is_convex()
         True
-        >>> indent = Polygon2([  \
-            Point2(0, 0),        \
-            Point2(10, 0),       \
-            Point2(5, 5),        \
-            Point2(10, 10),      \
-            Point2(0, 10)        \
-        ])
+        >>> indent = Polygon2([
+        ...     Point2(0, 0),
+        ...     Point2(10, 0),
+        ...     Point2(5, 5),
+        ...     Point2(10, 10),
+        ...     Point2(0, 10)
+        ... ])
         >>> indent.is_convex()
         False
 

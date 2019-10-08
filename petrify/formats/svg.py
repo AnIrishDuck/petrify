@@ -1,7 +1,7 @@
 """
 **Experimental** SVG read support.
 
-This currently only works with SVG paths devoid of problematic constructions:
+This currently only works with SVG paths without certain complications:
 
 - usage of fill-rule resulting in a single non-terminated (with the `Z` command)
   path resulting in unfilled areas.

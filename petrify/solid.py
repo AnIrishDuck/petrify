@@ -122,16 +122,16 @@ class Node:
         """
         Returns the axis-aligned bounding box for this shape:
 
-        >>> parallelogram = Polygon2([  \
-            Point2(0, 0), \
-            Point2(0, 1), \
-            Point2(1, 2), \
-            Point2(1, 1)  \
-        ])
-        >>> extruded = PolygonExtrusion(            \
-            PlanarPolygon(Basis.xy, parallelogram), \
-            Vector3(0, 0, 1)                         \
-        )
+        >>> parallelogram = Polygon2([
+        ...     Point2(0, 0),
+        ...     Point2(0, 1),
+        ...     Point2(1, 2),
+        ...     Point2(1, 1)
+        ... ])
+        >>> extruded = PolygonExtrusion(
+        ...     PlanarPolygon(Basis.xy, parallelogram),
+        ...     Vector3(0, 0, 1)
+        ... )
         >>> extruded.envelope()
         Box(Point3(0, 0, 0), Vector3(1, 2, 1))
 
@@ -227,10 +227,11 @@ class Collection(Node):
     Collection of multiple objects. Self-intersection is unsupported, but
     lack of intersection is not enforced:
 
-    >>> c = Collection([ \
-        Box(Point3.origin, Vector3(1, 1, 1)),     \
-        Box(Point3(0, 5, 0), Vector3(1, 1, 1))    \
-    ])
+    >>> c = Collection([
+    ...     Box(Point3.origin, Vector3(1, 1, 1)),
+    ...     Box(Point3(0, 5, 0), Vector3(1, 1, 1))
+    ... ])
+
     """
     def __init__(self, nodes):
         self.nodes = nodes
@@ -260,22 +261,22 @@ class Extrusion(Node):
     A three-dimensional object built from rings of :class:`~petrify.space.PlanarPolygon`
     objects with the same number of points at each ring:
 
-    >>> parallelogram = Polygon2([  \
-        Point2(0, 0), \
-        Point2(0, 1), \
-        Point2(1, 2), \
-        Point2(1, 1)  \
-    ])
-    >>> square = Polygon2([    \
-        Point2(0, 0),          \
-        Point2(0, 1),          \
-        Point2(1, 1),          \
-        Point2(1, 0)           \
-    ])
-    >>> object = Extrusion([                                \
-        PlanarPolygon(Basis.xy, parallelogram),             \
-        PlanarPolygon(Basis.xy + Vector3(0, 0, 1), square),  \
-    ])
+    >>> parallelogram = Polygon2([
+    ...    Point2(0, 0),
+    ...    Point2(0, 1),
+    ...    Point2(1, 2),
+    ...    Point2(1, 1)
+    ... ])
+    >>> square = Polygon2([
+    ...     Point2(0, 0),
+    ...     Point2(0, 1),
+    ...     Point2(1, 1),
+    ...     Point2(1, 0)
+    ... ])
+    >>> object = Extrusion([
+    ...     PlanarPolygon(Basis.xy, parallelogram),
+    ...     PlanarPolygon(Basis.xy + Vector3(0, 0, 1), square),
+    ... ])
 
     The rings must all have the same number of vertices. Quads are generated to
     connect each ring, and the bottom and top layers then complete the shape.
@@ -351,11 +352,11 @@ class Union(Node):
     """
     Defines a union of a list of `parts`:
 
-    >>> many = Union([                         \
-        Box(Point3(0, 0, 0), Vector3(10, 1, 1)), \
-        Box(Point3(0, 0, 0), Vector3(1, 10, 1)), \
-        Box(Point3(0, 0, 0), Vector3(1, 1, 10)), \
-    ])
+    >>> many = Union([
+    ...     Box(Point3(0, 0, 0), Vector3(10, 1, 1)),
+    ...     Box(Point3(0, 0, 0), Vector3(1, 10, 1)),
+    ...     Box(Point3(0, 0, 0), Vector3(1, 1, 10)),
+    ... ])
 
     """
     def __init__(self, parts):
@@ -398,13 +399,15 @@ class Box(Extrusion):
 class PolygonExtrusion(Extrusion):
     """
 
-    Extrusion of a simple two-dimensional polygon into three-dimensional space:
+    Extrusion of a :py:class:`~petrify.space.PlanarPolygon` created from a
+    two-dimensional :py:class:`~petrify.plane.Polygon2` or
+    :py:class:`~petrify.plane.ComplexPolygon2` into three-dimensional space:
 
-    >>> triangle = Polygon2([  \
-        Point2(0, 0),         \
-        Point2(0, 2),         \
-        Point2(1, 1)          \
-    ])
+    >>> triangle = Polygon2([
+    ...     Point2(0, 0),
+    ...     Point2(0, 2),
+    ...     Point2(1, 1)
+    ... ])
     >>> planar = PlanarPolygon(Basis.xy, triangle)
     >>> extruded = PolygonExtrusion(planar, Vector3(0, 0, 1))
 
@@ -430,11 +433,11 @@ class Spun(Node):
 
     >>> axis = Vector3.basis.z
     >>> start = Vector3.basis.y
-    >>> tri = Polygon2([   \
-        Point2(0, 0),      \
-        Point2(1, 1),      \
-        Point2(0, 2)       \
-    ])
+    >>> tri = Polygon2([
+    ...     Point2(0, 0),
+    ...     Point2(1, 1),
+    ...     Point2(0, 2)
+    ... ])
     >>> spun = Spun(axis, start, [tri] * 5)
 
     The y-axis of the profile is used as the rotational axis when building the solid.

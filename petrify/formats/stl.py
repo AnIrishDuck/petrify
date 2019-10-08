@@ -12,8 +12,8 @@ class STL:
     >>> from petrify import u
     >>> output = STL.read('tests/fixtures/svg.stl', 1 * u.mm / u.file)
     >>> output = STL.read('tests/fixtures/svg.stl', 'mm')
-    >>> with tempfile.NamedTemporaryFile() as fp: \
-        STL(fp.name, 'inches').write(output)
+    >>> with tempfile.NamedTemporaryFile() as fp:
+    ...     STL(fp.name, 'inches').write(output)
 
     """
     def __init__(self, path, scale):
@@ -45,8 +45,8 @@ class STL:
         >>> from petrify.solid import Box, Point3, Vector3
         >>> from tempfile import NamedTemporaryFile
         >>> b = Box(Point3.origin, Vector3(1, 1, 1))
-        >>> with NamedTemporaryFile() as fp: \
-            STL(fp.name, 1 * u.mm / u.file).write(b.as_unit('inches'))
+        >>> with NamedTemporaryFile() as fp:
+        ...     STL(fp.name, 1 * u.mm / u.file).write(b.as_unit('inches'))
 
         The input geometry must have a length unit tag:
 

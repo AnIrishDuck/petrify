@@ -1728,11 +1728,11 @@ class PlanarPolygon:
     :class:`~petrify.plane.ComplexPolygon2` embedded in three-dimensional space
     via a :class:`Basis`:
 
-    >>> tri = plane.Polygon2([   \
-        plane.Point2(0, 0),      \
-        plane.Point2(0, 2),      \
-        plane.Point2(1, 1)       \
-    ])
+    >>> tri = plane.Polygon2([
+    ...     plane.Point2(0, 0),
+    ...     plane.Point2(0, 2),
+    ...     plane.Point2(1, 1)
+    ... ])
     >>> triangle = PlanarPolygon(Basis.xy, tri)
     >>> triangle.project()
     [Polygon3([Point3(0, 0, 0), Point3(0, 2, 0), Point3(1, 1, 0)])]
@@ -1804,11 +1804,7 @@ class Face(PlanarPolygon):
     A :class:`PlanarPolygon` with an associated polarity. `Face.Positive` polarity
     follows the right hand rule, `Face.Negative` is inverted.
 
-    >>> tri= Polygon2([    \
-        Point2(0, 0),      \
-        Point2(0, 2),      \
-        Point2(1, 1)       \
-    ])
+    >>> tri= Polygon2([Point2(0, 0), Point2(0, 2), Point2(1, 1)])
     >>> triangle = Face(Basis.xy, Face.Positive, tri)
 
     """
