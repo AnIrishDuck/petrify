@@ -1,6 +1,10 @@
 import math
 from petrify.geometry import tau
 
+def aspect(properties):
+    renderer = properties.get('renderer')
+    return renderer['width'] / renderer['height'] if renderer is not None else 1
+
 def scene(nodes, **properties):
     import pythreejs as js
     from .space import _pmap, Point, Vector
@@ -23,6 +27,7 @@ def scene(nodes, **properties):
 
     light = js.DirectionalLight(color='white', position=[3, 5, 1], intensity=0.5)
     c = js.PerspectiveCamera(
+        aspect=aspect(properties),
         position=position.xyz,
         up=[0, 0, 1],
         children=[light]
