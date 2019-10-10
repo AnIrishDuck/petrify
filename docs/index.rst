@@ -13,14 +13,36 @@ Example usage:
 
 .. testcode::
 
-    from petrify import u
+    from petrify import u, Point, Vector
     from petrify.formats import STL
-    from petrify.solid import Point, Vector, Box
+    from petrify.solid import Box
 
     big = Box(Point(0, 0, 0), Vector(1, 1, 1))
     small = Box(Point(0.5, 0.5, 0.5), Vector(0.5, 0.5, 0.5))
 
     STL('example.stl', 'mm').write((big - small).as_unit('in'))
+
+Generics
+--------
+
+Object creation often requires switching between 2D and 3D descriptions. For
+that reason, we encourage you to use the :class:`Point`, :class:`Vector`, and
+:class:`Polygon` definitions exported from the top-level :mod:`petrify`
+package.
+
+These objects automatically construct the "correct" representation in context:
+
+.. doctest::
+
+    >>> from petrify import Point, Vector, Polygon
+    >>> Point(1, 2, 3)
+    Point3(1, 2, 3)
+    >>> Vector(1, 2)
+    Vector2(1, 2)
+    >>> Polygon([Point(0, 0), Point(2, 0), Point(1, 1)])
+    Polygon2([Point2(0, 0), Point2(2, 0), Point2(1, 1)])
+    >>> Polygon([Point(0, 0, 0), Point(2, 0, 1), Point(1, 1, -1)])
+    Polygon3([Point3(0, 0, 0), Point3(2, 0, 1), Point3(1, 1, -1)])
 
 Contents
 ========
