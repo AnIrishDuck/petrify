@@ -530,7 +530,7 @@ class Sphere(Extrusion):
     >>> ball = Sphere(Point3.origin, 1)
 
     The actual sphere is approximated by creating many `segments` of longitudinal
-    circules, each in turn approximated with the same number of `segments`
+    circles, each in turn approximated with the same number of `segments`
 
     `center` :
         a :class:`~petrify.space.Point3` defining the center of this sphere
