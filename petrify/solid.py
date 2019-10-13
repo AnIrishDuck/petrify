@@ -5,6 +5,8 @@ Creation of complex objects from humble building blocks:
     A simple box.
 :py:class:`Cylinder` :
     A cylinder rotated around an origin and axis.
+:py:class:`Sphere` :
+    A sphere centered around a given point.
 :py:class:`PolygonExtrusion` :
     Extrusion of a :class:`~petrify.space.PlanarPolygon` into a three-dimensional shape.
 :py:class:`Spun` :
@@ -520,3 +522,39 @@ class Cylinder(PolygonExtrusion):
     def height(self):
         """ The height of this cylinder along its `axis`. """
         return self.axis.magnitude()
+
+class Sphere(Extrusion):
+    """
+    A sphere defined via `center` and a `radius`
+
+    >>> ball = Sphere(Point3.origin, 1)
+
+    The actual sphere is approximated by creating many `segments` of longitudinal
+    circules, each in turn approximated with the same number of `segments`
+
+    `center` :
+        a :class:`~petrify.space.Point3` defining the center of this sphere
+    `radius` :
+        the radius of the sphere.
+    `segments` :
+        the number of longitudinal circles and segments to use when
+        approximating the sphere.
+
+    """
+    def __init__(self, center, radius, segments=10):
+        self.center = center
+        self.radius = radius
+
+        angles = list(tau * float(a) / segments for a in range(segments))
+        circle = shape.Circle(Point2(0, 0), self.radius, segments)
+
+        start = Basis.xy + Vector(*center.xyz)
+        dz = Vector.basis.z * self.radius
+        slices = [
+            PlanarPolygon(
+                start + (dz * math.cos(beta)),
+                circle * math.sin(beta)
+            )
+            for beta in (a / 2 for a in angles)
+        ]
+        super().__init__(slices)
