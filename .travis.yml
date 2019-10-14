@@ -9,6 +9,7 @@ matrix:
       install:
         - pip install cython
         - pip install -r requirements-cython-csg.txt
+        - pip install -r requirements-sphinx.txt
     - python: 3.7
       dist: xenial
       sudo: true
