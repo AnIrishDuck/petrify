@@ -14,6 +14,7 @@ matrix:
       sudo: true
 install:
   - pip install -r requirements.txt
+  - pip install -r requirements-sphinx.txt
 script:
   - python -m unittest discover tests
   - bash run_examples.sh
