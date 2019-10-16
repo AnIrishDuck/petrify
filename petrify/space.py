@@ -360,6 +360,8 @@ class Polygon3(Spatial):
     >>> triangle = Polygon3([Point3(0, 0, 0), Point3(0, 2, 0), Point3(1, 1, 0)])
     >>> triangle.plane
     Plane(Vector3(0.0, 0.0, -1.0), 0.0)
+    >>> len(triangle)
+    3
 
     """
 
@@ -415,6 +417,9 @@ class Polygon3(Spatial):
 
     def __repr__(self):
         return "Polygon3({0!r})".format(self.points)
+
+    def __len__(self):
+        return len(self.points)
 Polygon = Polygon3
 
 # a b c d

@@ -963,6 +963,8 @@ class Polygon2(Planar):
     Polygon2([Point2(4, 0), Point2(0, 0), Point2(2, 3)])
     >>> tri + Vector2(2, 1)
     Polygon2([Point2(4, 1), Point2(2, 1), Point2(3, 2)])
+    >>> len(tri)
+    3
 
     """
     def __init__(self, points):
@@ -982,6 +984,9 @@ class Polygon2(Planar):
 
     def __eq__(self, other):
         return all(a == b for a, b in zip(self.points, other.points))
+
+    def __len__(self):
+        return len(self.points)
 
     def segments(self):
         pairs = zip(self.points, self.points[1:] + [self.points[0]])
@@ -1277,7 +1282,13 @@ Polygon = Polygon2
 class ComplexPolygon2:
     """
     Represents a complex polygon. A complex polygon is composed of one or more
-    separate simple polygons, and may contain holes.
+    separate simple polygons, and may contain holes:
+
+    >>> from petrify.shape import Rectangle
+    >>> square = Rectangle(Point(0, 0), Vector(1, 1))
+    >>> complex = ComplexPolygon2([square + Vector2(1, 1), square * 3])
+    >>> len(complex)
+    8
 
     """
     def __init__(self, polygons=None, interior=None, exterior=None):
@@ -1332,6 +1343,9 @@ class ComplexPolygon2:
             exterior=[p.to_counterclockwise() for p in self.exterior],
             interior=[p.to_counterclockwise() for p in self.interior],
         )
+
+    def __len__(self):
+        return sum(len(p) for p in self.polygons())
 
     def __repr__(self):
         return "ComplexPolygon2({0!r})".format([*self.exterior, *self.interior])
