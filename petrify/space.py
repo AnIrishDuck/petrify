@@ -562,6 +562,7 @@ class Matrix3:
             other = other.copy()
             other._apply_transform(self)
             return other
+    __rmul__ = __mul__
 
     def __imul__(self, other):
         assert isinstance(other, Matrix3)
