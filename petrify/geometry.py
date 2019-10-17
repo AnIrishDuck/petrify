@@ -52,7 +52,7 @@ class AbstractPolygon:
             if snapped != prior:
                 points.append(point)
                 prior = snapped
-        return self.embedding.Polygon(points) if len(points) > 1 else None
+        return self.embedding.Polygon(points) if len(points) > 2 else None
 
 class Geometry:
     def _connect_unimplemented(self, other):

@@ -396,14 +396,7 @@ class Polygon3(AbstractPolygon, Spatial):
         True
 
         """
-        prior = self.points[-1].snap(tolerance)
-        points = []
-        for point in self.points:
-            snapped = point.snap(tolerance)
-            if snapped != prior:
-                points.append(point)
-                prior = snapped
-        return Polygon3(points) if len(points) > 2 else None
+        return super().simplify(tolerance)
 
     def has_edge(self, edge):
         """ Returns true if this polygon contains the given `edge`. """
