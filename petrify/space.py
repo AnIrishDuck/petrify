@@ -42,7 +42,7 @@ from pint.unit import _Unit
 
 from . import plane, decompose, visualize
 from .plane import Point2, Polygon2, Vector2
-from .geometry import Geometry, tau, valid_scalar
+from .geometry import AbstractPolygon, Geometry, tau, valid_scalar
 
 class Spatial:
     @property
@@ -353,14 +353,20 @@ Vector3.bx = Vector3.basis.x
 Vector3.by = Vector3.basis.y
 Vector3.bz = Vector3.basis.z
 
-class Polygon3(Spatial):
+class Polygon3(AbstractPolygon, Spatial):
     """
     A linear cycle of coplanar convex points:
 
-    >>> triangle = Polygon3([Point3(0, 0, 0), Point3(0, 2, 0), Point3(1, 1, 0)])
-    >>> triangle.plane
+    >>> tri= Polygon3([Point3(0, 0, 0), Point3(0, 2, 0), Point3(1, 1, 0)])
+    >>> tri.plane
     Plane(Vector3(0.0, 0.0, -1.0), 0.0)
-    >>> len(triangle)
+    >>> tri * Vector3(1, 2, 3)
+    Polygon3([Point3(0, 0, 0), Point3(0, 4, 0), Point3(1, 2, 0)])
+    >>> tri * Matrix3.scale(1, 2, 3)
+    Polygon3([Point3(0, 0, 0), Point3(0, 4, 0), Point3(1, 2, 0)])
+    >>> tri + Vector3(1, 2, 1)
+    Polygon3([Point3(1.0, 2.0, 1.0), Point3(1.0, 4.0, 1.0), Point3(2.0, 3.0, 1.0)])
+    >>> len(tri)
     3
 
     """

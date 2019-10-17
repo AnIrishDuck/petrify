@@ -21,6 +21,39 @@ def valid_scalar(v):
     """
     return isinstance(v, numbers.Number)
 
+class AbstractPolygon:
+    def __mul__(self, m):
+        if isinstance(m, self.embedding.Vector):
+            m = self.embedding.Matrix.scale(*m)
+        return self.embedding.Polygon([p * m for p in self.points])
+
+    def __add__(self, v):
+        m = self.embedding.Matrix.translate(*v)
+        return self.embedding.Polygon([p * m for p in self.points])
+
+    def __eq__(self, other):
+        return all(a == b for a, b in zip(self.points, other.points))
+
+    def __len__(self):
+        return len(self.points)
+
+    def segments(self):
+        pairs = zip(self.points, self.points[1:] + [self.points[0]])
+        return [self.embedding.LineSegment(a, b) for a, b in pairs]
+
+    def polygons(self):
+        return [self]
+
+    def simplify(self, tolerance):
+        prior = self.points[-1].snap(tolerance)
+        points = []
+        for point in self.points:
+            snapped = point.snap(tolerance)
+            if snapped != prior:
+                points.append(point)
+                prior = snapped
+        return self.embedding.Polygon(points) if len(points) > 1 else None
+
 class Geometry:
     def _connect_unimplemented(self, other):
         raise AttributeError('Cannot connect %s to %s' %

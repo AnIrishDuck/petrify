@@ -36,7 +36,7 @@ import operator
 import types
 
 from . import units
-from .geometry import Geometry, tau, valid_scalar
+from .geometry import AbstractPolygon, Geometry, tau, valid_scalar
 from .solver import solve_matrix
 
 def operate(op, self, other):
@@ -947,7 +947,7 @@ def _connect_circle_circle(A, B):
     return LineSegment2(Point2(A.c.x + s1 * v.x * A.r, A.c.y + s1 * v.y * A.r),
                         Point2(B.c.x + s2 * v.x * B.r, B.c.y + s2 * v.y * B.r))
 
-class Polygon2(Planar):
+class Polygon2(AbstractPolygon, Planar):
     """
     A two-dimensional polygon:
 
@@ -970,30 +970,8 @@ class Polygon2(Planar):
     def __init__(self, points):
         self.points = points
 
-    def __mul__(self, m):
-        if isinstance(m, Vector2):
-            m = Matrix2.scale(*m)
-        return Polygon2([p * m for p in self.points])
-
-    def __add__(self, v):
-        m = Matrix2.translate(*v)
-        return Polygon2([p * m for p in self.points])
-
     def __repr__(self):
         return 'Polygon2({0!r})'.format(self.points)
-
-    def __eq__(self, other):
-        return all(a == b for a, b in zip(self.points, other.points))
-
-    def __len__(self):
-        return len(self.points)
-
-    def segments(self):
-        pairs = zip(self.points, self.points[1:] + [self.points[0]])
-        return [LineSegment2(a, b) for a, b in pairs]
-
-    def polygons(self):
-        return [self]
 
     def simplify(self, tolerance=0.0001):
         """
@@ -1013,14 +991,7 @@ class Polygon2(Planar):
         True
 
         """
-        prior = self.points[-1].snap(tolerance)
-        points = []
-        for point in self.points:
-            snapped = point.snap(tolerance)
-            if snapped != prior:
-                points.append(point)
-                prior = snapped
-        return Polygon2(points) if len(points) > 1 else None
+        return super().simplify(tolerance)
 
     def to_clockwise(self):
         """
