@@ -269,8 +269,30 @@ class View(Node):
         super().__init__(node.polygons)
         self.view_data = data
 
+    def _apply_inner(self, node):
+        if node == NotImplemented: return NotImplemented
+        return View(node, **self.view_data)
+
+    def __add__(self, other): return self._apply_inner(self.node + other)
+    def __mul__(self, other): return self._apply_inner(self.node * other)
+    __rmul__ = __mul__
+    def __truediv__(self, other): return self._apply_inner(self.node / other)
+    def __sub__(self, other): return self._apply_inner(self.node - other)
+
     def view(self, **data):
         return View(self.node, **dict(**self.view_data, **data))
+
+    def scale(self, scale):
+        return self._apply_inner(self.node.scale(scale))
+
+    def translate(self, delta):
+        return self._apply_inner(self.node.translate(delta))
+
+    def rotate(self, axis, theta):
+        return self._apply_inner(self.node.rotate(axis, theta))
+
+    def rotate_at(self, origin, axis, theta):
+        return self._apply_inner(self.node.rotate_at(origin, axis, theta))
 
 class Extrusion(Node):
     """

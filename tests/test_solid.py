@@ -111,6 +111,20 @@ class TestView(unittest.TestCase):
         view = a.view(color='red').view(opacity=0.5)
         self.assertEqual(view.view_data, {'color': 'red', 'opacity': 0.5})
 
+    def test_inner_methods(self):
+        original = {'color': 'red'}
+        a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1)).view(**original)
+        b = solid.Box(Point(0.25, 0.25, 0.25), Vector(0.5, 0.5, 2))
+
+        self.assertEqual((a + b).view_data, original)
+        self.assertEqual((a * b).view_data, original)
+        self.assertEqual((a / 2).view_data, original)
+        self.assertEqual((a - b).view_data, original)
+
+        self.assertEqual(a.scale(Vector(2, 2, 2)).view_data, original)
+        self.assertEqual(a.translate(Vector(1, 2, 3)).view_data, original)
+        self.assertEqual(a.rotate(Vector.basis.z, tau / 3).view_data, original)
+        self.assertEqual(a.rotate_at(Point(1, 1, 1), Vector.basis.z, tau / 3).view_data, original)
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(solid))
