@@ -34,7 +34,11 @@ def parse_transform(s):
     elif name == 'translate':
         return Matrix.translate(*params)
     elif name == 'scale':
-        return Matrix.scale(*params)
+        if len(params):
+            param, = params
+            return Matrix.scale(param, param)
+        else:
+            return Matrix.scale(*params)
     elif name == 'rotate':
         if len(params) == 1:
             return Matrix.rotate(*params)

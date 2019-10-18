@@ -1,7 +1,7 @@
 import doctest, unittest
 from petrify.formats import svg, SVG
-from petrify.solid import Basis, Vector
-from petrify import u
+from petrify.solid import Basis
+from petrify import u, Vector
 
 class TestParse(unittest.TestCase):
     def test_example(self):
@@ -15,6 +15,12 @@ class TestParse(unittest.TestCase):
         paths['text'].polygon(1.0 * u.file)
         paths['text'].polygons()
         paths['text'].polygons(1.0 * u.mm / scale)
+
+    def test_unusual_transforms(self):
+        self.assertEqual(
+            Vector(1, 2) * svg.parse_transform('scale(2.0)'),
+            Vector(2, 4)
+        )
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(svg))
