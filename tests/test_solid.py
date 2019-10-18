@@ -82,6 +82,19 @@ class TestNode(unittest.TestCase):
         scaled = a / 2
         self.assertEqual(scaled.envelope().size(), Vector(1, 1, 1))
 
+class TestCollection(unittest.TestCase):
+    def test_subtraction(self):
+        a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1))
+        b = solid.Box(Point(0, 0, 2), Vector(1, 1, 1))
+        collection = solid.Collection([a, b])
+        cut = solid.Box(Point(0.25, 0.25, 0.25), Vector(0.5, 0.5, 2))
+
+        collection = collection - cut
+        inset = Vector(0.05, 0.05, 0.05)
+        inside = solid.Box(cut.origin + inset, cut.size() - (inset * 2))
+        for n in collection.nodes:
+            self.assertTrue(len((n * inside).polygons) == 0)
+
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(solid))
     return tests

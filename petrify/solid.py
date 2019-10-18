@@ -239,6 +239,14 @@ class Collection(Node):
         self.nodes = nodes
         super().__init__([p for n in nodes if hasattr(n, 'polygons') for p in n.polygons])
 
+    def __sub__(self, other):
+        if isinstance(other, Vector3):
+            return self.translate(-other)
+        elif isinstance(other, Node):
+            return Collection([n - other for n in self.nodes])
+        else:
+            return NotImplemented
+
     def flatten(self):
         return [child for n in self.nodes
                 for child in (n.flatten() if isinstance(n, Collection) else [n])]
