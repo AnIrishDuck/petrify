@@ -95,6 +95,23 @@ class TestCollection(unittest.TestCase):
         for n in collection.nodes:
             self.assertTrue(len((n * inside).polygons) == 0)
 
+    def test_view_recursion(self):
+        a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1))
+        b = solid.Box(Point(0, 0, 2), Vector(1, 1, 1))
+        collection = solid.Collection([a.view(color='red'), b])
+        self.assertEqual(
+            collection.view(opacity=0.5).nodes[0].view_data,
+            {'color': 'red', 'opacity': 0.5}
+        )
+
+
+class TestView(unittest.TestCase):
+    def test_recursion(self):
+        a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1))
+        view = a.view(color='red').view(opacity=0.5)
+        self.assertEqual(view.view_data, {'color': 'red', 'opacity': 0.5})
+
+
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(solid))
     return tests

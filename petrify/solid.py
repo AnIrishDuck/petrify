@@ -247,6 +247,9 @@ class Collection(Node):
         else:
             return NotImplemented
 
+    def view(self, **data):
+        return Collection([n.view(**data) for n in self.nodes])
+
     def flatten(self):
         return [child for n in self.nodes
                 for child in (n.flatten() if isinstance(n, Collection) else [n])]
@@ -265,6 +268,9 @@ class View(Node):
         self.node = node
         super().__init__(node.polygons)
         self.view_data = data
+
+    def view(self, **data):
+        return View(self.node, **dict(**self.view_data, **data))
 
 class Extrusion(Node):
     """
