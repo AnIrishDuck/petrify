@@ -83,6 +83,16 @@ class TestNode(unittest.TestCase):
         self.assertEqual(scaled.envelope().size(), Vector(1, 1, 1))
 
 class TestCollection(unittest.TestCase):
+    def test_addition(self):
+        a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1)).view(color='red')
+        b = solid.Box(Point(0, 0, 2), Vector(1, 1, 1)).view(color='blue')
+        collection = solid.Collection([a, b]) + Vector.basis.x
+
+        self.assertEqual(
+            [n.view_data for n in collection.nodes],
+            [{'color': 'red'}, {'color': 'blue'}]
+        )
+
     def test_subtraction(self):
         a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1))
         b = solid.Box(Point(0, 0, 2), Vector(1, 1, 1))
@@ -104,6 +114,19 @@ class TestCollection(unittest.TestCase):
             {'color': 'red', 'opacity': 0.5}
         )
 
+    def test_inner_methods(self):
+        a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1)).view(color='red')
+        b = solid.Box(Point(0, 0, 2), Vector(1, 1, 1)).view(color='blue')
+        c = solid.Collection([a, b]) + Vector.basis.x
+
+        original = [{'color': 'red'}, {'color': 'blue'}]
+
+        def _vd(c): return [n.view_data for n in c.nodes]
+
+        self.assertEqual(_vd(c.scale(Vector(2, 2, 2))), original)
+        self.assertEqual(_vd(c.translate(Vector(1, 2, 3))), original)
+        self.assertEqual(_vd(c.rotate(Vector.basis.z, tau / 3)), original)
+        self.assertEqual(_vd(c.rotate_at(Point(1, 1, 1), Vector.basis.z, tau / 3)), original)
 
 class TestView(unittest.TestCase):
     def test_recursion(self):

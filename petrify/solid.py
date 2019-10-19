@@ -257,6 +257,18 @@ class Collection(Node):
     def render(self, **properties):
         return visualize.scene(self.flatten(), **properties)
 
+    def scale(self, scale):
+        return Collection([node.scale(scale) for node in self.nodes])
+
+    def translate(self, delta):
+        return Collection([node.translate(delta) for node in self.nodes])
+
+    def rotate(self, axis, theta):
+        return Collection([node.rotate(axis, theta) for node in self.nodes])
+
+    def rotate_at(self, origin, axis, theta):
+        return Collection([node.rotate_at(origin, axis, theta) for node in self.nodes])
+
 class View(Node):
     """
     Apply view properties to geometry.
