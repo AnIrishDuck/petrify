@@ -105,6 +105,20 @@ class TestCollection(unittest.TestCase):
         for n in collection.nodes:
             self.assertTrue(len((n * inside).polygons) == 0)
 
+    def test_multiplication(self):
+        a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1)).view(color='red')
+        b = solid.Box(Point(0, 0, 2), Vector(1, 1, 1))
+        collection = solid.Collection([a, b])
+        common = solid.Box(Point(0.25, 0.25, 0.25), Vector(0.5, 0.5, 2))
+
+        collection = collection * common
+        self.assertEqual(len(collection.nodes), 2)
+        self.assertEqual(collection.nodes[0].view_data, {'color': 'red'})
+
+        collection = solid.Collection([a, b])
+        common = solid.Box(Point(0.25, 0.25, 0.25), Vector(0.5, 0.5, 0.5))
+        self.assertTrue(len(collection.nodes), 1)
+
     def test_view_recursion(self):
         a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1))
         b = solid.Box(Point(0, 0, 2), Vector(1, 1, 1))

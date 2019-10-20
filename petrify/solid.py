@@ -247,6 +247,10 @@ class Collection(Node):
         else:
             return NotImplemented
 
+    def __mul__(self, other):
+        nodes = [n * other for n in self.nodes]
+        return Collection([n for n in nodes if len(n.polygons) > 0])
+
     def view(self, **data):
         return Collection([n.view(**data) for n in self.nodes])
 
