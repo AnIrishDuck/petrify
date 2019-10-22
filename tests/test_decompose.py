@@ -134,7 +134,7 @@ class TestTrapezoid(unittest.TestCase):
             Point(4, 4),
         ])
 
-        polygons = decompose.trapezoidal(v.to_counterclockwise().polygons())
+        polygons = decompose.trapezoidal(v.to_counterclockwise().polygons)
         self.assertEqual([p.points for p in polygons], [
             [Point(1.5, 1.0), Point(2.5, 1.0), Point(2.0, 0.0)],
             [Point(1.5, 1.0), Point(0.0, 4.0), Point(1.0, 4.0), Point(2.0, 1.0)],

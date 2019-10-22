@@ -343,7 +343,7 @@ class Extrusion(Node):
 
     def __init__(self, slices):
         sizes = (
-            tuple(len(poly.points) for poly in sl.polygon.polygons())
+            tuple(len(poly.points) for poly in sl.polygon.polygons)
             for sl in slices
         )
         assert(len(set(sizes)) == 1)

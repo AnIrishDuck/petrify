@@ -1835,7 +1835,7 @@ class Face(PlanarPolygon):
         if isinstance(self.polygon, plane.Polygon) and self.polygon.is_convex():
             simple = [self.polygon]
         else:
-            simple = decompose.trapezoidal(self.polygon.polygons())
+            simple = decompose.trapezoidal(self.polygon.polygons)
         return [Face(self.basis, self.direction, p).project()[0] for p in simple]
 
 

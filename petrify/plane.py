@@ -1316,14 +1316,15 @@ class ComplexPolygon2:
         )
 
     def __len__(self):
-        return sum(len(p) for p in self.polygons())
+        return sum(len(p) for p in self.polygons)
 
     def __repr__(self):
         return "ComplexPolygon2({0!r})".format([*self.exterior, *self.interior])
 
     def segments(self):
-        return [s for p in self.polygons() for s in p.segments()]
+        return [s for p in self.polygons for s in p.segments()]
 
+    @property
     def polygons(self):
         return (*self.exterior, *self.interior)
 
@@ -1370,6 +1371,6 @@ class ComplexPolygon2:
 
         """
         from .shape import Rectangle
-        rectangles = Polygon2([p for polygon in self.polygons() for p in polygon.envelope().points])
+        rectangles = Polygon2([p for polygon in self.polygons for p in polygon.envelope().points])
         return rectangles.envelope()
 ComplexPolygon = ComplexPolygon2

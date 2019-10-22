@@ -41,6 +41,7 @@ class AbstractPolygon:
         pairs = zip(self.points, self.points[1:] + [self.points[0]])
         return [self.embedding.LineSegment(a, b) for a, b in pairs]
 
+    @property
     def polygons(self):
         return [self]
 
