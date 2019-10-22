@@ -296,7 +296,7 @@ class View(Node):
     def __sub__(self, other): return self._apply_inner(self.node - other)
 
     def view(self, **data):
-        return View(self.node, **dict(**self.view_data, **data))
+        return View(self.node, **dict(self.view_data, **data))
 
     def scale(self, scale):
         return self._apply_inner(self.node.scale(scale))

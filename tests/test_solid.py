@@ -145,8 +145,8 @@ class TestCollection(unittest.TestCase):
 class TestView(unittest.TestCase):
     def test_recursion(self):
         a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1))
-        view = a.view(color='red').view(opacity=0.5)
-        self.assertEqual(view.view_data, {'color': 'red', 'opacity': 0.5})
+        view = a.view(color='red').view(opacity=0.5).view(color='blue')
+        self.assertEqual(view.view_data, {'color': 'blue', 'opacity': 0.5})
 
     def test_inner_methods(self):
         original = {'color': 'red'}
