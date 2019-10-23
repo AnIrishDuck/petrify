@@ -62,7 +62,7 @@ class Circle(Polygon2):
 
         angles = (tau * float(a) / segments for a in range(segments))
         super().__init__([
-            Point2(math.cos(theta) * radius, math.sin(theta) * radius)
+            self.origin + Vector2(math.cos(theta) * radius, math.sin(theta) * radius)
             for theta in angles
         ])
 
