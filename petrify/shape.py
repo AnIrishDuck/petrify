@@ -198,12 +198,16 @@ class Text(ComplexPolygon2):
     >>> face = Face('./tests/fixtures/RussoOne.ttf')
     >>> polygon = Text(face, 'petrify')
 
+    Uses the face's pre-defined line height for the size of the text, scaled to
+    1.0 units on the y axis.
+
     .. _`freetype-py`: https://pypi.org/project/freetype-py/
     """
     def __init__(self, face, text):
         self.text = text
         face.set_char_size(48 * 64)
         slot = face.glyph
+        scale = float(face.size.height) / (48 * 64)
 
         x, y = 0, 0
         previous = 0
@@ -212,7 +216,7 @@ class Text(ComplexPolygon2):
             face.load_char(c)
             kerning = face.get_kerning(previous, c)
             x += (kerning.x >> 6)
-            polygons.append(character(face, c) + Vector2(x, 0) / 48)
+            polygons.append((character(face, c) + Vector2(x, 0) / 48) * (1.0 / scale))
             x += (slot.advance.x >> 6)
             previous = c
 
