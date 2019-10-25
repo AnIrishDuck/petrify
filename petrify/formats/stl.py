@@ -42,9 +42,9 @@ class STL:
         Save a :class:`~petrify.solid.Node` to a STL-formatted file.
 
         >>> from petrify import u
-        >>> from petrify.solid import Box, Point3, Vector3
+        >>> from petrify.solid import Box, Point, Vector
         >>> from tempfile import NamedTemporaryFile
-        >>> b = Box(Point3.origin, Vector3(1, 1, 1))
+        >>> b = Box(Point.origin, Vector(1, 1, 1))
         >>> with NamedTemporaryFile() as fp:
         ...     STL(fp.name, 1 * u.mm / u.file).write(b.as_unit('inches'))
 

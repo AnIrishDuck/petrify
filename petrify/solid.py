@@ -23,19 +23,18 @@ via CSG union and difference operations.
 import math
 
 from . import engines, plane, shape, units, visualize
-from .plane import Point2, Polygon2, Vector2
-from .space import _pmap, Matrix, Point, Polygon, PlanarPolygon, Face, Basis, Vector
-from .space import Point3, Polygon3, Vector3
+from .generic import Polygon, Point, Vector
+from .space import _pmap, Matrix, PlanarPolygon, Face, Basis, Vector3
 from .geometry import tau, valid_scalar
 
 def perpendicular(axis):
     "Return a vector that is perpendicular to the given axis."
     if axis.x == 0 and axis.y == 0:
-        return Vector3(1, -1, 0)
+        return Vector(1, -1, 0)
     elif axis.z == 0:
-        return Vector3(-axis.y, axis.x, 0)
+        return Vector(-axis.y, axis.x, 0)
     else:
-        return Vector3(axis.y, axis.x, -2 * axis.x * axis.y)
+        return Vector(axis.y, axis.x, -2 * axis.x * axis.y)
 
 class Node:
     """
@@ -44,17 +43,17 @@ class Node:
     All instances of this class can be added and subtracted via the built-in
     `__add__` and `__sub__` methods:
 
-    >>> a = Box(Point3(0, 0, 0), Vector3(1, 1, 1))
-    >>> b = Box(Point3(0, 0, 0.5), Vector3(1, 1, 1))
+    >>> a = Box(Point(0, 0, 0), Vector(1, 1, 1))
+    >>> b = Box(Point(0, 0, 0.5), Vector(1, 1, 1))
     >>> union = a + b
     >>> difference = a - b
 
     All nodes also support scaling and translation via vectors:
 
-    >>> box = Box(Point3(0, 0, 0), Vector3(1, 1, 1))
-    >>> (box * Vector3(2, 1, 1)).envelope()
+    >>> box = Box(Point(0, 0, 0), Vector(1, 1, 1))
+    >>> (box * Vector(2, 1, 1)).envelope()
     Box(Point3(0, 0, 0), Vector3(2, 1, 1))
-    >>> (box + Vector3(1, 0, 1)).envelope()
+    >>> (box + Vector(1, 0, 1)).envelope()
     Box(Point3(1.0, 0.0, 1.0), Vector3(1.0, 1.0, 1.0))
 
     To support unit operations via `pint`, multiplication and division by a
@@ -94,14 +93,14 @@ class Node:
             n.parts = [self, other]
             return n
         elif valid_scalar(other):
-            return self * Vector3(other, other, other)
+            return self * Vector(other, other, other)
         else:
             return NotImplemented
     __rmul__ = __mul__
 
     def __truediv__(self, other):
         if valid_scalar(other):
-            return self * Vector3(1 / other, 1 / other, 1 / other)
+            return self * Vector(1 / other, 1 / other, 1 / other)
         else:
             return NotImplemented
 
@@ -124,22 +123,22 @@ class Node:
         """
         Returns the axis-aligned bounding box for this shape:
 
-        >>> parallelogram = Polygon2([
-        ...     Point2(0, 0),
-        ...     Point2(0, 1),
-        ...     Point2(1, 2),
-        ...     Point2(1, 1)
+        >>> parallelogram = Polygon([
+        ...     Point(0, 0),
+        ...     Point(0, 1),
+        ...     Point(1, 2),
+        ...     Point(1, 1)
         ... ])
         >>> extruded = PolygonExtrusion(
         ...     PlanarPolygon(Basis.xy, parallelogram),
-        ...     Vector3(0, 0, 1)
+        ...     Vector(0, 0, 1)
         ... )
         >>> extruded.envelope()
         Box(Point3(0, 0, 0), Vector3(1, 2, 1))
 
         """
-        origin = _pmap(Point3, min, self.points)
-        extent = _pmap(Point3, max, self.points)
+        origin = _pmap(Point, min, self.points)
+        extent = _pmap(Point, max, self.points)
         return Box(origin, extent - origin)
 
     def mesh(self):
@@ -202,7 +201,7 @@ class Node:
         """
         Declare a unit for unitless geometry:
 
-        >>> Box(Point3(0, 0, 0), Vector3(1, 1, 1)).as_unit('inch').units
+        >>> Box(Point(0, 0, 0), Vector(1, 1, 1)).as_unit('inch').units
         <Unit('inch')>
 
         """
@@ -230,8 +229,8 @@ class Collection(Node):
     lack of intersection is not enforced:
 
     >>> c = Collection([
-    ...     Box(Point3.origin, Vector3(1, 1, 1)),
-    ...     Box(Point3(0, 5, 0), Vector3(1, 1, 1))
+    ...     Box(Point.origin, Vector(1, 1, 1)),
+    ...     Box(Point(0, 5, 0), Vector(1, 1, 1))
     ... ])
 
     """
@@ -277,7 +276,7 @@ class View(Node):
     """
     Apply view properties to geometry.
 
-    >>> v = View(Box(Point3.origin, Vector3(1, 1, 1)), wireframe=True)
+    >>> v = View(Box(Point.origin, Vector(1, 1, 1)), wireframe=True)
 
     """
     def __init__(self, node, **data):
@@ -315,21 +314,21 @@ class Extrusion(Node):
     A three-dimensional object built from rings of :class:`~petrify.space.PlanarPolygon`
     objects with the same number of points at each ring:
 
-    >>> parallelogram = Polygon2([
-    ...    Point2(0, 0),
-    ...    Point2(0, 1),
-    ...    Point2(1, 2),
-    ...    Point2(1, 1)
+    >>> parallelogram = Polygon([
+    ...    Point(0, 0),
+    ...    Point(0, 1),
+    ...    Point(1, 2),
+    ...    Point(1, 1)
     ... ])
-    >>> square = Polygon2([
-    ...     Point2(0, 0),
-    ...     Point2(0, 1),
-    ...     Point2(1, 1),
-    ...     Point2(1, 0)
+    >>> square = Polygon([
+    ...     Point(0, 0),
+    ...     Point(0, 1),
+    ...     Point(1, 1),
+    ...     Point(1, 0)
     ... ])
     >>> object = Extrusion([
     ...     PlanarPolygon(Basis.xy, parallelogram),
-    ...     PlanarPolygon(Basis.xy + Vector3(0, 0, 1), square),
+    ...     PlanarPolygon(Basis.xy + Vector(0, 0, 1), square),
     ... ])
 
     The rings must all have the same number of vertices. Quads are generated to
@@ -379,7 +378,7 @@ class Extrusion(Node):
     def ring(self, bottom, top):
         """ Builds a ring from two slices. """
         lines = list(zip(bottom.points, top.points))
-        polygons =  [Polygon3([la[1], lb[1], lb[0], la[0]]).simplify()
+        polygons =  [Polygon([la[1], lb[1], lb[0], la[0]]).simplify()
                      for la, lb in zip(lines, lines[1:] + [lines[0]])]
         return [p for p in polygons if p is not None]
 
@@ -396,7 +395,7 @@ class Transformed(Node):
         self.matrix = matrix
 
         polygons = [
-            Polygon3([matrix * point for point in polygon.points])
+            Polygon([matrix * point for point in polygon.points])
             for polygon in prior.polygons
         ]
         super().__init__(polygons)
@@ -407,9 +406,9 @@ class Union(Node):
     Defines a union of a list of `parts`:
 
     >>> many = Union([
-    ...     Box(Point3(0, 0, 0), Vector3(10, 1, 1)),
-    ...     Box(Point3(0, 0, 0), Vector3(1, 10, 1)),
-    ...     Box(Point3(0, 0, 0), Vector3(1, 1, 10)),
+    ...     Box(Point(0, 0, 0), Vector(10, 1, 1)),
+    ...     Box(Point(0, 0, 0), Vector(1, 10, 1)),
+    ...     Box(Point(0, 0, 0), Vector(1, 1, 10)),
     ... ])
 
     """
@@ -421,12 +420,12 @@ class Box(Extrusion):
     """
     A simple three-dimensional box:
 
-    >>> cube = Box(Point3.origin, Vector3(1, 1, 1))
+    >>> cube = Box(Point.origin, Vector(1, 1, 1))
 
     `origin` :
-        a :class:`~petrify.space.Point3` defining the origin of this box.
+        a :class:`~petrify.space.Point` defining the origin of this box.
     `size` :
-        a :class:`~petrify.space.Vector3` of the box's size.
+        a :class:`~petrify.space.Vector` of the box's size.
 
     """
 
@@ -435,10 +434,10 @@ class Box(Extrusion):
         self.extent = extent = origin + size
 
         footprint = shape.Rectangle(
-            Point2(*self.origin.xy),
-            Vector2(*size.xy)
+            Point(*self.origin.xy),
+            Vector(*size.xy)
         )
-        bz = Vector3.basis.z
+        bz = Vector.basis.z
         bottom = PlanarPolygon(Basis.xy + bz * origin.z, footprint)
         top = PlanarPolygon(Basis.xy + bz * extent.z, footprint)
 
@@ -454,22 +453,22 @@ class PolygonExtrusion(Extrusion):
     """
 
     Extrusion of a :py:class:`~petrify.space.PlanarPolygon` created from a
-    two-dimensional :py:class:`~petrify.plane.Polygon2` or
+    two-dimensional :py:class:`~petrify.plane.Polygon` or
     :py:class:`~petrify.plane.ComplexPolygon2` into three-dimensional space:
 
-    >>> triangle = Polygon2([
-    ...     Point2(0, 0),
-    ...     Point2(0, 2),
-    ...     Point2(1, 1)
+    >>> triangle = Polygon([
+    ...     Point(0, 0),
+    ...     Point(0, 2),
+    ...     Point(1, 1)
     ... ])
     >>> planar = PlanarPolygon(Basis.xy, triangle)
-    >>> extruded = PolygonExtrusion(planar, Vector3(0, 0, 1))
+    >>> extruded = PolygonExtrusion(planar, Vector(0, 0, 1))
 
     `footprint` :
         a :py:class:`~petrify.space.PlanarPolygon` object describing a the polygon
         that will be extruded in the given `direction`
     `direction` :
-        A :class:`~petrify.space.Vector3` defining which direction the polygon will be
+        A :class:`~petrify.space.Vector` defining which direction the polygon will be
         linearly extruded into.
 
     """
@@ -485,12 +484,12 @@ class Spun(Node):
     A three-dimensional object built from two-dimensional profiles rotated uniformly around
     an axis:
 
-    >>> axis = Vector3.basis.z
-    >>> start = Vector3.basis.y
-    >>> tri = Polygon2([
-    ...     Point2(0, 0),
-    ...     Point2(1, 1),
-    ...     Point2(0, 2)
+    >>> axis = Vector.basis.z
+    >>> start = Vector.basis.y
+    >>> tri = Polygon([
+    ...     Point(0, 0),
+    ...     Point(1, 1),
+    ...     Point(0, 2)
     ... ])
     >>> spun = Spun(axis, start, [tri] * 5)
 
@@ -507,7 +506,7 @@ class Spun(Node):
 
     def profile(self, polygon, angle):
         bx = self.start.rotate(self.axis, angle)
-        return Polygon3([
+        return Polygon([
             (p.x * bx + p.y * self.axis).point()
             for p in polygon.points
         ])
@@ -535,7 +534,7 @@ class Spun(Node):
     def rotation(self, a, b):
         """ Builds a ring from two slices. """
         lines = list(zip(a.points, b.points))
-        polygons = [Polygon3([la[1], lb[1], lb[0], la[0]]).simplify()
+        polygons = [Polygon([la[1], lb[1], lb[0], la[0]]).simplify()
                     for la, lb in zip(lines, lines[1:] + [lines[0]])]
         return [p for p in polygons if p is not None]
 
@@ -543,15 +542,15 @@ class Cylinder(PolygonExtrusion):
     """
     A three-dimensional cylinder extruded along the given `axis`:
 
-    >>> axle = Cylinder(Point3.origin, Vector3.basis.y * 10, 1.0)
+    >>> axle = Cylinder(Point.origin, Vector.basis.y * 10, 1.0)
 
     The actual cylinder is approximated by creating many `segments` of quads to
     simulate a circular shape.
 
     `origin` :
-        a :class:`~petrify.space.Point3` defining the origin of this cylinder.
+        a :class:`~petrify.space.Point` defining the origin of this cylinder.
     `axis` :
-        a :class:`~petrify.space.Vector3` that defines the axis the cylinder will
+        a :class:`~petrify.space.Vector` that defines the axis the cylinder will
         be "spun about". The magnitude of the axis is the height of the cylinder.
     `radius` :
         the radius of the cylinder.
@@ -565,7 +564,7 @@ class Cylinder(PolygonExtrusion):
         self.axis = axis
         self.radius = radius
 
-        circle = shape.Circle(Point2(0, 0), radius, segments)
+        circle = shape.Circle(Point(0, 0), radius, segments)
         bx = perpendicular(axis).normalized()
         by = bx.cross(axis).normalized()
         bottom = PlanarPolygon(Basis(origin, bx, by), circle)
@@ -579,13 +578,13 @@ class Sphere(Extrusion):
     """
     A sphere defined via `center` and a `radius`
 
-    >>> ball = Sphere(Point3.origin, 1)
+    >>> ball = Sphere(Point.origin, 1)
 
     The actual sphere is approximated by creating many `segments` of longitudinal
     circles, each in turn approximated with the same number of `segments`
 
     `center` :
-        a :class:`~petrify.space.Point3` defining the center of this sphere
+        a :class:`~petrify.space.Point` defining the center of this sphere
     `radius` :
         the radius of the sphere.
     `segments` :
@@ -598,7 +597,7 @@ class Sphere(Extrusion):
         self.radius = radius
 
         angles = list(tau * float(a) / segments for a in range(segments))
-        circle = shape.Circle(Point2(0, 0), self.radius, segments)
+        circle = shape.Circle(Point(0, 0), self.radius, segments)
 
         start = Basis.xy + Vector(*center.xyz)
         dz = Vector.basis.z * self.radius
