@@ -1,7 +1,7 @@
 import math
 
 from .motion import PlanarToolpath, CutSteps
-from .util import frange
+from ..util import frange
 
 from ..plane import Line, LineSegment, Point, Vector
 from ..decompose import grouper

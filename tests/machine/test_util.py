@@ -2,15 +2,7 @@ import unittest
 
 from petrify import Point
 from petrify.plane import LineSegment2
-from petrify.machine.util import frange, CutLine
-
-class TestUtil(unittest.TestCase):
-    def test_frange_inclusive(self):
-        self.assertEqual(
-            list(frange(-1, -5, -1, inclusive=True)),
-            [-1, -2, -3, -4, -5]
-        )
-
+from petrify.machine.util import CutLine
 
 class TestCutLine(unittest.TestCase):
     def test_parallel_lines(self):

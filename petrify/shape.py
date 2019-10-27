@@ -24,7 +24,7 @@ from geomdl import utilities
 
 from .plane import ComplexPolygon2, Polygon2, Point2, Vector2
 from .geometry import tau
-from .machine.util import frange
+from .util import frange
 
 class Rectangle(Polygon2):
     """

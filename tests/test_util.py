@@ -2,7 +2,14 @@ import unittest
 
 from petrify import Point, Vector
 from petrify.plane import LineSegment2
-from petrify.util import locate_circle
+from petrify.util import locate_circle, frange
+
+class RangeTests(unittest.TestCase):
+    def test_frange_inclusive(self):
+        self.assertEqual(
+            list(frange(-1, -5, -1, inclusive=True)),
+            [-1, -2, -3, -4, -5]
+        )
 
 class CircleTests(unittest.TestCase):
     def test_angle(self):
