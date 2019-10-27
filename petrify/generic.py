@@ -9,9 +9,9 @@ class Point:
     count:
 
     >>> Point(1, 2)
-    Point2(1, 2)
+    Point(1, 2)
     >>> Point(1, 2, 3)
-    Point3(1, 2, 3)
+    Point(1, 2, 3)
 
     """
 
@@ -27,13 +27,13 @@ Point.origin = Point3.origin
 class Vector:
     """
     A generic constructor that chooses the correct variant of
-    :py:`~petrify.plane.Vector2` or :py:`~petrify.space.Vector3` based on argument
+    :py:`~petrify.plane.Vector` or :py:`~petrify.space.Vector` based on argument
     count:
 
     >>> Vector(1, 2)
-    Vector2(1, 2)
+    Vector(1, 2)
     >>> Vector(1, 2, 3)
-    Vector3(1, 2, 3)
+    Vector(1, 2, 3)
 
     """
 
@@ -66,9 +66,9 @@ class Polygon:
     the embedding of the passed arguments:
 
     >>> Polygon([Point(0, 0), Point(1, 0), Point(1, 1)])
-    Polygon2([Point2(0, 0), Point2(1, 0), Point2(1, 1)])
+    Polygon([Point(0, 0), Point(1, 0), Point(1, 1)])
     >>> Polygon([Point(0, 0, 0), Point(1, 0, 0), Point(1, 1, 1)])
-    Polygon3([Point3(0, 0, 0), Point3(1, 0, 0), Point3(1, 1, 1)])
+    Polygon([Point(0, 0, 0), Point(1, 0, 0), Point(1, 1, 1)])
     >>> Polygon([Point(0, 0), Point(1, 1, 2)])
     Traceback (most recent call last):
     ...

@@ -53,7 +53,7 @@ class STL:
         >>> STL('/tmp/error.stl', 1 * u.mm / u.file).write(b)
         Traceback (most recent call last):
         ...
-        AssertionError: object does not have unit tag: Box(Point3(0, 0, 0), Vector3(1, 1, 1))
+        AssertionError: object does not have unit tag: Box(Point(0, 0, 0), Vector(1, 1, 1))
 
         """
         units.assert_lengthy(solid)

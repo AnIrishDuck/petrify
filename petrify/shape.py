@@ -22,7 +22,8 @@ import math
 from geomdl import BSpline
 from geomdl import utilities
 
-from .plane import ComplexPolygon2, Polygon2, Point2, Vector2
+from .plane import ComplexPolygon2, Polygon2, Vector2
+from .generic import Point, Vector
 from .geometry import tau
 from .util import frange
 
@@ -30,7 +31,7 @@ class Rectangle(Polygon2):
     """
     An axis-aligned rectangle with a point of `origin` and a vector `size`:
 
-    >>> square = Rectangle(Point2.origin, Vector2(1, 1))
+    >>> square = Rectangle(Point(0, 0), Vector(1, 1))
 
     """
 
@@ -39,10 +40,10 @@ class Rectangle(Polygon2):
         self.size = size
         extent = self.extent = self.origin + self.size
         super().__init__([
-            Point2(origin.x, origin.y),
-            Point2(origin.x, extent.y),
-            Point2(extent.x, extent.y),
-            Point2(extent.x, origin.y)
+            Point(origin.x, origin.y),
+            Point(origin.x, extent.y),
+            Point(extent.x, extent.y),
+            Point(extent.x, origin.y)
         ])
 
     def __repr__(self):
@@ -52,7 +53,7 @@ class Circle(Polygon2):
     """
     Approximates a perfect circle with a finite number of line segments:
 
-    >>> circle = Circle(Point2.origin, 1, 5)
+    >>> circle = Circle(Point(0, 0), 1, 5)
 
     """
 
@@ -62,7 +63,7 @@ class Circle(Polygon2):
 
         angles = (tau * float(a) / segments for a in range(segments))
         super().__init__([
-            self.origin + Vector2(math.cos(theta) * radius, math.sin(theta) * radius)
+            self.origin + Vector(math.cos(theta) * radius, math.sin(theta) * radius)
             for theta in angles
         ])
 
@@ -71,16 +72,16 @@ def bezier(a, b, c, d, segments=10):
     Creates a bezier curve between the given control points, approximated with
     a given number of `segments`:
 
-    >>> points = bezier(Point2(0, 0), Point2(5, 0), Point2(5, 5), Point2(10, 5), 4)
+    >>> points = bezier(Point(0, 0), Point(5, 0), Point(5, 5), Point(10, 5), 4)
     >>> [p.snap(1.0) for p in points]
-    [Point2(0.0, 0.0), Point2(4.0, 1.0), Point2(6.0, 4.0), Point2(10.0, 5.0)]
+    [Point(0.0, 0.0), Point(4.0, 1.0), Point(6.0, 4.0), Point(10.0, 5.0)]
 
     You can also use relative :py:class:`~petrify.plane.Vector` controls instead
     of absolute points:
 
-    >>> points = bezier(Point2(0, 0), Vector2(5, 0), Vector2(-5, 0), Point2(10, 5), 4)
+    >>> points = bezier(Point(0, 0), Vector(5, 0), Vector(-5, 0), Point(10, 5), 4)
     >>> [p.snap(1.0) for p in points]
-    [Point2(0.0, 0.0), Point2(4.0, 1.0), Point2(6.0, 4.0), Point2(10.0, 5.0)]
+    [Point(0.0, 0.0), Point(4.0, 1.0), Point(6.0, 4.0), Point(10.0, 5.0)]
 
     """
 
@@ -102,20 +103,20 @@ def bezier(a, b, c, d, segments=10):
 
     # Evaluate curve
     r.evaluate()
-    return [Point2(*xy) for xy in r.evalpts]
+    return [Point(*xy) for xy in r.evalpts]
 
 def arc(center, radius, start, end, segments=10):
     """
     Creates an arc of points around the given `center` with a specified `radius`
     and `start` and `end` angles, approximated with a fixed number of `segments`:
 
-    >>> points = arc(Point2(5, 0), 5, 0, tau / 2, segments = 3)
+    >>> points = arc(Point(5, 0), 5, 0, tau / 2, segments = 3)
     >>> [p.snap(0.1) for p in points]
-    [Point2(10.0, 0.0), Point2(5.0, 5.0), Point2(0.0, 0.0)]
+    [Point(10.0, 0.0), Point(5.0, 5.0), Point(0.0, 0.0)]
 
     """
     angles = frange(start, end, (end - start) / (segments - 1), inclusive=True)
-    return [Point2(math.cos(theta), math.sin(theta)) * radius + Vector2(*center.xy)
+    return [Point(math.cos(theta), math.sin(theta)) * radius + Vector(*center.xy)
             for theta in angles]
 
 def fillet(a, b, c, r, segments=10):
@@ -123,9 +124,9 @@ def fillet(a, b, c, r, segments=10):
     Creates a smooth circular fillet from an ordered triplet of points that
     define a corner:
 
-    >>> points = fillet(Point2(1, 0), Point2(0, 0), Point2(0, 1), 0.5, segments = 3)
+    >>> points = fillet(Point(1, 0), Point(0, 0), Point(0, 1), 0.5, segments = 3)
     >>> [p.snap(0.1) for p in points]
-    [Point2(0.5, 0.0), Point2(0.1, 0.1), Point2(0.0, 0.5)]
+    [Point(0.5, 0.0), Point(0.1, 0.1), Point(0.0, 0.5)]
 
     """
     def clock(v):
@@ -168,7 +169,7 @@ def character(face, c):
 
         verts = [points[0], ]
         for segment in segments:
-            points = [Point2(*t) for t in segment]
+            points = [Point(*t) for t in segment]
             if len(segment) == 2:
                 verts.extend(segment[1:])
             elif len(segment) == 3:
@@ -181,12 +182,12 @@ def character(face, c):
                 for i in range(1,len(segment)-2):
                     A,B = segment[i], segment[i+1]
                     C = ((A[0]+B[0])/2.0, (A[1]+B[1])/2.0)
-                    verts.extend(bezier(Point2(*A), Point2(*C), Point2(*C), Point2(*B)))
+                    verts.extend(bezier(Point(*A), Point(*C), Point(*C), Point(*B)))
                 verts.append(segment[-1])
         shapes.append(verts)
         start = end+1
 
-    return ComplexPolygon2([Polygon2([Point2(*xy) / (48 * 64) for xy in vs]) for vs in shapes])
+    return ComplexPolygon2([Polygon2([Point(*xy) / (48 * 64) for xy in vs]) for vs in shapes])
 
 class Text(ComplexPolygon2):
     """
@@ -216,7 +217,7 @@ class Text(ComplexPolygon2):
             face.load_char(c)
             kerning = face.get_kerning(previous, c)
             x += (kerning.x >> 6)
-            polygons.append((character(face, c) + Vector2(x, 0) / 48) * (1.0 / scale))
+            polygons.append((character(face, c) + Vector(x, 0) / 48) * (1.0 / scale))
             x += (slot.advance.x >> 6)
             previous = c
 

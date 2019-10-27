@@ -16,9 +16,9 @@ Math utility library for common three-dimensional constructs:
 The `pint`_ library can be used to specify dimensions:
 
 >>> from petrify import u
->>> p = Point3(50, 25, 50) * u.mm
+>>> p = Point(50, 25, 50) * u.mm
 >>> p.to('m')
-<Quantity(Point3(0.05, 0.025, 0.05), 'meter')>
+<Quantity(Point(0.05, 0.025, 0.05), 'meter')>
 
 Many methods are nominally supported when wrapped with `pint`. We recommend
 you only use units when exporting and importing data, and pick a canonical unit
@@ -59,30 +59,30 @@ class Vector3(Spatial):
     A three-dimensional vector supporting all corresponding built-in math
     operators:
 
-    >>> Vector3(1, 2, 3) + Vector3(2, 2, 2)
-    Vector3(3, 4, 5)
-    >>> Vector3(1, 2, 3) - Vector3(2, 2, 2)
-    Vector3(-1, 0, 1)
-    >>> Vector3(1, 0, 1) * 5
-    Vector3(5, 0, 5)
-    >>> Vector3(1, 0, 1) / 5
-    Vector3(0.2, 0.0, 0.2)
-    >>> Vector3(1, 1, 1) == Vector3(1, 1, 1)
+    >>> Vector(1, 2, 3) + Vector(2, 2, 2)
+    Vector(3, 4, 5)
+    >>> Vector(1, 2, 3) - Vector(2, 2, 2)
+    Vector(-1, 0, 1)
+    >>> Vector(1, 0, 1) * 5
+    Vector(5, 0, 5)
+    >>> Vector(1, 0, 1) / 5
+    Vector(0.2, 0.0, 0.2)
+    >>> Vector(1, 1, 1) == Vector(1, 1, 1)
     True
 
     In addition to many other specialized vector operations.
 
     Defines convenience `.basis` members for commonly used basis vectors:
 
-    >>> Vector3.basis.x; Vector3.bx
-    Vector3(1, 0, 0)
-    Vector3(1, 0, 0)
-    >>> Vector3.basis.y; Vector3.by
-    Vector3(0, 1, 0)
-    Vector3(0, 1, 0)
-    >>> Vector3.basis.z; Vector3.bz
-    Vector3(0, 0, 1)
-    Vector3(0, 0, 1)
+    >>> Vector.basis.x; Vector.bx
+    Vector(1, 0, 0)
+    Vector(1, 0, 0)
+    >>> Vector.basis.y; Vector.by
+    Vector(0, 1, 0)
+    Vector(0, 1, 0)
+    >>> Vector.basis.z; Vector.bz
+    Vector(0, 0, 1)
+    Vector(0, 0, 1)
 
     """
 
@@ -99,7 +99,7 @@ class Vector3(Spatial):
     copy = __copy__
 
     def __repr__(self):
-        return 'Vector3({0!r}, {1!r}, {2!r})'.format(*self.xyz)
+        return 'Vector({0!r}, {1!r}, {2!r})'.format(*self.xyz)
 
     def __hash__(self):
         return hash((self.x, self.y, self.z))
@@ -248,7 +248,7 @@ class Vector3(Spatial):
         Returns a vector with the same direction but unit (1) length:
 
         >>> Vector(0, 0, 5).normalized()
-        Vector3(0.0, 0.0, 1.0)
+        Vector(0.0, 0.0, 1.0)
 
         """
         return self / self.magnitude()
@@ -325,8 +325,8 @@ class Vector3(Spatial):
         """
         Snaps this vector to a `grid`:
 
-        >>> Vector3(1.15, 1.15, 0.9).snap(0.25)
-        Vector3(1.25, 1.25, 1.0)
+        >>> Vector(1.15, 1.15, 0.9).snap(0.25)
+        Vector(1.25, 1.25, 1.0)
 
         """
         def snap(v):
@@ -357,15 +357,15 @@ class Polygon3(AbstractPolygon, Spatial):
     """
     A linear cycle of coplanar convex points:
 
-    >>> tri= Polygon3([Point3(0, 0, 0), Point3(0, 2, 0), Point3(1, 1, 0)])
+    >>> tri= Polygon([Point(0, 0, 0), Point(0, 2, 0), Point(1, 1, 0)])
     >>> tri.plane
-    Plane(Vector3(0.0, 0.0, -1.0), 0.0)
-    >>> tri * Vector3(1, 2, 3)
-    Polygon3([Point3(0, 0, 0), Point3(0, 4, 0), Point3(1, 2, 0)])
+    Plane(Vector(0.0, 0.0, -1.0), 0.0)
+    >>> tri * Vector(1, 2, 3)
+    Polygon([Point(0, 0, 0), Point(0, 4, 0), Point(1, 2, 0)])
     >>> tri * Matrix3.scale(1, 2, 3)
-    Polygon3([Point3(0, 0, 0), Point3(0, 4, 0), Point3(1, 2, 0)])
-    >>> tri + Vector3(1, 2, 1)
-    Polygon3([Point3(1.0, 2.0, 1.0), Point3(1.0, 4.0, 1.0), Point3(2.0, 3.0, 1.0)])
+    Polygon([Point(0, 0, 0), Point(0, 4, 0), Point(1, 2, 0)])
+    >>> tri + Vector(1, 2, 1)
+    Polygon([Point(1.0, 2.0, 1.0), Point(1.0, 4.0, 1.0), Point(2.0, 3.0, 1.0)])
     >>> len(tri)
     3
 
@@ -387,12 +387,12 @@ class Polygon3(AbstractPolygon, Spatial):
         """
         Remove any duplicate points, within a certain `tolerance`:
 
-        >>> Polygon3([Point3(1, 1, 0), Point3(2, 0, 0), Point3(0, 0, 0), Point3(1, 1, 0)]).simplify()
-        Polygon3([Point3(2, 0, 0), Point3(0, 0, 0), Point3(1, 1, 0)])
+        >>> Polygon([Point(1, 1, 0), Point(2, 0, 0), Point(0, 0, 0), Point(1, 1, 0)]).simplify()
+        Polygon([Point(2, 0, 0), Point(0, 0, 0), Point(1, 1, 0)])
 
         Returns `None` if the resulting simplification would create a point:
 
-        >>> Polygon3([Point3(1, 1, 0), Point3(2, 0, 0), Point3(0, 0, 0)]).simplify(100) is None
+        >>> Polygon([Point(1, 1, 0), Point(2, 0, 0), Point(0, 0, 0)]).simplify(100) is None
         True
 
         """
@@ -415,7 +415,7 @@ class Polygon3(AbstractPolygon, Spatial):
         return visualize.scene([self])
 
     def __repr__(self):
-        return "Polygon3({0!r})".format(self.points)
+        return "Polygon({0!r})".format(self.points)
 
     def __len__(self):
         return len(self.points)
@@ -430,8 +430,8 @@ class Matrix3:
     A matrix that can be used to perform common transformations on
     three-dimensional points and vectors:
 
-    >>> Matrix3.scale(*Vector3(1, 2, 1).xyz) * Point3(1, 1, 1)
-    Point3(1, 2, 1)
+    >>> Matrix3.scale(*Vector(1, 2, 1).xyz) * Point(1, 1, 1)
+    Point(1, 2, 1)
 
     """
     __slots__ = list('abcdefghijklmnop')
@@ -659,8 +659,8 @@ class Matrix3:
         """
         The identity transform:
 
-        >>> Matrix3.identity() * Point3(1, 1, 1)
-        Point3(1.0, 1.0, 1.0)
+        >>> Matrix3.identity() * Point(1, 1, 1)
+        Point(1.0, 1.0, 1.0)
 
         """
         self = cls()
@@ -671,8 +671,8 @@ class Matrix3:
         """
         A scale transform:
 
-        >>> Matrix3.scale(*Vector3(1, 2, 1).xyz) * Point3(1, 1, 1)
-        Point3(1, 2, 1)
+        >>> Matrix3.scale(*Vector(1, 2, 1).xyz) * Point(1, 1, 1)
+        Point(1, 2, 1)
 
         """
         self = cls()
@@ -686,8 +686,8 @@ class Matrix3:
         """
         A translation transform:
 
-        >>> Matrix3.translate(*Vector3(1, 2, 1).xyz) * Point3(1, 1, 1)
-        Point3(2.0, 3.0, 2.0)
+        >>> Matrix3.translate(*Vector(1, 2, 1).xyz) * Point(1, 1, 1)
+        Point(2.0, 3.0, 2.0)
 
         """
         self = cls()
@@ -701,8 +701,8 @@ class Matrix3:
         """
         A rotational transform:
 
-        >>> (Matrix3.rotate_axis(Vector3.basis.z, tau / 4) * Point3(1, 0, 0)).rounded()
-        Point3(0, 1, 0)
+        >>> (Matrix3.rotate_axis(Vector.basis.z, tau / 4) * Point(1, 0, 0)).rounded()
+        Point(0, 1, 0)
 
         """
         assert(isinstance(axis, Vector3))
@@ -733,9 +733,9 @@ class Matrix3:
         """
         A rotational transform:
 
-        >>> rotation = Matrix3.rotate_at(Point3(1, 1, 1), Vector3.basis.z, tau / 4)
-        >>> (rotation * Point3(2, 1, 1)).rounded()
-        Point3(1, 2, 1)
+        >>> rotation = Matrix3.rotate_at(Point(1, 1, 1), Vector.basis.z, tau / 4)
+        >>> (rotation * Point(2, 1, 1)).rounded()
+        Point(1, 2, 1)
 
         """
         return (
@@ -896,12 +896,12 @@ class Quaternion:
     Quaternions are composable representations of three-dimensional rotation
     operations.
 
-    Multiplication can be performed on `Vector3` instances to get the transformed
+    Multiplication can be performed on `Vector` instances to get the transformed
     vector or point:
 
-    >>> r = Quaternion.rotate_axis(Vector3.basis.x, tau / 4);
-    >>> (r * Vector3(0, 1, 0)).rounded()
-    Vector3(0, 0, 1)
+    >>> r = Quaternion.rotate_axis(Vector.basis.x, tau / 4);
+    >>> (r * Vector(0, 1, 0)).rounded()
+    Vector(0, 0, 1)
 
     """
 
@@ -1230,21 +1230,21 @@ class Quaternion:
 
 class Point3(Vector3, Geometry):
     """
-    A close cousin of :py:class:`~petrify.space.Vector3`, used to represent a
+    A close cousin of :py:class:`~petrify.space.Vector`, used to represent a
     point instead of a transform:
 
-    >>> Point3(1, 2, 3) + Vector3(1, 1, 1)
-    Point3(2, 3, 4)
+    >>> Point(1, 2, 3) + Vector(1, 1, 1)
+    Point(2, 3, 4)
 
     Defines a convenience `.origin` attribute for this commonly-used point:
 
-    >>> Point3.origin
-    Point3(0, 0, 0)
+    >>> Point.origin
+    Point(0, 0, 0)
 
     """
 
     def __repr__(self):
-        return 'Point3({0!r}, {1!r}, {2!r})'.format(*self.xyz)
+        return 'Point({0!r}, {1!r}, {2!r})'.format(*self.xyz)
 
     def intersect(self, other):
         """
@@ -1295,10 +1295,10 @@ class Line3(Spatial):
     """
     An infinite line:
 
-    >>> Line3(Point3(0, 0, 0), Vector3(1, 1, 1))
-    Line3(Point3(0, 0, 0), Vector3(1, 1, 1))
-    >>> Line3(Point3(0, 0, 0), Point3(1, 1, 1))
-    Line3(Point3(0, 0, 0), Vector3(1, 1, 1))
+    >>> Line(Point(0, 0, 0), Vector(1, 1, 1))
+    Line(Point(0, 0, 0), Vector(1, 1, 1))
+    >>> Line(Point(0, 0, 0), Point(1, 1, 1))
+    Line(Point(0, 0, 0), Vector(1, 1, 1))
 
     """
     __slots__ = ['p', 'v']
@@ -1344,7 +1344,7 @@ class Line3(Spatial):
     copy = __copy__
 
     def __repr__(self):
-        return 'Line3({0!r}, {1!r})'.format(self.p, self.v)
+        return 'Line({0!r}, {1!r})'.format(self.p, self.v)
 
     p1 = property(lambda self: self.p)
     p2 = property(lambda self: Point3(self.p.x + self.v.x,
@@ -1362,10 +1362,10 @@ class Line3(Spatial):
         """
         Find the point where this line intersects the `other` plane or sphere:
 
-        >>> l = Line3(Point3(0, 0, 0), Vector3(1, 1, 1));
-        >>> p = Plane(Vector3(0, 0, 1), 2);
+        >>> l = Line(Point(0, 0, 0), Vector(1, 1, 1));
+        >>> p = Plane(Vector(0, 0, 1), 2);
         >>> l.intersect(p)
-        Point3(2.0, 2.0, 2.0)
+        Point(2.0, 2.0, 2.0)
 
         """
         return other._intersect_line3(self)
@@ -1401,12 +1401,12 @@ Line = Line3
 
 class Ray3(Line3):
     """
-    A :py:class:`Line3` with a fixed origin that continues indefinitely in the given
+    A :py:class:`Line` with a fixed origin that continues indefinitely in the given
     direction.
 
     """
     def __repr__(self):
-        return 'Ray3({0!r}, {1!r})'.format(self.p, self.v)
+        return 'Ray({0!r}, {1!r})'.format(self.p, self.v)
 
     def _u_in(self, u):
         return u >= 0.0
@@ -1417,7 +1417,7 @@ class LineSegment3(Line3):
         return hash((self.p, self.v))
 
     def __repr__(self):
-        return 'LineSegment3({0!r}, {1!r})'.format(self.p, self.p2)
+        return 'LineSegment({0!r}, {1!r})'.format(self.p, self.p2)
 
     def _u_in(self, u):
         return u >= 0.0 and u <= 1.0
@@ -1472,8 +1472,8 @@ class Sphere:
     """
     A perfect sphere with the provided `center` and `radius`:
 
-    >>> Sphere(Point3(0, 0, 0), 1.0)
-    Sphere(Point3(0, 0, 0), 1.0)
+    >>> Sphere(Point(0, 0, 0), 1.0)
+    Sphere(Point(0, 0, 0), 1.0)
 
     """
     __slots__ = ['c', 'r']
@@ -1537,28 +1537,28 @@ class Plane:
 
     Can be constructed with three coplanar points:
 
-    >>> Plane(Point3(0, 0, 0), Point3(1, 0, 0), Point3(0, 1, 0))
-    Plane(Vector3(0.0, 0.0, 1.0), 0.0)
+    >>> Plane(Point(0, 0, 0), Point(1, 0, 0), Point(0, 1, 0))
+    Plane(Vector(0.0, 0.0, 1.0), 0.0)
 
     Or an origin point and two basis vectors:
-    >>> Plane(Point3(0, 0, 0), Vector3.basis.x, Vector3.basis.y)
-    Plane(Vector3(0.0, 0.0, 1.0), 0.0)
+    >>> Plane(Point(0, 0, 0), Vector.basis.x, Vector.basis.y)
+    Plane(Vector(0.0, 0.0, 1.0), 0.0)
 
     Or a normal and solution scalar / point:
 
-    >>> Plane(Vector3.basis.z, 0)
-    Plane(Vector3(0.0, 0.0, 1.0), 0)
-    >>> Plane(Vector3.basis.z, Point3.origin)
-    Plane(Vector3(0.0, 0.0, 1.0), 0.0)
+    >>> Plane(Vector.basis.z, 0)
+    Plane(Vector(0.0, 0.0, 1.0), 0)
+    >>> Plane(Vector.basis.z, Point.origin)
+    Plane(Vector(0.0, 0.0, 1.0), 0.0)
 
     `Plane` also defines convenience methods for commonly used origin planes:
 
     >>> Plane.xy
-    Plane(Vector3(0.0, 0.0, 1.0), 0.0)
+    Plane(Vector(0.0, 0.0, 1.0), 0.0)
     >>> Plane.xz
-    Plane(Vector3(0.0, 1.0, 0.0), 0.0)
+    Plane(Vector(0.0, 1.0, 0.0), 0.0)
     >>> Plane.yz
-    Plane(Vector3(1.0, 0.0, 0.0), 0.0)
+    Plane(Vector(1.0, 0.0, 0.0), 0.0)
 
     """
     # n.p = k, where n is normal, p is point on plane, k is constant scalar
@@ -1619,10 +1619,10 @@ class Plane:
         """
         Find the point where this plane intersects the `other` line or plane:
 
-        >>> Plane(Vector3(0, 1, 0), 1).intersect(Plane(Vector3(1, 0, 0), 2))
-        Line3(Point3(2.0, 1.0, 0.0), Vector3(0.0, 0.0, 1.0))
-        >>> Plane(Vector3(0, 0, 1), 2).intersect(Line3(Point3(0, 0, 0), Vector3(1, 1, 1)))
-        Point3(2.0, 2.0, 2.0)
+        >>> Plane(Vector(0, 1, 0), 1).intersect(Plane(Vector(1, 0, 0), 2))
+        Line(Point(2.0, 1.0, 0.0), Vector(0.0, 0.0, 1.0))
+        >>> Plane(Vector(0, 0, 1), 2).intersect(Line(Point(0, 0, 0), Vector(1, 1, 1)))
+        Point(2.0, 2.0, 2.0)
 
         """
         return other._intersect_plane(self)
@@ -1664,19 +1664,19 @@ class Basis:
     """
     Embeds a two-dimensional space into a three-dimensional space:
 
-    >>> basis = Basis(Point3(1, 0, 0), Vector3.basis.y, Vector3.basis.z)
+    >>> basis = Basis(Point(1, 0, 0), Vector.basis.y, Vector.basis.z)
     >>> basis.project(Point2(2, 3))
-    Point3(1, 2, 3)
+    Point(1, 2, 3)
     >>> basis.project(Vector2(-2, -3))
-    Vector3(1, -2, -3)
+    Vector(1, -2, -3)
 
     Can be translated:
 
-    >>> translated = basis.xy + Vector3(0, 0, 2)
+    >>> translated = basis.xy + Vector(0, 0, 2)
     >>> translated
-    Basis(Point3(0, 0, 2), Vector3(1, 0, 0), Vector3(0, 1, 0))
+    Basis(Point(0, 0, 2), Vector(1, 0, 0), Vector(0, 1, 0))
     >>> translated.project(Point2(2, 3))
-    Point3(2, 3, 2)
+    Point(2, 3, 2)
 
     .. note ::
         Any given :class:`Plane` has an infinite number of associated
@@ -1685,13 +1685,13 @@ class Basis:
     There are special `Basis` objects for commonly used bases:
 
     >>> Basis.unit
-    Basis(Point3(0, 0, 0), Vector3(1, 0, 0), Vector3(0, 1, 0))
+    Basis(Point(0, 0, 0), Vector(1, 0, 0), Vector(0, 1, 0))
     >>> Basis.xy
-    Basis(Point3(0, 0, 0), Vector3(1, 0, 0), Vector3(0, 1, 0))
+    Basis(Point(0, 0, 0), Vector(1, 0, 0), Vector(0, 1, 0))
     >>> Basis.yz
-    Basis(Point3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1))
+    Basis(Point(0, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1))
     >>> Basis.xz
-    Basis(Point3(0, 0, 0), Vector3(1, 0, 0), Vector3(0, 0, 1))
+    Basis(Point(0, 0, 0), Vector(1, 0, 0), Vector(0, 0, 1))
 
     """
     def __init__(self, origin, bx, by):
@@ -1722,10 +1722,10 @@ class Basis:
     def normal(self):
         return self.bx.cross(self.by)
 
-Basis.unit = Basis(Point3.origin, Vector3.basis.x, Vector3.basis.y)
+Basis.unit = Basis(Point.origin, Vector.basis.x, Vector.basis.y)
 Basis.xy = Basis.unit
-Basis.yz = Basis(Point3.origin, Vector3.basis.y, Vector3.basis.z)
-Basis.xz = Basis(Point3.origin, Vector3.basis.x, Vector3.basis.z)
+Basis.yz = Basis(Point.origin, Vector.basis.y, Vector.basis.z)
+Basis.xz = Basis(Point.origin, Vector.basis.x, Vector.basis.z)
 
 class PlanarPolygon:
     """
@@ -1740,7 +1740,7 @@ class PlanarPolygon:
     ... ])
     >>> triangle = PlanarPolygon(Basis.xy, tri)
     >>> triangle.project()
-    [Polygon3([Point3(0, 0, 0), Point3(0, 2, 0), Point3(1, 1, 0)])]
+    [Polygon([Point(0, 0, 0), Point(0, 2, 0), Point(1, 1, 0)])]
 
     """
 

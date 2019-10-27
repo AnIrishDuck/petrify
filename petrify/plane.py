@@ -13,9 +13,9 @@ Math utility library for common two-dimensional constructs:
 The `pint`_ library can be used to specify dimensions:
 
 >>> from petrify import u
->>> p = Point2(24, 12) * u.inches
+>>> p = Point(24, 12) * u.inches
 >>> p.to(u.ft)
-<Quantity(Point2(2.0, 1.0), 'foot')>
+<Quantity(Point(2.0, 1.0), 'foot')>
 
 Many methods are nominally supported when wrapped with `pint`. We recommend
 you only use units when exporting and importing data, and pick a canonical unit
@@ -54,15 +54,15 @@ class Vector2(Planar):
     A two-dimensional vector supporting all corresponding built-in math
     operators:
 
-    >>> Vector2(1, 2) + Vector2(2, 2)
-    Vector2(3, 4)
-    >>> Vector2(1, 2) - Vector2(2, 2)
-    Vector2(-1, 0)
-    >>> Vector2(1, 1) * 5
-    Vector2(5, 5)
-    >>> Vector2(1, 1) / 5
-    Vector2(0.2, 0.2)
-    >>> Vector2(1, 1) == Vector2(1, 1)
+    >>> Vector(1, 2) + Vector(2, 2)
+    Vector(3, 4)
+    >>> Vector(1, 2) - Vector(2, 2)
+    Vector(-1, 0)
+    >>> Vector(1, 1) * 5
+    Vector(5, 5)
+    >>> Vector(1, 1) / 5
+    Vector(0.2, 0.2)
+    >>> Vector(1, 1) == Vector(1, 1)
     True
 
     In addition to many other specialized vector operations.
@@ -81,7 +81,7 @@ class Vector2(Planar):
     copy = __copy__
 
     def __repr__(self):
-        return 'Vector2({0!r}, {1!r})'.format(self.x, self.y)
+        return 'Vector({0!r}, {1!r})'.format(self.x, self.y)
 
     def __hash__(self):
         return hash((self.x, self.y))
@@ -222,8 +222,8 @@ class Vector2(Planar):
         """
         Return a new vector normalized to unit length:
 
-        >>> Vector2(0, 5).normalized()
-        Vector2(0.0, 1.0)
+        >>> Vector(0, 5).normalized()
+        Vector(0.0, 1.0)
 
         """
         d = self.magnitude()
@@ -235,7 +235,7 @@ class Vector2(Planar):
         """
         The dot product of this vector and `other`:
 
-        >>> Vector2(2, 1).dot(Vector2(2, 3))
+        >>> Vector(2, 1).dot(Vector(2, 3))
         7
         """
         assert isinstance(other, Vector2)
@@ -250,8 +250,8 @@ class Vector2(Planar):
         Reflects this vector across a line with the given perpendicular
         `normal`:
 
-        >>> Vector2(1, 1).reflected(Vector2(0, 1))
-        Vector2(1, -1)
+        >>> Vector(1, 1).reflected(Vector(0, 1))
+        Vector(1, -1)
 
         .. warning::
             Assumes `normal` is normalized (has unit length).
@@ -266,7 +266,7 @@ class Vector2(Planar):
         """
         Return the angle to the vector other:
 
-        >>> Vector2(1, 0).angle(Vector2(0, 1)) == tau / 4
+        >>> Vector(1, 0).angle(Vector(0, 1)) == tau / 4
         True
 
         """
@@ -283,8 +283,8 @@ class Vector2(Planar):
         """
         Rounds this vector to the given decimal place:
 
-        >>> Vector2(1.00001, 1.00001).round(2)
-        Vector2(1.0, 1.0)
+        >>> Vector(1.00001, 1.00001).round(2)
+        Vector(1.0, 1.0)
         """
         return self.__class__(round(self.x, places), round(self.y, places))
 
@@ -292,8 +292,8 @@ class Vector2(Planar):
         """
         Snaps this vector to a `grid`:
 
-        >>> Vector2(1.15, 1.15).snap(0.25)
-        Vector2(1.25, 1.25)
+        >>> Vector(1.15, 1.15).snap(0.25)
+        Vector(1.25, 1.25)
         """
         def snap(v):
             return round(v / grid) * grid
@@ -458,8 +458,8 @@ class Matrix2:
         """
         A scale transform:
 
-        >>> Point2(1, 1) * Matrix2.scale(2, 3)
-        Point2(2, 3)
+        >>> Point(1, 1) * Matrix2.scale(2, 3)
+        Point(2, 3)
 
         """
         self = cls()
@@ -472,8 +472,8 @@ class Matrix2:
         """
         Translates:
 
-        >>> Point2(1, 1) * Matrix2.translate(2, 3)
-        Point2(3, 4)
+        >>> Point(1, 1) * Matrix2.translate(2, 3)
+        Point(3, 4)
 
         """
         self = cls()
@@ -486,8 +486,8 @@ class Matrix2:
         """
         Counter-clockwise rotational transform:
 
-        >>> (Point2(1, 0) * Matrix2.rotate(tau / 4)).round(2)
-        Point2(0.0, 1.0)
+        >>> (Point(1, 0) * Matrix2.rotate(tau / 4)).round(2)
+        Point(0.0, 1.0)
 
         """
         self = cls()
@@ -534,22 +534,22 @@ class Point2(Vector2, Geometry):
     """
     A close cousin of :py:class:`Vector2` used to represent points:
 
-    >>> Point2(1, 1) + Vector2(2, 3)
-    Point2(3, 4)
-    >>> Point2(1, 2) * 2
-    Point2(2, 4)
+    >>> Point(1, 1) + Vector(2, 3)
+    Point(3, 4)
+    >>> Point(1, 2) * 2
+    Point(2, 4)
 
     """
     def __repr__(self):
-        return 'Point2({0!r}, {1!r})'.format(self.x, self.y)
+        return 'Point({0!r}, {1!r})'.format(self.x, self.y)
 
     def intersect(self, other):
         """
         Used to determine if this point is within a circle:
 
-        >>> Point2(1, 1).intersect(Circle(Point2(0, 0), 2))
+        >>> Point(1, 1).intersect(Circle(Point(0, 0), 2))
         True
-        >>> Point2(3, 3).intersect(Circle(Point2(0, 0), 2))
+        >>> Point(3, 3).intersect(Circle(Point(0, 0), 2))
         False
 
         """
@@ -562,12 +562,12 @@ class Point2(Vector2, Geometry):
         """
         Connects this point to the other given geometry:
 
-        >>> Point2(1, 1).connect(Line2(Point2(0, 0), Vector2(1, 0)))
-        LineSegment2(Point2(1, 1), Point2(1.0, 0.0))
-        >>> Point2(1, 1).connect(Point2(0, 0))
-        LineSegment2(Point2(1, 1), Point2(0, 0))
-        >>> Point2(0, 2).connect(Circle(Point2(0, 0), 1))
-        LineSegment2(Point2(0, 2), Point2(0.0, 1.0))
+        >>> Point(1, 1).connect(Line(Point(0, 0), Vector(1, 0)))
+        LineSegment(Point(1, 1), Point(1.0, 0.0))
+        >>> Point(1, 1).connect(Point(0, 0))
+        LineSegment(Point(1, 1), Point(0, 0))
+        >>> Point(0, 2).connect(Circle(Point(0, 0), 1))
+        LineSegment(Point(0, 2), Point(0.0, 1.0))
 
         """
         return other._connect_point2(self)
@@ -591,10 +591,10 @@ class Line2(Geometry, Planar):
     """
     Represents an infinite line:
 
-    >>> Line2(Point2(0, 0), Vector2(1, 1))
-    Line2(Point2(0, 0), Vector2(1, 1))
-    >>> Line2(Point2(0, 0), Point2(1, 1))
-    Line2(Point2(0, 0), Vector2(1, 1))
+    >>> Line(Point(0, 0), Vector(1, 1))
+    Line(Point(0, 0), Vector(1, 1))
+    >>> Line(Point(0, 0), Point(1, 1))
+    Line(Point(0, 0), Vector(1, 1))
 
     """
     __slots__ = ['p', 'v']
@@ -646,7 +646,7 @@ class Line2(Geometry, Planar):
     copy = __copy__
 
     def __repr__(self):
-        return 'Line2({0!r}, {1!r})'.format(self.p, self.v)
+        return 'Line({0!r}, {1!r})'.format(self.p, self.v)
 
     p1 = property(lambda self: self.p)
     p2 = property(lambda self: Point2(self.p.x + self.v.x,
@@ -663,8 +663,8 @@ class Line2(Geometry, Planar):
         """
         Normalizes this line:
 
-        >>> Line2(Point2(0, 0), Point2(2, 0)).normalized()
-        Line2(Point2(0, 0), Vector2(1.0, 0.0))
+        >>> Line(Point(0, 0), Point(2, 0)).normalized()
+        Line(Point(0, 0), Vector(1.0, 0.0))
 
         """
         return self.__class__(self.p, self.v.normalized())
@@ -673,13 +673,13 @@ class Line2(Geometry, Planar):
         """
         Finds the intersection of this object and another:
 
-        >>> l = Line2(Point2(0, 2), Vector2(0, -2))
-        >>> l.intersect(Line2(Point2(2, 0), Vector2(-2, 0)))
-        Point2(0.0, 0.0)
-        >>> l.intersect(Line2(Point2(1, 2), Vector2(0, -2))) is None
+        >>> l = Line(Point(0, 2), Vector(0, -2))
+        >>> l.intersect(Line(Point(2, 0), Vector(-2, 0)))
+        Point(0.0, 0.0)
+        >>> l.intersect(Line(Point(1, 2), Vector(0, -2))) is None
         True
-        >>> l.intersect(Circle(Point2(0, 0), 1))
-        LineSegment2(Point2(0.0, -1.0), Point2(0.0, 1.0))
+        >>> l.intersect(Circle(Point(0, 0), 1))
+        LineSegment(Point(0.0, -1.0), Point(0.0, 1.0))
 
         """
         return other._intersect_line2(self)
@@ -695,11 +695,11 @@ class Line2(Geometry, Planar):
         Finds the closest connecting line segment between this object and
         another:
 
-        >>> l = Line2(Point2(0, 2), Vector2(0, -2))
-        >>> l.connect(Point2(1, 0))
-        LineSegment2(Point2(0.0, 0.0), Point2(1.0, 0.0))
-        >>> l.connect(Circle(Point2(2, 0), 1))
-        LineSegment2(Point2(0.0, 0.0), Point2(1.0, 0.0))
+        >>> l = Line(Point(0, 2), Vector(0, -2))
+        >>> l.connect(Point(1, 0))
+        LineSegment(Point(0.0, 0.0), Point(1.0, 0.0))
+        >>> l.connect(Circle(Point(2, 0), 1))
+        LineSegment(Point(0.0, 0.0), Point(1.0, 0.0))
 
         """
         return other._connect_line2(self)
@@ -718,12 +718,12 @@ class Ray2(Line2):
     """
     Represents a line with an origin point that extends forever:
 
-    >>> Ray2(Point2(0, 0), Vector2(1, 1))
-    Ray2(Point2(0, 0), Vector2(1, 1))
+    >>> Ray(Point(0, 0), Vector(1, 1))
+    Ray(Point(0, 0), Vector(1, 1))
 
     """
     def __repr__(self):
-        return 'Ray2({0!r}, {1!r})'.format(self.p, self.v)
+        return 'Ray({0!r}, {1!r})'.format(self.p, self.v)
 
     def _u_in(self, u):
         return u >= 0.0
@@ -733,12 +733,12 @@ class LineSegment2(Line2):
     """
     Represents a line segment:
 
-    >>> LineSegment2(Point2(0, 0), Vector2(1, 1))
-    LineSegment2(Point2(0, 0), Point2(1, 1))
+    >>> LineSegment(Point(0, 0), Vector(1, 1))
+    LineSegment(Point(0, 0), Point(1, 1))
 
     """
     def __repr__(self):
-        return 'LineSegment2({0!r}, {1!r})'.format(self.p, self.p2)
+        return 'LineSegment({0!r}, {1!r})'.format(self.p, self.p2)
 
     def _u_in(self, u):
         return u >= 0.0 and u <= 1.0
@@ -772,7 +772,7 @@ class Circle(Geometry):
     copy = __copy__
 
     def __repr__(self):
-        return 'Circle({0!r}, {1!r})'.format(self.c, self.r)
+        return 'Circle2({0!r}, {1!r})'.format(self.c, self.r)
 
     def _apply_transform(self, t):
         self.c = t * self.c
@@ -951,18 +951,18 @@ class Polygon2(AbstractPolygon, Planar):
     """
     A two-dimensional polygon:
 
-    >>> Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
-    Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
+    >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+    Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
 
     Supports scaling and translation:
 
-    >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
-    >>> tri * Vector2(2, 3)
-    Polygon2([Point2(4, 0), Point2(0, 0), Point2(2, 3)])
+    >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+    >>> tri * Vector(2, 3)
+    Polygon([Point(4, 0), Point(0, 0), Point(2, 3)])
     >>> tri * Matrix2.scale(2, 3)
-    Polygon2([Point2(4, 0), Point2(0, 0), Point2(2, 3)])
-    >>> tri + Vector2(2, 1)
-    Polygon2([Point2(4, 1), Point2(2, 1), Point2(3, 2)])
+    Polygon([Point(4, 0), Point(0, 0), Point(2, 3)])
+    >>> tri + Vector(2, 1)
+    Polygon([Point(4, 1), Point(2, 1), Point(3, 2)])
     >>> len(tri)
     3
 
@@ -971,22 +971,22 @@ class Polygon2(AbstractPolygon, Planar):
         self.points = points
 
     def __repr__(self):
-        return 'Polygon2({0!r})'.format(self.points)
+        return 'Polygon({0!r})'.format(self.points)
 
     def simplify(self, tolerance=0.0001):
         """
         Remove any duplicate points, within a certain `tolerance`:
 
-        >>> Polygon2([Point2(1, 1), Point2(2, 0), Point2(0, 0), Point2(1, 1)]).simplify()
-        Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
+        >>> Polygon([Point(1, 1), Point(2, 0), Point(0, 0), Point(1, 1)]).simplify()
+        Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
 
         Returns `None` if the resulting simplification would create a point:
 
-        >>> Polygon2([
-        ...     Point2(1, 1),
-        ...     Point2(2, 0),
-        ...     Point2(0, 0),
-        ...     Point2(1, 1)
+        >>> Polygon([
+        ...     Point(1, 1),
+        ...     Point(2, 0),
+        ...     Point(0, 0),
+        ...     Point(1, 1)
         ... ]).simplify(100) is None
         True
 
@@ -997,10 +997,10 @@ class Polygon2(AbstractPolygon, Planar):
         """
         Converts this polygon to a clockwise one if necessary:
 
-        >>> Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)]).to_clockwise()
-        Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
-        >>> Polygon2([Point2(1, 1), Point2(0, 0), Point2(2, 0)]).to_clockwise()
-        Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
+        >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)]).to_clockwise()
+        Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> Polygon([Point(1, 1), Point(0, 0), Point(2, 0)]).to_clockwise()
+        Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
 
         """
         return self if self.clockwise() else self.inverted()
@@ -1009,10 +1009,10 @@ class Polygon2(AbstractPolygon, Planar):
         """
         Converts this polygon to a clockwise one if necessary:
 
-        >>> Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)]).to_counterclockwise()
-        Polygon2([Point2(1, 1), Point2(0, 0), Point2(2, 0)])
-        >>> Polygon2([Point2(1, 1), Point2(0, 0), Point2(2, 0)]).to_counterclockwise()
-        Polygon2([Point2(1, 1), Point2(0, 0), Point2(2, 0)])
+        >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)]).to_counterclockwise()
+        Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])
+        >>> Polygon([Point(1, 1), Point(0, 0), Point(2, 0)]).to_counterclockwise()
+        Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])
 
         """
         return self.inverted() if self.clockwise() else self
@@ -1021,9 +1021,9 @@ class Polygon2(AbstractPolygon, Planar):
         """
         Returns `True` if the points in this polygon are in clockwise order:
 
-        >>> Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)]).clockwise()
+        >>> Polygon([Point(2, 0), Point(0, 0), Point(1, 1)]).clockwise()
         True
-        >>> Polygon2([Point2(1, 1), Point2(0, 0), Point2(2, 0)]).clockwise()
+        >>> Polygon([Point(1, 1), Point(0, 0), Point(2, 0)]).clockwise()
         False
 
         """
@@ -1034,9 +1034,9 @@ class Polygon2(AbstractPolygon, Planar):
         """
         Finds the normalized :py:class:`Ray2` facing inwards for a given `edge`:
 
-        >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
         >>> tri.inwards(tri.segments()[0])
-        Vector2(0.0, 1.0)
+        Vector(0.0, 1.0)
 
         """
         mid = (edge.p1 + edge.p2) / 2
@@ -1063,11 +1063,11 @@ class Polygon2(AbstractPolygon, Planar):
         Finds the dynamic offset of a polygon by moving all edges by a given
         `amount` perpendicular to their direction:
 
-        >>> square = Polygon2([Point2(0, 0), Point2(0, 1), Point2(1, 1), Point2(1, 0)])
+        >>> square = Polygon([Point(0, 0), Point(0, 1), Point(1, 1), Point(1, 0)])
         >>> square.offset(-0.1)
-        Polygon2([Point2(0.1, 0.1), Point2(0.1, 0.9), Point2(0.9, 0.9), Point2(0.9, 0.1)])
+        Polygon([Point(0.1, 0.1), Point(0.1, 0.9), Point(0.9, 0.9), Point(0.9, 0.1)])
         >>> square.offset(0.1)
-        Polygon2([Point2(-0.1, -0.1), Point2(-0.1, 1.1), Point2(1.1, 1.1), Point2(1.1, -0.1)])
+        Polygon([Point(-0.1, -0.1), Point(-0.1, 1.1), Point(1.1, 1.1), Point(1.1, -0.1)])
         >>> square.offset(10) is None
         True
 
@@ -1113,34 +1113,34 @@ class Polygon2(AbstractPolygon, Planar):
 
             points.append(start + (motion * -amount))
 
-        return Polygon2(points)
+        return Polygon(points)
 
 
     def inverted(self):
         """
         Reverse the points in this polygon:
 
-        >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
         >>> tri.inverted()
-        Polygon2([Point2(1, 1), Point2(0, 0), Point2(2, 0)])
+        Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])
 
         """
-        return Polygon2(list(reversed(self.points)))
+        return Polygon(list(reversed(self.points)))
 
     def is_convex(self):
         """
         Return True if the polynomial defined by the sequence of 2D
         points is 'strictly convex':
 
-        >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
         >>> tri.is_convex()
         True
-        >>> indent = Polygon2([
-        ...     Point2(0, 0),
-        ...     Point2(10, 0),
-        ...     Point2(5, 5),
-        ...     Point2(10, 10),
-        ...     Point2(0, 10)
+        >>> indent = Polygon([
+        ...     Point(0, 0),
+        ...     Point(10, 0),
+        ...     Point(5, 5),
+        ...     Point(10, 10),
+        ...     Point(0, 10)
         ... ])
         >>> indent.is_convex()
         False
@@ -1206,10 +1206,10 @@ class Polygon2(AbstractPolygon, Planar):
         """
         Tests whether a point lies within this polygon:
 
-        >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
-        >>> tri.contains(Point2(1.0, 0.5))
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> tri.contains(Point(1.0, 0.5))
         True
-        >>> tri.contains(Point2(0.5, 1.5))
+        >>> tri.contains(Point(0.5, 1.5))
         False
 
         """
@@ -1225,9 +1225,9 @@ class Polygon2(AbstractPolygon, Planar):
         """
         Shift the points in this polygon by `n`:
 
-        >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
         >>> tri.shift(1)
-        Polygon2([Point2(0, 0), Point2(1, 1), Point2(2, 0)])
+        Polygon([Point(0, 0), Point(1, 1), Point(2, 0)])
 
         """
         return Polygon([*self.points[n:], *self.points[:n]])
@@ -1237,9 +1237,9 @@ class Polygon2(AbstractPolygon, Planar):
         Returns the bounding :py:class:`~petrify.shape.Rectangle` around this
         polygon:
 
-        >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
         >>> tri.envelope()
-        Rectangle(Point2(0, 0), Vector2(2, 1))
+        Rectangle(Point(0, 0), Vector(2, 1))
 
         """
         from .shape import Rectangle
@@ -1257,7 +1257,7 @@ class ComplexPolygon2:
 
     >>> from petrify.shape import Rectangle
     >>> square = Rectangle(Point(0, 0), Vector(1, 1))
-    >>> complex = ComplexPolygon2([square + Vector2(1, 1), square * 3])
+    >>> complex = ComplexPolygon([square + Vector(1, 1), square * 3])
     >>> len(complex)
     8
 
@@ -1287,14 +1287,14 @@ class ComplexPolygon2:
         """
         Converts all sub-polygons to clockwise:
 
-        >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
-        >>> ComplexPolygon2([tri]).to_clockwise()
-        ComplexPolygon2([Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])])
-        >>> ComplexPolygon2([tri.inverted()]).to_clockwise()
-        ComplexPolygon2([Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])])
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> ComplexPolygon([tri]).to_clockwise()
+        ComplexPolygon([Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])])
+        >>> ComplexPolygon([tri.inverted()]).to_clockwise()
+        ComplexPolygon([Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])])
 
         """
-        return ComplexPolygon2(
+        return ComplexPolygon(
             exterior=[p.to_clockwise() for p in self.exterior],
             interior=[p.to_clockwise() for p in self.interior],
         )
@@ -1303,14 +1303,14 @@ class ComplexPolygon2:
         """
         Converts all sub-polygons to counter-clockwise:
 
-        >>> tri = Polygon2([Point2(2, 0), Point2(0, 0), Point2(1, 1)])
-        >>> ComplexPolygon2([tri]).to_counterclockwise()
-        ComplexPolygon2([Polygon2([Point2(1, 1), Point2(0, 0), Point2(2, 0)])])
-        >>> ComplexPolygon2([tri.inverted()]).to_counterclockwise()
-        ComplexPolygon2([Polygon2([Point2(1, 1), Point2(0, 0), Point2(2, 0)])])
+        >>> tri = Polygon([Point(2, 0), Point(0, 0), Point(1, 1)])
+        >>> ComplexPolygon([tri]).to_counterclockwise()
+        ComplexPolygon([Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])])
+        >>> ComplexPolygon([tri.inverted()]).to_counterclockwise()
+        ComplexPolygon([Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])])
 
         """
-        return ComplexPolygon2(
+        return ComplexPolygon(
             exterior=[p.to_counterclockwise() for p in self.exterior],
             interior=[p.to_counterclockwise() for p in self.interior],
         )
@@ -1319,7 +1319,7 @@ class ComplexPolygon2:
         return sum(len(p) for p in self.polygons)
 
     def __repr__(self):
-        return "ComplexPolygon2({0!r})".format([*self.exterior, *self.interior])
+        return "ComplexPolygon({0!r})".format([*self.exterior, *self.interior])
 
     def segments(self):
         return [s for p in self.polygons for s in p.segments()]
@@ -1336,25 +1336,25 @@ class ComplexPolygon2:
         Any inner polygons are offset in the reverse direction to the outer
         polygons:
 
-        >>> square = Polygon2([Point2(0, 0), Point2(0, 1), Point2(1, 1), Point2(1, 0)])
-        >>> complex = ComplexPolygon2([square + Vector2(1, 1), square * 3])
+        >>> square = Polygon([Point(0, 0), Point(0, 1), Point(1, 1), Point(1, 0)])
+        >>> complex = ComplexPolygon([square + Vector(1, 1), square * 3])
         >>> complex.offset(-0.1).interior
-        [Polygon2([Point2(0.9, 0.9), Point2(0.9, 2.1), Point2(2.1, 2.1), Point2(2.1, 0.9)])]
+        [Polygon([Point(0.9, 0.9), Point(0.9, 2.1), Point(2.1, 2.1), Point(2.1, 0.9)])]
         >>> complex.offset(-0.1).exterior
-        [Polygon2([Point2(0.1, 0.1), Point2(0.1, 2.9), Point2(2.9, 2.9), Point2(2.9, 0.1)])]
+        [Polygon([Point(0.1, 0.1), Point(0.1, 2.9), Point(2.9, 2.9), Point(2.9, 0.1)])]
 
         """
         from . import engines
         return engines.offset.offset(self, amount)
 
     def __mul__(self, v):
-        return ComplexPolygon2(
+        return ComplexPolygon(
             interior=[p * v for p in self.interior],
             exterior=[p * v for p in self.exterior]
         )
 
     def __add__(self, v):
-        return ComplexPolygon2(
+        return ComplexPolygon(
             interior=[p + v for p in self.interior],
             exterior=[p + v for p in self.exterior]
         )
@@ -1364,13 +1364,13 @@ class ComplexPolygon2:
         Returns the bounding :py:class:`~petrify.shape.Rectangle` around this
         polygon:
 
-        >>> square = Polygon2([Point2(0, 0), Point2(0, 1), Point2(1, 1), Point2(1, 0)])
-        >>> complex = ComplexPolygon2([square + Vector2(1, 1), square * 3])
+        >>> square = Polygon([Point(0, 0), Point(0, 1), Point(1, 1), Point(1, 0)])
+        >>> complex = ComplexPolygon([square + Vector(1, 1), square * 3])
         >>> square.envelope()
-        Rectangle(Point2(0, 0), Vector2(1, 1))
+        Rectangle(Point(0, 0), Vector(1, 1))
 
         """
         from .shape import Rectangle
-        rectangles = Polygon2([p for polygon in self.polygons for p in polygon.envelope().points])
+        rectangles = Polygon([p for polygon in self.polygons for p in polygon.envelope().points])
         return rectangles.envelope()
 ComplexPolygon = ComplexPolygon2

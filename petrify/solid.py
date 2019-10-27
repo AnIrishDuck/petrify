@@ -52,17 +52,17 @@ class Node:
 
     >>> box = Box(Point(0, 0, 0), Vector(1, 1, 1))
     >>> (box * Vector(2, 1, 1)).envelope()
-    Box(Point3(0, 0, 0), Vector3(2, 1, 1))
+    Box(Point(0, 0, 0), Vector(2, 1, 1))
     >>> (box + Vector(1, 0, 1)).envelope()
-    Box(Point3(1.0, 0.0, 1.0), Vector3(1.0, 1.0, 1.0))
+    Box(Point(1.0, 0.0, 1.0), Vector(1.0, 1.0, 1.0))
 
     To support unit operations via `pint`, multiplication and division by a
     scalar are also supported:
 
     >>> (box * 2).envelope()
-    Box(Point3(0, 0, 0), Vector3(2, 2, 2))
+    Box(Point(0, 0, 0), Vector(2, 2, 2))
     >>> (box / 2).envelope()
-    Box(Point3(0.0, 0.0, 0.0), Vector3(0.5, 0.5, 0.5))
+    Box(Point(0.0, 0.0, 0.0), Vector(0.5, 0.5, 0.5))
     >>> from petrify import u
     >>> (box * u.mm).units
     <Unit('millimeter')>
@@ -134,7 +134,7 @@ class Node:
         ...     Vector(0, 0, 1)
         ... )
         >>> extruded.envelope()
-        Box(Point3(0, 0, 0), Vector3(1, 2, 1))
+        Box(Point(0, 0, 0), Vector(1, 2, 1))
 
         """
         origin = _pmap(Point, min, self.points)
