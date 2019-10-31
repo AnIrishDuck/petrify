@@ -30,19 +30,20 @@ that reason, we encourage you to use the :class:`Point`, :class:`Vector`, and
 :class:`Polygon` definitions exported from the top-level :mod:`petrify`
 package.
 
-These objects automatically construct the "correct" representation in context:
+These objects automatically construct the "correct" representation from
+:mod:`petrify.space` or :mod:`petrify.plane` in context:
 
 .. doctest::
 
     >>> from petrify import Point, Vector, Polygon
     >>> Point(1, 2, 3)
-    Point3(1, 2, 3)
+    Point(1, 2, 3)
     >>> Vector(1, 2)
-    Vector2(1, 2)
+    Vector(1, 2)
     >>> Polygon([Point(0, 0), Point(2, 0), Point(1, 1)])
-    Polygon2([Point2(0, 0), Point2(2, 0), Point2(1, 1)])
+    Polygon([Point(0, 0), Point(2, 0), Point(1, 1)])
     >>> Polygon([Point(0, 0, 0), Point(2, 0, 1), Point(1, 1, -1)])
-    Polygon3([Point3(0, 0, 0), Point3(2, 0, 1), Point3(1, 1, -1)])
+    Polygon([Point(0, 0, 0), Point(2, 0, 1), Point(1, 1, -1)])
 
 Contents
 ========

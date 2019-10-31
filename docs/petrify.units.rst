@@ -62,7 +62,7 @@ you tag the input objects with units:
     >>> from petrify.solid import Box, Vector, Point
     >>> box = Box(Point.origin, Vector(1, 1, 1)).as_unit(u.mm)
     >>> (box + (Vector.basis.x * u.inch)).envelope().origin
-    Point3(25.4, 0.0, 0.0)
+    Point(25.4, 0.0, 0.0)
 
 To prevent constant conversions, you can use an implicit "internal" unit. You
 still must always specify your input and output units:
