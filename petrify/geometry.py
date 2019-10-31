@@ -22,7 +22,15 @@ def valid_scalar(v):
     return isinstance(v, numbers.Number)
 
 class AbstractPolygon:
+    def __truediv__(self, v):
+        if valid_scalar(v):
+            return self * (1.0 / v)
+        else:
+            return NotImplemented
+
     def __mul__(self, m):
+        if valid_scalar(m):
+            return self.embedding.Polygon([p * m for p in self.points])
         if isinstance(m, self.embedding.Vector):
             m = self.embedding.Matrix.scale(*m)
         return self.embedding.Polygon([p * m for p in self.points])

@@ -1347,6 +1347,12 @@ class ComplexPolygon2:
         from . import engines
         return engines.offset.offset(self, amount)
 
+    def __truediv__(self, v):
+        return ComplexPolygon(
+            interior=[p / v for p in self.interior],
+            exterior=[p / v for p in self.exterior]
+        )
+
     def __mul__(self, v):
         return ComplexPolygon(
             interior=[p * v for p in self.interior],

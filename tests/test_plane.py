@@ -207,6 +207,26 @@ class TestComplexPolygon(unittest.TestCase):
             Polygon([Point(0, 0), Point(0, 3), Point(3, 3), Point(3, 0)]) * Vector(20, 10)
         ])
 
+        moved = polygon * 2
+
+        self.assertEqual(moved.interior, [
+            Polygon([Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 1)]) * 2
+        ])
+
+        self.assertEqual(moved.exterior, [
+            Polygon([Point(0, 0), Point(0, 3), Point(3, 3), Point(3, 0)]) * 2
+        ])
+
+        moved = polygon / 2
+
+        self.assertEqual(moved.interior, [
+            Polygon([Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 1)]) / 2
+        ])
+
+        self.assertEqual(moved.exterior, [
+            Polygon([Point(0, 0), Point(0, 3), Point(3, 3), Point(3, 0)]) / 2
+        ])
+
     def test_complex_offset_cleanup(self):
         polygon = ComplexPolygon([
             Polygon([Point(0, 0), Point(0, 100), Point(100, 100), Point(100, 0)]),
