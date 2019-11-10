@@ -1722,6 +1722,15 @@ class Basis:
     def normal(self):
         return self.bx.cross(self.by)
 
+    def grid(self, ticks, count):
+        """
+        Returns a visual :py:class:`petrify.visualize.Grid` of the projected
+        space.
+
+        """
+        from .visualize import Grid
+        return Grid(self, ticks, count)
+
 Basis.unit = Basis(Point.origin, Vector.basis.x, Vector.basis.y)
 Basis.xy = Basis.unit
 Basis.yz = Basis(Point.origin, Vector.basis.y, Vector.basis.z)
