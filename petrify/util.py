@@ -30,8 +30,8 @@ def locate_circle(p, np, l):
         return None
 
 def frange(a, b, step, inclusive=False):
-    count = math.floor((b - a) / step) if a != b else 1
-    for ix in range(0, count):
+    count = math.floor((float(b) - float(a)) / step) if a != b else 1
+    for ix in range(0, count + 1):
         v = a + (ix * step)
         if v != b: yield v
 

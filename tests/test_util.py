@@ -11,6 +11,12 @@ class RangeTests(unittest.TestCase):
             [-1, -2, -3, -4, -5]
         )
 
+    def test_basic_frange(self):
+        self.assertEqual(
+            list(frange(0, 2.99, 1.5, inclusive=True)),
+            [0.0, 1.5, 2.99]
+        )
+
 class CircleTests(unittest.TestCase):
     def test_angle(self):
         p = Point(1, 1)
