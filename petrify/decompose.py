@@ -229,4 +229,6 @@ def decouple(segments):
 def rebuild(simple):
     valid = [p.simplify() for p in simple if p.simplify() is not None]
     segments = [s for p in valid for s in exact_segments(p.simplify())]
-    return [collate_collinear(p) for p in recreate_polygons(decouple(segments))]
+    decoupled = decouple(segments)
+    if len(decoupled) == 0: return []
+    return [collate_collinear(p) for p in recreate_polygons(decoupled) if p is not None]
