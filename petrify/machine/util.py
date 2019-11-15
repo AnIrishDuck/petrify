@@ -26,11 +26,24 @@ class CutLine:
         midpoints = [locate_circle(p, b.v.cross(), a) for p in (b.p1, b.p2)]
         midpoints = [s for s in midpoints if s is not None]
         midpoints = [(x, (p, r, x)) for p, r, x in midpoints if _close(p, r, a)]
-        ordered = [(x, p, r) for x, (p, r, _) in sorted(endpoints + midpoints, key=lambda v: (v[0], v[1][1]))]
-        return None if len(ordered) < 2 else CutLine(ordered[0], ordered[-1])
+        cuts = [cls.lead(a, b), *endpoints, *midpoints]
+        ordered = [(x, p, r) for x, (p, r, _) in sorted(cuts, key=lambda v: (v[0], v[1][1]))]
+        if len(ordered) < 2:
+            return None
+        else:
+            return [CutLine(a, b) for a, b in zip(ordered, ordered[1:])]
+
+    @classmethod
+    def lead(cls, a, b):
+        cs = [a.connect(p) for p in (b.p1, b.p2)]
+        c = min(cs, key=lambda v: v.magnitude_squared())
+        x = math.sqrt((c.p - a.p).magnitude_squared() / a.v.magnitude_squared())
+        r = c.v.magnitude() / 2
+        return (x, (c.p + (c.v / 2), r, x))
 
 def clearance(segment, others):
-    cuts = [CutLine.from_lines(segment, other) for other in others]
+    lines = [CutLine.from_lines(segment, other) for other in others]
+    cuts = [l for _ls in lines if _ls is not None for l in _ls]
     cuts = [c for c in cuts if c is not None]
 
     ordered = sorted(cuts, key=lambda c: c.start[0])
