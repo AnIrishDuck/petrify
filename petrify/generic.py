@@ -1,6 +1,6 @@
 from . import plane, space
-from .plane import Point2, Polygon2, Vector2
-from .space import Point3, Polygon3, Vector3
+from .plane import Line2, Point2, Polygon2, Vector2
+from .space import Line3, Point3, Polygon3, Vector3
 
 class Point:
     """
@@ -78,3 +78,23 @@ class Polygon:
 
     def __new__(cls, points):
         return create(Polygon2, Polygon3, embedding_from(points), [points])
+
+class Line:
+    """
+    A generic constructor that chooses the correct variant of
+    :py:`~petrify.plane.Line2` or :py:`~petrify.space.Line3` based on
+    the embedding of the passed arguments:
+
+    >>> Line(Point(0, 0), Point(1, 0))
+    Line(Point(0, 0), Vector(1, 0))
+    >>> Line(Point(0, 0, 0), Point(1, 0, 0))
+    Line(Point(0, 0, 0), Vector(1, 0, 0))
+    >>> Line(Point(0, 0, 0), Point(1, 0))
+    Traceback (most recent call last):
+    ...
+    AssertionError: arguments must either be all spatial or all planar
+
+    """
+
+    def __new__(cls, *args):
+        return create(Line2, Line3, embedding_from(args), args)
