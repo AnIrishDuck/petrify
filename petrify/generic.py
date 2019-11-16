@@ -1,6 +1,6 @@
 from . import plane, space
-from .plane import Line2, Point2, Polygon2, Vector2
-from .space import Line3, Point3, Polygon3, Vector3
+from .plane import Line2, LineSegment2, Point2, Polygon2, Ray2, Vector2
+from .space import Line3, LineSegment3, Point3, Polygon3, Ray3, Vector3
 
 class Point:
     """
@@ -98,3 +98,43 @@ class Line:
 
     def __new__(cls, *args):
         return create(Line2, Line3, embedding_from(args), args)
+
+class Ray:
+    """
+    A generic constructor that chooses the correct variant of
+    :py:`~petrify.plane.Ray2` or :py:`~petrify.space.Ray3` based on
+    the embedding of the passed arguments:
+
+    >>> Ray(Point(0, 0), Vector(1, 0))
+    Ray(Point(0, 0), Vector(1, 0))
+    >>> Ray(Point(0, 0, 0), Vector(1, 0, 0))
+    Ray(Point(0, 0, 0), Vector(1, 0, 0))
+    >>> Ray(Point(0, 0, 0), Point(1, 0))
+    Traceback (most recent call last):
+    ...
+    AssertionError: arguments must either be all spatial or all planar
+
+    """
+
+    def __new__(cls, *args):
+        return create(Ray2, Ray3, embedding_from(args), args)
+
+class LineSegment:
+    """
+    A generic constructor that chooses the correct variant of
+    :py:`~petrify.plane.LineSegment2` or :py:`~petrify.space.LineSegment3` based
+    on the embedding of the passed arguments:
+
+    >>> LineSegment(Point(0, 0), Point(1, 0))
+    LineSegment(Point(0, 0), Point(1, 0))
+    >>> LineSegment(Point(0, 0, 0), Point(1, 0, 0))
+    LineSegment(Point(0, 0, 0), Point(1, 0, 0))
+    >>> LineSegment(Point(0, 0, 0), Point(1, 0))
+    Traceback (most recent call last):
+    ...
+    AssertionError: arguments must either be all spatial or all planar
+
+    """
+
+    def __new__(cls, *args):
+        return create(LineSegment2, LineSegment3, embedding_from(args), args)
