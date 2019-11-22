@@ -17,6 +17,17 @@ class TestCutLine(unittest.TestCase):
         self.assertEqual(reversed[0].start, (0.5, Point(0, 0.5), 0.5))
         self.assertEqual(reversed[-1].end, (0.75, Point(1, 0.5), 0.5))
 
+    def test_corner_case(self):
+        a = LineSegment2(Point(10, 0), Point(0, 0))
+        b = LineSegment2(Point(5, 3), Point(5, 10))
+
+        line = CutLine.from_lines(a, b)
+        self.assertEqual([(l.start, l.end) for l in line], [
+            ((0, Point(10.0, 5.0), 5.0), (0.2, Point(8.0, 3.0), 3.0)),
+            ((0.2, Point(8.0, 3.0), 3.0), (0.2, Point(5.0, 1.5), 1.5)),
+            ((0.2, Point(5.0, 1.5), 1.5), (0.5, Point(5.0, 1.5), 1.5))
+        ])
+
 class TestClearance(unittest.TestCase):
     def test_indent(self):
         segments = Polygon([
@@ -33,10 +44,10 @@ class TestClearance(unittest.TestCase):
         path = clearance(segments[0], segments[1:])
         expected = [
             (Point(0.0, 0.0), 0.0),
-            (Point(1.0, 1.0), 1.0),
+            (Point(0.5, 2.0), 0.5),
             (Point(0.5, 2.0), 0.5),
             (Point(0.5, 4.0), 0.5),
-            (Point(1.0, 5.0), 1.0),
+            (Point(0.5, 4.0), 0.5),
             (Point(0.0, 6.0), 0.0)
         ]
         self.assertEqual([(c.snap(0.25), round(r, 1)) for c, r in path], expected)

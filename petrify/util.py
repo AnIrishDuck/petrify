@@ -25,7 +25,7 @@ def locate_circle(p, np, l):
         x, r = solve_matrix(list(list(row) for row in rows))
         x = x / l.v.magnitude()
         if x < 0 or x > 1: return None
-        return [p + npn * r, r, x]
+        return (p + npn * r, r, x)
     except ZeroDivisionError:
         return None
 

@@ -23,15 +23,37 @@ class CutLine:
         endpoints = [(dl, locate_circle(p, a.v.cross(), b)) for dl, p in ((0, a.p1), (1, a.p2))]
         endpoints = [(dl, s) for dl, s in endpoints if s is not None]
         endpoints = [(dl, (p, r, x)) for dl, (p, r, x) in endpoints if _close(p, r, b)]
-        midpoints = [locate_circle(p, b.v.cross(), a) for p in (b.p1, b.p2)]
-        midpoints = [s for s in midpoints if s is not None]
+        midpoints = cls.midpoints(a, b)
         midpoints = [(x, (p, r, x)) for p, r, x in midpoints if _close(p, r, a)]
-        cuts = [cls.lead(a, b), *endpoints, *midpoints]
-        ordered = [(x, p, r) for x, (p, r, _) in sorted(cuts, key=lambda v: (v[0], v[1][1]))]
+        cuts = [*endpoints, *midpoints]
+        ordered = [(x, p, r) for x, (p, r, _) in sorted(cuts, key=lambda v: (v[0], -v[1][1]))]
         if len(ordered) < 2:
             return None
         else:
             return [CutLine(a, b) for a, b in zip(ordered, ordered[1:])]
+
+    @classmethod
+    def midpoints(cls, a, b):
+        cuts = []
+        cs = [(a.connect(p), p) for p in (b.p1, b.p2)]
+        near, far = sorted(cs, key=lambda v: v[0].magnitude_squared())
+
+        _, p_far = far
+        far = locate_circle(p_far, b.v.cross(), a)
+        if far:
+            cuts.append(far)
+
+        connection, p_near = near
+        cut = locate_circle(p_near, b.v.cross(), a)
+        if cut:
+            cuts.append(cut)
+            p, r, x = cut
+            p_corner = connection.p + (connection.v / 2)
+            r_corner = connection.v.magnitude() / 2
+            x_corner = math.sqrt((connection.p - a.p).magnitude_squared() / a.v.magnitude_squared())
+            cuts.append((p_corner, r_corner, x))
+            cuts.append((p_corner, r_corner, x_corner))
+        return cuts
 
     @classmethod
     def lead(cls, a, b):
