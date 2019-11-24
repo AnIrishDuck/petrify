@@ -1590,7 +1590,7 @@ class Plane:
             raise TypeError('Cannot instantiate Vector from {0!r}'.format(args))
 
         if not self.n:
-            raise AttributeError('Points on plane are colinear')
+            raise AttributeError('Points are collinear and do not form plane')
 
     def __copy__(self):
         return self.__class__(self.n, self.k)
