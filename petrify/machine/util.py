@@ -55,14 +55,6 @@ class CutLine:
             cuts.append((p_corner, r_corner, x_corner))
         return cuts
 
-    @classmethod
-    def lead(cls, a, b):
-        cs = [a.connect(p) for p in (b.p1, b.p2)]
-        c = min(cs, key=lambda v: v.magnitude_squared())
-        x = math.sqrt((c.p - a.p).magnitude_squared() / a.v.magnitude_squared())
-        r = c.v.magnitude() / 2
-        return (x, (c.p + (c.v / 2), r, x))
-
 def clearance(segment, others):
     lines = [CutLine.from_lines(segment, other) for other in others]
     cuts = [l for _ls in lines if _ls is not None for l in _ls]
