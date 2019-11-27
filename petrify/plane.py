@@ -1115,6 +1115,54 @@ class Polygon2(AbstractPolygon, Planar):
 
         return Polygon(points)
 
+    def inward_ray(self, ix):
+        def magnitude(line, normal, inwards):
+            # w * inwards = u * line.vector + normal
+            # w * inwards - u * line.vector = normal
+            rows = list(zip(inwards.xy, (-line).xy, normal))
+            matrix = list(list(row) for row in rows)
+            solution = solve_matrix(matrix)
+            return inwards * solution[0]
+
+        segments = self.shift(ix).segments()
+
+        a, b = segments[0], segments[1]
+        ai, bi = self.inwards(a), self.inwards(b)
+        return (segments[0].p2, magnitude(a.v, ai, ai + bi))
+
+    def index_of(self, point):
+        for ix, p in enumerate(self.points):
+            if p == point: return ix
+
+    def find_offset_split(self):
+        def solve(line, normal, vertex, inwards):
+            # line.p + x * line.v + normal * y = vertex + y * inwards
+            # x * line.v + (normal - inwards) * y = vertex - line.p
+            rows = list(zip(line.v, (normal-inwards).xy, (vertex - line.p).xy))
+            matrix = list(list(row) for row in rows)
+            solution = solve_matrix(matrix)
+            return (line.p + line.v * solution[0] + normal * solution[1], solution[1])
+
+        in_rays = dict(self.inward_ray(ix) for ix in range(len(self)))
+        segments = self.segments()
+
+        solutions = (
+            ((other, v), solve(other, self.inwards(other), v, in_rays[v]))
+            for v in self.points
+            for other in segments if other.p1 != v and other.p2 != v
+        )
+
+        (segment, cut), point, offset = min(
+            ((pair, p, o) for pair, (p, o) in solutions if o > 0),
+            key=lambda t: t[2]
+        )
+
+        cut_i = self.index_of(cut)
+        line_i = self.index_of(segment.p1)
+
+        a = [p + in_rays[p] * offset for p in (*self.points[0:line_i + 1], *self.points[cut_i:])]
+        b = [p + in_rays[p] * offset for p in self.points[(line_i + 1):(cut_i + 1)]]
+        return (offset, ComplexPolygon([Polygon(a), Polygon(b)]))
 
     def inverted(self):
         """

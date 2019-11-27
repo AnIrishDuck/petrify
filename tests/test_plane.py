@@ -127,6 +127,20 @@ class TestPolygon(unittest.TestCase):
             Point(10 + 3, 5)
         ])
 
+    def test_offset_split_notch(self):
+        notch = Polygon([
+            Point(0, 0),
+            Point(6, 0),
+            Point(6, 5),
+            Point(3, 1),
+            Point(0, 5)
+        ])
+
+        offset, parts = notch.find_offset_split()
+
+        self.assertEqual(offset, 0.375)
+        self.assertEqual(len(parts.polygons), 2)
+
     @unittest.skip
     def test_inset_split(self):
         dumbbell = Polygon([

@@ -1,5 +1,5 @@
-def solve_matrix(A):
-    "Solve a system of equations using gauss-jordan elimination."
+def upper_tri(A):
+    "In-place converts A into upper-triangular form."
     n = len(A)
 
     for i in range(0, n):
@@ -22,6 +22,12 @@ def solve_matrix(A):
                     A[k][j] = 0
                 else:
                     A[k][j] += c * A[i][j]
+    return A
+
+def solve_matrix(A):
+    "Solve a system of equations using gauss-jordan elimination."
+    A = upper_tri(A)
+    n = len(A)
 
     # Solve given the upper triangular matrix
     x = [0 for i in range(n)]
