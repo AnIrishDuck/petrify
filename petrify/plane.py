@@ -1115,6 +1115,16 @@ class Polygon2(AbstractPolygon, Planar):
 
         return Polygon(points)
 
+    def index_of(self, point):
+        """
+        Finds index of given `point`:
+
+        >>> Polygon([Point(0, 0), Point(1, 0), Point(1, 1)]).index_of(Point(1, 1))
+        2
+
+        """
+        return super().index_of(point)
+
     def inward_ray(self, ix):
         def magnitude(line, normal, inwards):
             # w * inwards = u * line.vector + normal
@@ -1129,10 +1139,6 @@ class Polygon2(AbstractPolygon, Planar):
         a, b = segments[0], segments[1]
         ai, bi = self.inwards(a), self.inwards(b)
         return (segments[0].p2, magnitude(a.v, ai, ai + bi))
-
-    def index_of(self, point):
-        for ix, p in enumerate(self.points):
-            if p == point: return ix
 
     def find_offset_split(self):
         def solve(line, normal, vertex, inwards):
@@ -1173,7 +1179,7 @@ class Polygon2(AbstractPolygon, Planar):
         Polygon([Point(1, 1), Point(0, 0), Point(2, 0)])
 
         """
-        return Polygon(list(reversed(self.points)))
+        return super().inverted()
 
     def is_convex(self):
         """

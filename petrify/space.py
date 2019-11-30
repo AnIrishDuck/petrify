@@ -375,7 +375,26 @@ class Polygon3(AbstractPolygon, Spatial):
         self.plane = Plane(*points[0:3])
 
     def inverted(self):
-        return Polygon3(list(reversed(self.points)))
+        """
+        Reverses the points on a given polygon:
+
+        >>> p = Polygon([Point(0, 0, 0), Point(1, 0, 0), Point(1, 1, 0)])
+        >>> p.inverted()
+        Polygon([Point(1, 1, 0), Point(1, 0, 0), Point(0, 0, 0)])
+
+        """
+        return super().inverted()
+
+    def index_of(self, point):
+        """
+        Finds index of given `point`:
+
+        >>> p = Polygon([Point(0, 0, 0), Point(1, 0, 0), Point(1, 1, 0)])
+        >>> p.index_of(Point(1, 1))
+        2
+
+        """
+        return super().index_of(point)
 
     def segments(self):
         """ Returns all line segments composing this polygon's edges. """

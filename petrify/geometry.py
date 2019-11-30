@@ -28,6 +28,13 @@ class AbstractPolygon:
         else:
             return NotImplemented
 
+    def index_of(self, point):
+        for ix, p in enumerate(self.points):
+            if p == point: return ix
+
+    def inverted(self):
+        return self.embedding.Polygon(list(reversed(self.points)))
+
     def __mul__(self, m):
         if valid_scalar(m):
             return self.embedding.Polygon([p * m for p in self.points])
