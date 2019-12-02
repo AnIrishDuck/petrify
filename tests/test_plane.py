@@ -136,7 +136,7 @@ class TestPolygon(unittest.TestCase):
             Point(0, 5)
         ])
 
-        offset, parts = notch.find_offset_split()
+        offset, parts = notch.find_first_offset_event()
 
         self.assertEqual(offset, 0.375)
         self.assertEqual(len(parts.polygons), 2)

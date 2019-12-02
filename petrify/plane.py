@@ -1125,7 +1125,7 @@ class Polygon2(AbstractPolygon, Planar):
         """
         return super().index_of(point)
 
-    def inward_ray(self, ix):
+    def offset_inward_ray(self, ix):
         def magnitude(line, normal, inwards):
             # w * inwards = u * line.vector + normal
             # w * inwards - u * line.vector = normal
@@ -1140,7 +1140,7 @@ class Polygon2(AbstractPolygon, Planar):
         ai, bi = self.inwards(a), self.inwards(b)
         return (segments[0].p2, magnitude(a.v, ai, ai + bi))
 
-    def find_offset_split(self):
+    def find_first_offset_event(self):
         def solve(line, normal, vertex, inwards):
             # line.p + x * line.v + normal * y = vertex + y * inwards
             # x * line.v + (normal - inwards) * y = vertex - line.p
@@ -1149,19 +1149,23 @@ class Polygon2(AbstractPolygon, Planar):
             solution = solve_matrix(matrix)
             return (line.p + line.v * solution[0] + normal * solution[1], solution[1])
 
-        in_rays = dict(self.inward_ray(ix) for ix in range(len(self)))
+        in_rays = dict(self.offset_inward_ray(ix) for ix in range(len(self)))
+
+        def find_solutions(v):
+            initial = (
+                ((other, v), solve(other, self.inwards(other), v, in_rays[v]))
+                for other in segments if other.p1 != v and other.p2 != v
+            )
+            return ((pair, p, o) for pair, (p, o) in initial if o > 0)
+
         segments = self.segments()
 
-        solutions = (
-            ((other, v), solve(other, self.inwards(other), v, in_rays[v]))
+        solutions = [
+            min(find_solutions(v), key=lambda t: t[2])
             for v in self.points
-            for other in segments if other.p1 != v and other.p2 != v
-        )
+        ]
 
-        (segment, cut), point, offset = min(
-            ((pair, p, o) for pair, (p, o) in solutions if o > 0),
-            key=lambda t: t[2]
-        )
+        (segment, cut), point, offset = min(solutions, key=lambda t: t[2])
 
         cut_i = self.index_of(cut)
         line_i = self.index_of(segment.p1)
