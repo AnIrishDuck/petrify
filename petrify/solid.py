@@ -197,6 +197,9 @@ class Node:
         """
         return visualize.scene([self], **properties)
 
+    def _ipython_display_(self):
+        self.render()._ipython_display_()
+
     def as_unit(self, unit):
         """
         Declare a unit for unitless geometry:
