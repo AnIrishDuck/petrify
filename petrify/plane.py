@@ -1140,7 +1140,7 @@ class Polygon2(AbstractPolygon, Planar):
         ai, bi = self.inwards(a), self.inwards(b)
         return (segments[0].p2, magnitude(a.v, ai, ai + bi))
 
-    def find_first_offset_event(self):
+    def find_first_split_event(self, in_rays):
         def solve(line, normal, vertex, inwards):
             # line.p + x * line.v + normal * y = vertex + y * inwards
             # x * line.v + (normal - inwards) * y = vertex - line.p
@@ -1148,8 +1148,6 @@ class Polygon2(AbstractPolygon, Planar):
             matrix = list(list(row) for row in rows)
             solution = solve_matrix(matrix)
             return (line.p + line.v * solution[0] + normal * solution[1], solution[1])
-
-        in_rays = dict(self.offset_inward_ray(ix) for ix in range(len(self)))
 
         def find_solutions(v):
             initial = (
@@ -1172,7 +1170,11 @@ class Polygon2(AbstractPolygon, Planar):
 
         a = [p + in_rays[p] * offset for p in (*self.points[0:line_i + 1], *self.points[cut_i:])]
         b = [p + in_rays[p] * offset for p in self.points[(line_i + 1):(cut_i + 1)]]
-        return (offset, ComplexPolygon([Polygon(a), Polygon(b)]))
+        return (offset, ComplexPolygon([Polygon(p) for p in (a, b) if p]))
+
+    def find_first_offset_event(self):
+        in_rays = dict(self.offset_inward_ray(ix) for ix in range(len(self)))
+        return self.find_first_split_event(in_rays)
 
     def inverted(self):
         """

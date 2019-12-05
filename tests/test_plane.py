@@ -141,6 +141,20 @@ class TestPolygon(unittest.TestCase):
         self.assertEqual(offset, 0.375)
         self.assertEqual(len(parts.polygons), 2)
 
+    def test_offset_merge(self):
+        notch = Polygon([
+            Point(0, 0),
+            Point(7, 0),
+            Point(4, 4),
+            Point(3, 4)
+        ])
+
+        offset, parts = notch.find_first_offset_event()
+
+        self.assertEqual(offset, 1.0)
+        self.assertEqual(len(parts.polygons), 1)
+        self.assertEqual(len(parts.polygons[0].points), 3)
+
     @unittest.skip
     def test_inset_split(self):
         dumbbell = Polygon([
