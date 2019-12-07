@@ -40,9 +40,9 @@ import types
 
 from pint.unit import _Unit
 
-from . import plane, decompose, visualize
-from .plane import Point2, Polygon2, Vector2
-from .geometry import AbstractPolygon, Geometry, tau, valid_scalar
+from .. import decompose, plane, visualize
+from ..plane import Point2, Polygon2, Vector2
+from ..geometry import AbstractPolygon, Geometry, tau, valid_scalar
 
 class Spatial:
     @property

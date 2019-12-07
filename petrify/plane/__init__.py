@@ -35,9 +35,9 @@ import math
 import operator
 import types
 
-from . import units
-from .geometry import AbstractPolygon, Geometry, tau, valid_scalar
-from .solver import solve_matrix
+from .. import units
+from ..geometry import AbstractPolygon, Geometry, tau, valid_scalar
+from ..solver import solve_matrix
 
 def operate(op, self, other):
     if valid_scalar(other):
@@ -1302,7 +1302,7 @@ class Polygon2(AbstractPolygon, Planar):
         Rectangle(Point(0, 0), Vector(2, 1))
 
         """
-        from .shape import Rectangle
+        from ..shape import Rectangle
         sx = min(p.x for p in self.points)
         sy = min(p.y for p in self.points)
         ex = max(p.x for p in self.points)
@@ -1404,7 +1404,7 @@ class ComplexPolygon2:
         [Polygon([Point(0.1, 0.1), Point(0.1, 2.9), Point(2.9, 2.9), Point(2.9, 0.1)])]
 
         """
-        from . import engines
+        from .. import engines
         return engines.offset.offset(self, amount)
 
     def __truediv__(self, v):
