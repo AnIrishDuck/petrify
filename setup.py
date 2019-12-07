@@ -5,7 +5,14 @@ setup(
     version='0.8.1',
     author='Frank Murphy, et al',
     author_email='fpmurphy@mtu.edu',
-    packages=['petrify', 'petrify.engines', 'petrify.formats', 'petrify.machine'],
+    packages=[
+        'petrify',
+        'petrify.engines',
+        'petrify.formats',
+        'petrify.plane',
+        'petrify.machine',
+        'petrify.space'
+    ],
     url='http://pypi.python.org/pypi/petrify/',
     license='LICENSE',
     description='a programmatic cad library',
