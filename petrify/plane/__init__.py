@@ -1115,6 +1115,9 @@ class Polygon2(AbstractPolygon, Planar):
 
         return Polygon(points)
 
+    def nonlocal_offset(self, amount):
+        return ComplexPolygon(exterior=[self], interior=[]).nonlocal_offset(amount)
+
     def index_of(self, point):
         """
         Finds index of given `point`:
@@ -1124,57 +1127,6 @@ class Polygon2(AbstractPolygon, Planar):
 
         """
         return super().index_of(point)
-
-    def offset_inward_ray(self, ix):
-        def magnitude(line, normal, inwards):
-            # w * inwards = u * line.vector + normal
-            # w * inwards - u * line.vector = normal
-            rows = list(zip(inwards.xy, (-line).xy, normal))
-            matrix = list(list(row) for row in rows)
-            solution = solve_matrix(matrix)
-            return inwards * solution[0]
-
-        segments = self.shift(ix).segments()
-
-        a, b = segments[0], segments[1]
-        ai, bi = self.inwards(a), self.inwards(b)
-        return (segments[0].p2, magnitude(a.v, ai, ai + bi))
-
-    def find_first_split_event(self, in_rays):
-        def solve(line, normal, vertex, inwards):
-            # line.p + x * line.v + normal * y = vertex + y * inwards
-            # x * line.v + (normal - inwards) * y = vertex - line.p
-            rows = list(zip(line.v, (normal-inwards).xy, (vertex - line.p).xy))
-            matrix = list(list(row) for row in rows)
-            solution = solve_matrix(matrix)
-            return (line.p + line.v * solution[0] + normal * solution[1], solution[1])
-
-        def find_solutions(v):
-            initial = (
-                ((other, v), solve(other, self.inwards(other), v, in_rays[v]))
-                for other in segments if other.p1 != v and other.p2 != v
-            )
-            return ((pair, p, o) for pair, (p, o) in initial if o > 0)
-
-        segments = self.segments()
-
-        solutions = [
-            min(find_solutions(v), key=lambda t: t[2])
-            for v in self.points
-        ]
-
-        (segment, cut), point, offset = min(solutions, key=lambda t: t[2])
-
-        cut_i = self.index_of(cut)
-        line_i = self.index_of(segment.p1)
-
-        a = [p + in_rays[p] * offset for p in (*self.points[0:line_i + 1], *self.points[cut_i:])]
-        b = [p + in_rays[p] * offset for p in self.points[(line_i + 1):(cut_i + 1)]]
-        return (offset, ComplexPolygon([Polygon(p) for p in (a, b) if p]))
-
-    def find_first_offset_event(self):
-        in_rays = dict(self.offset_inward_ray(ix) for ix in range(len(self)))
-        return self.find_first_split_event(in_rays)
 
     def inverted(self):
         """
@@ -1406,6 +1358,10 @@ class ComplexPolygon2:
         """
         from .. import engines
         return engines.offset.offset(self, amount)
+
+    def nonlocal_offset(self, amount):
+        from .. import engines
+        return engines.offset.nonlocal_offset(self, amount)
 
     def __truediv__(self, v):
         return ComplexPolygon(
