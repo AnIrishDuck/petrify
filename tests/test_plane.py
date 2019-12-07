@@ -136,9 +136,8 @@ class TestPolygon(unittest.TestCase):
             Point(0, 5)
         ])
 
-        offset, parts = notch.find_first_offset_event()
+        parts = notch.nonlocal_offset(0.375 + 0.1)
 
-        self.assertEqual(offset, 0.375)
         self.assertEqual(len(parts.polygons), 2)
 
     def test_offset_merge(self):
@@ -149,9 +148,8 @@ class TestPolygon(unittest.TestCase):
             Point(3, 4)
         ])
 
-        offset, parts = notch.find_first_offset_event()
+        parts = notch.nonlocal_offset(1.0 + 0.1)
 
-        self.assertEqual(offset, 1.0)
         self.assertEqual(len(parts.polygons), 1)
         self.assertEqual(len(parts.polygons[0].points), 3)
 
