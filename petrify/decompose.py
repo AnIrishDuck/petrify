@@ -4,6 +4,7 @@ Utility methods for decomposition of polygons into simpler polygons.
 """
 from petrify import space
 from .plane import tau, LineSegment, Line, Ray
+from .plane import util as putil
 from . import geometry, plane
 from .util import index_by
 import heapq, itertools
@@ -30,7 +31,7 @@ class ExactSegment:
         return plane._intersect_line2_line2(self, other)
 
     def _connect_point2(self, other):
-        return plane._connect_point2_line2(other, self)
+        return putil._connect_point2_line2(other, self)
 
     def _connect_point3(self, other):
         return space._connect_point3_line3(other, self)
