@@ -62,11 +62,16 @@ def find_collisions(v, segments, inwards, in_rays):
     )
     return ((pair, p, o) for pair, (p, o) in initial if o > 0)
 
-def find_first_split_event(polygon):
-    in_rays = dict(offset_inward_ray(polygon, ix) for ix in range(len(polygon)))
-
+def inner_properties(polygon):
     segments = polygon.segments()
+
+    in_rays = dict(offset_inward_ray(polygon, ix) for ix in range(len(polygon)))
     inwards = {s: find_inward_ray(polygon, s) for s in segments}
+
+    return (segments, in_rays, inwards)
+
+def find_first_split_event(polygon):
+    segments, in_rays, inwards = inner_properties(polygon)
 
     solutions = [
         min(find_collisions(v, segments, inwards, in_rays), key=lambda t: t[2])
