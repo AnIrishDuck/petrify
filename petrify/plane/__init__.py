@@ -933,11 +933,11 @@ class ComplexPolygon2:
 
         >>> square = Polygon([Point(0, 0), Point(0, 1), Point(1, 1), Point(1, 0)])
         >>> complex = ComplexPolygon([square + Vector(1, 1), square * 3])
-        >>> square.envelope()
-        Rectangle(Point(0, 0), Vector(1, 1))
+        >>> complex.envelope()
+        Rectangle(Point(0, 0), Vector(3, 3))
 
         """
-        from .shape import Rectangle
+        from ..shape import Rectangle
         rectangles = Polygon([p for polygon in self.polygons for p in polygon.envelope().points])
         return rectangles.envelope()
 ComplexPolygon = ComplexPolygon2
