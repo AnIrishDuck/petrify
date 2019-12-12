@@ -53,14 +53,24 @@ def find_collision(line, normal, vertex, inwards):
     rows = list(zip(line.v, (normal-inwards).xy, (vertex - line.p).xy))
     matrix = list(list(row) for row in rows)
     solution = solve_matrix(matrix)
-    return (line.p + line.v * solution[0] + normal * solution[1], solution[1])
+    if solution[0] < 0 or solution[0] > 1:
+        return None
+    else:
+        return (line.p + line.v * solution[0] + normal * solution[1], solution[1])
+
+def safe_find_collision(line, normal, vertex, inwards):
+    try:
+        return find_collision(line, normal, vertex, inwards)
+    except ZeroDivisionError:
+        return None
 
 def find_collisions(ray, segments, inwards):
     initial = (
-        ((other, ray.p), find_collision(other, inwards[other], ray.p, ray.v))
+        ((other, ray.p), safe_find_collision(other, inwards[other], ray.p, ray.v))
         for other in segments if other.p1 != ray.p and other.p2 != ray.p
     )
-    return ((pair, p, o) for pair, (p, o) in initial if o > 0)
+    initial = ((a, b) for a, b in initial if b)
+    return [(pair, p, o) for pair, (p, o) in initial if o > 0]
 
 def inner_properties(polygon):
     segments = polygon.segments()
@@ -100,9 +110,10 @@ def find_first_split_event(rays):
     polygon = Polygon([ray.p for ray in rays])
     segments, inwards = inner_properties(polygon)
 
+    all_collisions = [find_collisions(ray, segments, inwards) for ray in rays]
     solutions = [
-        min(find_collisions(ray, segments, inwards), key=lambda t: t[2])
-        for ray in rays
+        min(collisions, key=lambda t: t[2])
+        for collisions in all_collisions if collisions
     ]
 
     (segment, cut), point, offset = min(solutions, key=lambda t: t[2])
@@ -118,16 +129,27 @@ def find_first_split_event(rays):
 
     return (offset, [_rays for _rays in (a, b) if _rays])
 
+def safe_find_first_split_event(rays):
+    try:
+        return find_first_split_event(rays)
+    except ZeroDivisionError:
+        return None
+
 def nonlocal_offset(complex, amount):
     all_rays = [to_rays(polygon) for polygon in complex.exterior]
-    offsets = [(rays, find_first_split_event(rays)) for rays in all_rays]
-    polygons = [
-        rays
-        for original, (event_offset, split) in offsets
-        for rays in ([original] if event_offset > amount else split)
-    ]
+
+    offsets = [(rays, safe_find_first_split_event(rays)) for rays in all_rays]
+    amounts = [o[1][0] for o in offsets if o[1]]
+    while amounts and amount >= min(amounts):
+        all_rays = [
+            rays
+            for original, pair in offsets
+            for rays in ([original] if not pair or pair[0] > amount else pair[1])
+        ]
+        offsets = [(rays, safe_find_first_split_event(rays)) for rays in all_rays]
+        amounts = [o[1][0] for o in offsets if o[1]]
 
     return ComplexPolygon([
         Polygon([ray.p + ray.v * amount for ray in polygon])
-        for polygon in polygons
+        for polygon in all_rays
     ])

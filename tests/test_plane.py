@@ -140,6 +140,19 @@ class TestPolygon(unittest.TestCase):
 
         self.assertEqual(len(parts.polygons), 2)
 
+    def test_offset_foot_double_merge(self):
+        foot = Polygon([
+            Point(0, 0),
+            Point(10, 0),
+            Point(10, 1),
+            Point(10, 10),
+            Point(1, 10),
+            Point(1, 2),
+            Point(0, 1)
+        ])
+        rect = foot.nonlocal_offset(2)
+        self.assertEqual(len(rect.polygons[0].points), 4)
+
     def test_offset_merge(self):
         notch = Polygon([
             Point(0, 0),
