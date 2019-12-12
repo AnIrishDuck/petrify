@@ -1,4 +1,4 @@
-from ..plane import ComplexPolygon, Polygon, Point, Ray
+from ..plane import ComplexPolygon, Line, LineSegment, Polygon, Point, Ray
 from ..solver import solve_matrix
 
 def offset(polygon, amount):
@@ -72,6 +72,30 @@ def inner_properties(polygon):
 def to_rays(polygon):
     return [offset_inward_ray(polygon, ix) for ix in range(len(polygon))]
 
+def shift(l, n):
+    return [*l[n:], *l[:n]]
+
+def partition(rays, cut_i, line_i):
+    shifted = shift(rays, line_i + 1)
+    a, b = [], []
+    splitter = rays[cut_i]
+    split = False
+    for ray in shifted:
+        if ray == splitter:
+            split = True
+        elif not split:
+            a.append(ray)
+        else:
+            b.append(ray)
+    return a, b
+
+def find_merge_ray(a, b, line, inwards):
+    segment = LineSegment(a, b)
+    new_vertex = Line(segment.p1, segment.p2).intersect(Line(line.p1, line.p2))
+    ai = inwards[segment]
+    bi = inwards[line]
+    return Ray(new_vertex, magnitude(segment.v, ai, ai + bi))
+
 def find_first_split_event(rays):
     polygon = Polygon([ray.p for ray in rays])
     segments, inwards = inner_properties(polygon)
@@ -86,16 +110,24 @@ def find_first_split_event(rays):
     cut_i = polygon.index_of(cut)
     line_i = polygon.index_of(segment.p1)
 
-    a = [ray.p + ray.v * offset for ray in (*rays[0:line_i + 1], *rays[cut_i:])]
-    b = [ray.p + ray.v * offset for ray in rays[(line_i + 1):(cut_i + 1)]]
-    return (offset, ComplexPolygon([Polygon(p) for p in (a, b) if p]))
+    cut = polygon.points[cut_i]
+    line = LineSegment(polygon.points[line_i], polygon.points[(line_i + 1) % len(polygon.points)])
+    a, b = partition(rays, cut_i, line_i)
+    a = [*a, find_merge_ray(a[-1].p, cut, line, inwards)] if len(a) > 1 else []
+    b = [find_merge_ray(cut, b[0].p, line, inwards), *b] if len(b) > 1 else []
+
+    return (offset, [_rays for _rays in (a, b) if _rays])
 
 def nonlocal_offset(complex, amount):
-    offsets = [(polygon, find_first_split_event(to_rays(polygon)))
-               for polygon in complex.exterior]
+    all_rays = [to_rays(polygon) for polygon in complex.exterior]
+    offsets = [(rays, find_first_split_event(rays)) for rays in all_rays]
     polygons = [
-        p
+        rays
         for original, (event_offset, split) in offsets
-        for p in ([original] if event_offset > amount else split.polygons)
+        for rays in ([original] if event_offset > amount else split)
     ]
-    return ComplexPolygon(polygons)
+
+    return ComplexPolygon([
+        Polygon([ray.p + ray.v * amount for ray in polygon])
+        for polygon in polygons
+    ])
