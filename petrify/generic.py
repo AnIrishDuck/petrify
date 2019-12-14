@@ -21,7 +21,7 @@ class Point:
         elif len(args) == 3:
             return Point3(*args)
         else:
-            return Notimplemented
+            return NotImplemented
 Point.origin = Point3.origin
 
 class Vector:
@@ -43,7 +43,7 @@ class Vector:
         elif len(args) == 3:
             return Vector3(*args)
         else:
-            return Notimplemented
+            return NotImplemented
 Vector.basis = Vector3.basis
 
 def embedding_from(args):
