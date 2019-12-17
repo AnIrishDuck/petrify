@@ -22,23 +22,45 @@ import math
 from geomdl import BSpline
 from geomdl import utilities
 
-from .plane import ComplexPolygon2, Polygon2, Vector2
+from .plane import ComplexPolygon2, Polygon2, Point2, Vector2
 from .generic import Point, Vector
 from .geometry import tau
 from .util import frange
 
+def assert_type(v, name, options):
+    if isinstance(options, list):
+        type = "one of {0}".format(', '.join(o.__name__ for o in options))
+    else:
+        type = str(options)
+        options = [options]
+    msg = "{0} must be {1}".format(name, type)
+    assert any(isinstance(v, t) for t in options), msg
+
+
 class Rectangle(Polygon2):
     """
-    An axis-aligned rectangle with a point of `origin` and a vector `size`:
+    An axis-aligned rectangle with a point of `origin` and a vector or point
+    `extent`:
 
-    >>> square = Rectangle(Point(0, 0), Vector(1, 1))
+    >>> Rectangle(Point(0, 0), Vector(1, 1))
+    Rectangle(Point(0, 0), Vector(1, 1))
+    >>> Rectangle(Point(1, 1), Point(2, 3))
+    Rectangle(Point(1, 1), Vector(1, 2))
 
     """
 
-    def __init__(self, origin, size):
+    def __init__(self, origin, extent):
+        assert_type(origin, 'origin', Point2)
         self.origin = origin
-        self.size = size
-        extent = self.extent = self.origin + self.size
+
+        assert_type(extent, 'extent', [Point2, Vector2])
+        if isinstance(extent, Point2):
+            self.extent = extent
+            self.size = self.extent - self.origin
+        else:
+            self.size = extent
+            extent = self.extent = self.origin + self.size
+
         super().__init__([
             Point(origin.x, origin.y),
             Point(origin.x, extent.y),

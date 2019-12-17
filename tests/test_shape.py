@@ -1,9 +1,15 @@
 import doctest, unittest
-from petrify import shape, Point
+from petrify import shape, Point, Vector
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(shape))
     return tests
+
+class TestTypes(unittest.TestCase):
+    def test_square_inputs(self):
+        with self.assertRaises(AssertionError):
+            shape.Rectangle(Point(0, 0, 0), Vector(1, 1))
+            shape.Rectangle(Point(0, 0), Vector(1, 1, 1))
 
 class TestFillet(unittest.TestCase):
     def test_rounded_square(self):
