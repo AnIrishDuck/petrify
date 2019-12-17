@@ -906,7 +906,7 @@ class ComplexPolygon2:
 
     def nonlocal_offset(self, amount):
         from .. import engines
-        return engines.offset.nonlocal_offset(self, amount)
+        return engines.offset.nonlocal_offset(self, -amount)
 
     def __truediv__(self, v):
         return ComplexPolygon(
