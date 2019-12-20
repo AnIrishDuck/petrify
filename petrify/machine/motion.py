@@ -72,6 +72,20 @@ class Cut:
             f.write(command.gcode())
             f.write('\n')
 
+    def time(self):
+        state = Motion(0, 0, 0, 0)
+        dt = 0
+        for (parent, cmd) in self.commands():
+            if isinstance(cmd, Motion):
+                prior = Point(state.x, state.y, state.z)
+                state = state.merge(cmd)
+                fr = state.f
+                cur = Point(state.x, state.y, state.z)
+                d = (cur - prior).magnitude()
+                dt += (d / fr)
+
+        return dt
+
     def visualize(self, colors={}):
         from ..space import Vector
         import pythreejs as js
