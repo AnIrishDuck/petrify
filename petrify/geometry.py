@@ -70,6 +70,11 @@ class AbstractPolygon:
                 prior = snapped
         return self.embedding.Polygon(points) if len(points) > 2 else None
 
+    def center(self, point):
+        r = self.envelope()
+        center = (r.origin + r.extent) / 2
+        return self + (-center + point)
+
 class Geometry:
     def _connect_unimplemented(self, other):
         raise AttributeError('Cannot connect %s to %s' %

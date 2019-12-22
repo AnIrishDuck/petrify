@@ -603,6 +603,17 @@ class Polygon2(AbstractPolygon, Planar):
         )
         return (ray if count % 2 == 1 else -ray).v.normalized()
 
+    def center(self, point):
+        """
+        Center this polygon at a given point:
+
+        >>> from petrify.shape import Rectangle
+        >>> Rectangle(Point(0, 0), Vector(2, 2)).center(Point(3, 3))
+        Polygon([Point(2.0, 2.0), Point(2.0, 4.0), Point(4.0, 4.0), Point(4.0, 2.0)])
+
+        """
+        return super().center(point)
+
     def offset(self, amount, tolerance=0.0001):
         """
         Finds the dynamic offset of a polygon by moving all edges by a given
