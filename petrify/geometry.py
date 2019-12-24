@@ -46,6 +46,9 @@ class AbstractPolygon:
         m = self.embedding.Matrix.translate(*v)
         return self.embedding.Polygon([p * m for p in self.points])
 
+    def __sub__(self, v):
+        return self + (-v)
+
     def __eq__(self, other):
         return all(a == b for a, b in zip(self.points, other.points))
 

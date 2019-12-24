@@ -508,6 +508,8 @@ class Polygon2(AbstractPolygon, Planar):
     Polygon([Point(4, 0), Point(0, 0), Point(2, 3)])
     >>> tri + Vector(2, 1)
     Polygon([Point(4, 1), Point(2, 1), Point(3, 2)])
+    >>> tri - Vector(1, 1)
+    Polygon([Point(1, -1), Point(-1, -1), Point(0, 0)])
     >>> len(tri)
     3
 
@@ -829,6 +831,14 @@ class ComplexPolygon2:
     >>> len(complex)
     8
 
+    Supports common built-in methods:
+
+    >>> square = Rectangle(Point(0, 0), Vector(1, 1))
+    >>> ComplexPolygon([square]) + Vector(1, 1)
+    ComplexPolygon([Polygon([Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 1)])])
+    >>> ComplexPolygon([square]) - Vector(1, 1)
+    ComplexPolygon([Polygon([Point(-1, -1), Point(-1, 0), Point(0, 0), Point(0, -1)])])
+
     """
     def __init__(self, polygons=None, interior=None, exterior=None):
         if polygons is not None:
@@ -936,6 +946,9 @@ class ComplexPolygon2:
             interior=[p + v for p in self.interior],
             exterior=[p + v for p in self.exterior]
         )
+
+    def __sub__(self, v):
+        return self + (-v)
 
     def envelope(self):
         """
