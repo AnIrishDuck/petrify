@@ -8,6 +8,11 @@ from ..geometry import AbstractPolygon, Geometry, tau, valid_scalar
 def operate(op, self, other):
     if valid_scalar(other):
         return self.__class__(op(self.x, other), op(self.y, other))
+    else:
+        return NotImplemented
+
+def partial(v):
+    return (isinstance(v, tuple) or isinstance(v, list)) and len(v) == 2
 
 # Fix class in arithmetic methods
 # Point + Point should either throw or be a point!
@@ -50,10 +55,11 @@ class Vector2(Planar):
         if isinstance(other, Vector2):
             return self.x == other.x and \
                    self.y == other.y
-        else:
-            assert hasattr(other, '__len__') and len(other) == 2
+        elif partial(other):
             return self.x == other[0] and \
                    self.y == other[1]
+        else:
+            return NotImplemented
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -93,11 +99,11 @@ class Vector2(Planar):
                 _class = Point2
             return _class(self.x + other.x,
                           self.y + other.y)
-        else:
-            if not (hasattr(other, '__len__') and len(other) == 2):
-                return NotImplemented
+        elif partial(other):
             return Vector2(self.x + other[0],
                            self.y + other[1])
+        else:
+            return NotImplemented
     __radd__ = __add__
 
     def __iadd__(self, other):
@@ -120,25 +126,25 @@ class Vector2(Planar):
                 _class = Point2
             return _class(self.x - other.x,
                           self.y - other.y)
-        else:
-            assert hasattr(other, '__len__') and len(other) == 2
+        elif partial(other):
             return Vector2(self.x - other[0],
                            self.y - other[1])
+        else:
+            return NotImplemented
 
+    # asserts in arithmetic give confusing errors, bad multi-method!
     def __rsub__(self, other):
         if isinstance(other, Vector2):
             return Vector2(other.x - self.x,
                            other.y - self.y)
-        else:
-            assert hasattr(other, '__len__') and len(other) == 2
+        elif partial(other):
             return Vector2(other.x - self[0],
                            other.y - self[1])
+        else:
+            return NotImplemented
 
     def __mul__(self, other):
-        if isinstance(other, units.u.Unit):
-            assert (1 * other).check('[length]'), 'only compatible with length units'
-            return NotImplemented
-        elif valid_scalar(other):
+        if valid_scalar(other):
             return self.__class__(self.x * other, self.y * other)
         else:
             return NotImplemented

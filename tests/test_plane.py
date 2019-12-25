@@ -13,6 +13,21 @@ class TestVector(unittest.TestCase):
         b = Vector(0.016835599543175706, 0.008578166424744738)
         a.angle(b)
 
+    def test_builtins(self):
+        self.assertTrue(Vector(1, 1) == [1, 1])
+        self.assertTrue(Vector(1, 1) == Vector(1, 1))
+        self.assertEqual(Vector(1, 1) + [1, 1], Vector(2, 2))
+        self.assertEqual(Vector(1, 1) - [1, 1], Vector(1, 1))
+
+        with self.assertRaises(TypeError):
+            self.assertEqual(Vector(1, 1) + [1], Vector(2, 2))
+        with self.assertRaises(TypeError):
+            self.assertEqual(Vector(1, 1) - [1], Vector(2, 2))
+        with self.assertRaises(TypeError):
+            self.assertEqual(Vector(1, 1) * [1], Vector(2, 2))
+        with self.assertRaises(TypeError):
+            self.assertEqual(Vector(1, 1) / [1], Vector(2, 2))
+
 class TestPolygon(unittest.TestCase):
     def test_star_contain(self):
         # taken from https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/fill-rule
