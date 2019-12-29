@@ -132,7 +132,6 @@ class Vector2(Planar):
         else:
             return NotImplemented
 
-    # asserts in arithmetic give confusing errors, bad multi-method!
     def __rsub__(self, other):
         if isinstance(other, Vector2):
             return Vector2(other.x - self.x,
