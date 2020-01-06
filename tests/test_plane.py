@@ -17,7 +17,7 @@ class TestVector(unittest.TestCase):
         self.assertTrue(Vector(1, 1) == [1, 1])
         self.assertTrue(Vector(1, 1) == Vector(1, 1))
         self.assertEqual(Vector(1, 1) + [1, 1], Vector(2, 2))
-        self.assertEqual(Vector(1, 1) - [1, 1], Vector(1, 1))
+        self.assertEqual(Vector(1, 1) - [1, 1], Vector(0, 0))
 
         with self.assertRaises(TypeError):
             self.assertEqual(Vector(1, 1) + [1], Vector(2, 2))
