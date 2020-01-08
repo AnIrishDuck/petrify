@@ -1,6 +1,15 @@
 from ..plane import ComplexPolygon, Line, LineSegment, Polygon, Point, Ray
 from ..solver import solve_matrix
 
+# The algorithm here is roughly derived from the naive inefficient algorithm
+# described in:
+#
+# A FAST STRAIGHT-SKELETON ALGORITHM BASED ON GENERALIZED MOTORCYCLE GRAPHS
+# Huber & Held
+#
+# We'd obviously like to implement the efficient algorithm described in the
+# paper at some point, and convert this code to Rust.
+
 def offset(polygon, amount):
     def off(ps, v):
         polygons = [p.offset(v) for p in ps]
