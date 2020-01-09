@@ -1,5 +1,42 @@
 from ..geometry import tau
-from ..plane import Line, LineSegment, Point, Vector
+from ..generic import Point
+from ..plane import Line, LineSegment, Vector
+from .. import visualize
+
+class Toolpath:
+    def __init__(self, motion, basis, z):
+        self.motion = motion
+        self.basis = basis
+        self.z = z
+
+    def project(self, motion):
+        p = self.basis.project(Point(motion.x, motion.y))
+        return p + (motion.z * self.z)
+
+    def _lines(self):
+        from ..generic import Point, Vector, LineSegment
+        import pythreejs as js
+        import numpy as np
+
+        prior = Motion(x=0, y=0, z=0, f=0)
+
+        for parent, command in self.motion.commands():
+            if isinstance(command, Motion):
+                updated = prior.merge(command)
+                pv = self.project(prior)
+                uv = self.project(updated)
+                delta = pv - uv
+                start = (uv + pv) / 2
+                color = getattr(parent, 'color', [0, 1, 0])
+                yield (LineSegment(pv, uv), color)
+                prior = updated
+
+    @property
+    def points(self):
+        return [p for l, c in self._lines() for p in (l.p1, l.p2)]
+
+    def mesh(self):
+        return visualize.segments(self._lines())
 
 class PlanarToolpath:
     """
