@@ -906,6 +906,10 @@ class ComplexPolygon2:
     def polygons(self):
         return (*self.exterior, *self.interior)
 
+    @property
+    def points(self):
+        return (p for polygon in self.polygons for p in polygon.points)
+
     def offset(self, amount):
         """
         Finds the dynamic offset of this complex polygon by moving all edges by
