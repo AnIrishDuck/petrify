@@ -281,6 +281,11 @@ class Line2(Geometry, Planar):
     >>> Line(Point(0, 0), Point(1, 1))
     Line(Point(0, 0), Vector(1, 1))
 
+    Implements many built-in methods:
+
+    >>> Line(Point(1, 1), Point(2, 1)) + Vector(1, 1)
+    Line(Point(2, 2), Vector(1, 0))
+
     """
     __slots__ = ['p', 'v']
 
@@ -311,6 +316,9 @@ class Line2(Geometry, Planar):
 
         if not self.v:
             raise AttributeError('Line has zero-length vector')
+
+    def __add__(self, v):
+        return self.__class__(self.p + v, self.v)
 
     def __mul__(self, v):
         return self.__class__(self.p * v, self.v * v)
