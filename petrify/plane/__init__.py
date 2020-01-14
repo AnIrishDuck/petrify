@@ -624,65 +624,25 @@ class Polygon2(AbstractPolygon, Planar):
         """
         return super().center(point)
 
-    def offset(self, amount, tolerance=0.0001):
+    def offset(self, amount):
         """
         Finds the dynamic offset of a polygon by moving all edges by a given
         `amount` perpendicular to their direction:
 
         >>> square = Polygon([Point(0, 0), Point(0, 1), Point(1, 1), Point(1, 0)])
-        >>> square.offset(-0.1)
+        >>> square.offset(-0.1).exterior[0]
         Polygon([Point(0.1, 0.1), Point(0.1, 0.9), Point(0.9, 0.9), Point(0.9, 0.1)])
-        >>> square.offset(0.1)
+        >>> square.offset(0.1).exterior[0]
         Polygon([Point(-0.1, -0.1), Point(-0.1, 1.1), Point(1.1, 1.1), Point(1.1, -0.1)])
-        >>> square.offset(10) is None
-        True
+        >>> square.offset(-10)
+        ComplexPolygon([])
 
         .. note::
-            This is currently a naive implementation that does not properly
-            handle non-local intersections that can split the polygon.
+            This always returns a :py:class:`ComplexPolygon`. Collisions during
+            the offset process can subdivide the polygon.
 
         """
-        def magnitude(line, normal, inwards):
-            # u * line.vector + normal = w * inwards
-            # w * inwards - u * line.vector = normal
-            rows = list(zip(inwards.xy, (-line).xy, normal))
-            matrix = list(list(row) for row in rows)
-            solution = solve_matrix(matrix)
-            return inwards * solution[0]
-
-        amount_squared = amount ** 2
-        lines = self.segments()
-        inwards = [self.inwards(l) for l in lines]
-        remnant = []
-        for ai, l, n, bi in zip((inwards[-1], *inwards), lines, inwards, (*inwards[1:], inwards[0])):
-            ra = Ray2(l.p1, ai + n)
-            rb = Ray2(l.p2, bi + n)
-
-            # We need to find the true magnitude of the "halfway" pair inwards
-            # vector. It forms a triangle with the normal and the line itself.
-            i = ra.intersect(rb)
-            motion = magnitude(l.v, n, ra.v)
-            m = motion.magnitude_squared()
-            if not i or (i - ra.p).magnitude_squared() / m > amount_squared:
-                remnant.append((l, n))
-
-        if not remnant:
-            return None
-
-        points = []
-        for a, b in zip((remnant[-1], *remnant), remnant):
-            al, ai = a
-            bl, bi = b
-
-            start = Line2(al.p, al.v).intersect(Line2(bl.p, bl.v))
-            motion = magnitude(bl.v, bi, ai + bi)
-
-            points.append(start + (motion * -amount))
-
-        return Polygon(points)
-
-    def nonlocal_offset(self, amount):
-        return ComplexPolygon(exterior=[self], interior=[]).nonlocal_offset(amount)
+        return ComplexPolygon(exterior=[self], interior=[]).offset(amount)
 
     def index_of(self, point):
         """
@@ -936,10 +896,6 @@ class ComplexPolygon2:
         """
         from .. import engines
         return engines.offset.offset(self, amount)
-
-    def nonlocal_offset(self, amount):
-        from .. import engines
-        return engines.offset.nonlocal_offset(self, -amount)
 
     def __truediv__(self, v):
         return ComplexPolygon(

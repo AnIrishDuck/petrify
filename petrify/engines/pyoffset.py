@@ -12,12 +12,13 @@ from ..solver import solve_matrix
 
 def offset(polygon, amount):
     def off(ps, v):
-        polygons = [p.offset(v) for p in ps]
-        return [p for p in polygons if p is not None]
+        polygons = [nonlocal_offset([p], v) for p in ps]
+        return [ep for p in polygons if p is not None
+                for ep in p.exterior if ep is not None]
 
     return ComplexPolygon(
-        interior=off(polygon.interior, -amount),
-        exterior=off(polygon.exterior, amount)
+        interior=off(polygon.interior, amount),
+        exterior=off(polygon.exterior, -amount)
     )
 
 def magnitude(line, normal, inwards):
@@ -111,9 +112,15 @@ def partition(rays, cut_i, line_i):
 def find_merge_ray(a, b, line, inwards):
     segment = LineSegment(a, b)
     new_vertex = Line(segment.p1, segment.p2).intersect(Line(line.p1, line.p2))
+    if new_vertex is None:
+        return None
     ai = inwards[segment]
     bi = inwards[line]
     return Ray(new_vertex, magnitude(segment.v, ai, ai + bi))
+
+def rebuild_polygon(rays):
+    cleaned = [r for r in rays if r is not None]
+    return cleaned if len(cleaned) > 2 else []
 
 def find_first_split_event(rays):
     polygon = Polygon([ray.p for ray in rays])
@@ -133,21 +140,15 @@ def find_first_split_event(rays):
     cut = polygon.points[cut_i]
     line = LineSegment(polygon.points[line_i], polygon.points[(line_i + 1) % len(polygon.points)])
     a, b = partition(rays, cut_i, line_i)
-    a = [*a, find_merge_ray(a[-1].p, cut, line, inwards)] if len(a) > 1 else []
-    b = [find_merge_ray(cut, b[0].p, line, inwards), *b] if len(b) > 1 else []
+    a = rebuild_polygon([*a, find_merge_ray(a[-1].p, cut, line, inwards)])
+    b = rebuild_polygon([find_merge_ray(cut, b[0].p, line, inwards), *b])
 
     return (offset, [_rays for _rays in (a, b) if _rays])
 
-def safe_find_first_split_event(rays):
-    try:
-        return find_first_split_event(rays)
-    except ZeroDivisionError:
-        return None
+def nonlocal_offset(polygons, amount):
+    all_rays = [to_rays(polygon) for polygon in polygons]
 
-def nonlocal_offset(complex, amount):
-    all_rays = [to_rays(polygon) for polygon in complex.exterior]
-
-    offsets = [(rays, safe_find_first_split_event(rays)) for rays in all_rays]
+    offsets = [(rays, find_first_split_event(rays)) for rays in all_rays]
     amounts = [o[1][0] for o in offsets if o[1]]
     while amounts and amount >= min(amounts):
         all_rays = [
@@ -155,7 +156,7 @@ def nonlocal_offset(complex, amount):
             for original, pair in offsets
             for rays in ([original] if not pair or pair[0] > amount else pair[1])
         ]
-        offsets = [(rays, safe_find_first_split_event(rays)) for rays in all_rays]
+        offsets = [(rays, find_first_split_event(rays)) for rays in all_rays]
         amounts = [o[1][0] for o in offsets if o[1]]
 
     return ComplexPolygon([

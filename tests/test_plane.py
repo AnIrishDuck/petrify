@@ -120,7 +120,7 @@ class TestPolygon(unittest.TestCase):
             Point(1, 0)
         ])
 
-        self.assertEqual(square.offset(-0.1).points, [
+        self.assertEqual(list(square.offset(-0.1).points), [
             Point(0.1, 0.1),
             Point(0.1, 0.9),
             Point(0.9, 0.9),
@@ -137,10 +137,24 @@ class TestPolygon(unittest.TestCase):
         ])
 
         self.assertEqual([p.round(4) for p in trapezoid.offset(-5).points], [
+            Point(10 + 3, 5),
             Point(10, 5),
-            Point(10 + (3 / 2), 5 + (4 / 2)),
-            Point(10 + 3, 5)
+            Point(10 + (3 / 2), 5 + (4 / 2))
         ])
+
+    def test_offset_square(self):
+        square = Polygon([
+            Point(0, 0),
+            Point(3, 0),
+            Point(3, 3),
+            Point(0, 3)
+        ])
+
+        parts = square.offset(-0.25)
+        self.assertEqual(
+            set(c for poly in parts.polygons for p in poly.points for c in (p.x, p.y)),
+            set([0.25, 2.75])
+        )
 
     def test_offset_split_notch(self):
         notch = Polygon([
@@ -151,7 +165,7 @@ class TestPolygon(unittest.TestCase):
             Point(0, 5)
         ])
 
-        parts = notch.nonlocal_offset(-(0.375 + 0.1))
+        parts = notch.offset(-(0.375 + 0.1))
 
         self.assertEqual(len(parts.polygons), 2)
 
@@ -165,7 +179,7 @@ class TestPolygon(unittest.TestCase):
             Point(1, 2),
             Point(0, 1)
         ])
-        rect = foot.nonlocal_offset(-2)
+        rect = foot.offset(-2)
         self.assertEqual(len(rect.polygons[0].points), 4)
 
     def test_offset_merge(self):
@@ -176,7 +190,7 @@ class TestPolygon(unittest.TestCase):
             Point(3, 4)
         ])
 
-        parts = notch.nonlocal_offset(-(1.0 + 0.1))
+        parts = notch.offset(-(1.0 + 0.1))
 
         self.assertEqual(len(parts.polygons), 1)
         self.assertEqual(len(parts.polygons[0].points), 3)
@@ -221,7 +235,7 @@ class TestPolygon(unittest.TestCase):
             Point(1, 0)
         ])
 
-        self.assertEqual(square.offset(0.1).points, [
+        self.assertEqual(list(square.offset(0.1).points), [
             Point(-0.1, -0.1),
             Point(-0.1, 1.1),
             Point(1.1, 1.1),
