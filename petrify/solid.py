@@ -22,7 +22,7 @@ via CSG union and difference operations.
 """
 import math
 
-from . import engines, plane, shape, units, visualize
+from . import engines, plane, shape, units, util, visualize
 from .generic import Polygon, Point, Vector
 from .space import _pmap, Matrix, PlanarPolygon, Face, Basis, Vector3
 from .geometry import tau, valid_scalar
@@ -225,6 +225,17 @@ class Node:
     def rotate_at(self, origin, axis, theta):
         """ Rotate this geometry about the given `origin` and `axis` by `theta` radians. """
         return Transformed(self, Matrix.rotate_at(origin, axis, theta))
+
+    def centered(self, point):
+        """
+        Center this node at the given `point`:
+
+        >>> b = Box(Point(0, 0, 0), Vector(2, 2, 2))
+        >>> b.centered(Point.origin).envelope()
+        Box(Point(-1.0, -1.0, -1.0), Vector(2.0, 2.0, 2.0))
+
+        """
+        return util.center(self, point)
 
 class Collection(Node):
     """

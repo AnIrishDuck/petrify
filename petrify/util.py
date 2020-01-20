@@ -12,6 +12,11 @@ def index_by(it, f):
         d[k] = previous
     return d
 
+def center(obj, point):
+    e = obj.envelope()
+    center = (e.origin + e.extent) / 2
+    return obj + (-center + point)
+
 def locate_circle(p, np, l):
     try:
         # l.p + l.v * x + l.normal * r == p + np * r

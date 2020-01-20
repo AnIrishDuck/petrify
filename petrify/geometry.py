@@ -3,6 +3,7 @@
 # ---------------------------------------------------------------------------
 import math
 import numbers
+from .util import center
 
 quantum = 0.000001
 tau = math.pi * 2
@@ -73,10 +74,8 @@ class AbstractPolygon:
                 prior = snapped
         return self.embedding.Polygon(points) if len(points) > 2 else None
 
-    def center(self, point):
-        r = self.envelope()
-        center = (r.origin + r.extent) / 2
-        return self + (-center + point)
+    def centered(self, point):
+        return center(self, point)
 
 class Geometry:
     def _connect_unimplemented(self, other):
