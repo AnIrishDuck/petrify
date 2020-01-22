@@ -40,7 +40,7 @@ import types
 
 from pint.unit import _Unit
 
-from .. import decompose, plane, visualize
+from .. import decompose, generic, plane, visualize
 from ..plane import Point2, Polygon2, Vector2
 from ..geometry import AbstractPolygon, Geometry, tau, valid_scalar
 
@@ -347,6 +347,7 @@ class Vector3(Spatial):
         def z(self): return Vector3(0, 0, 1)
     basis = Basis()
 
+generic.Vector.basis = Vector3.basis
 Vector = Vector3
 Vector3.bx = Vector3.basis.x
 Vector3.by = Vector3.basis.y
@@ -1308,6 +1309,7 @@ class Point3(Vector3, Geometry):
 
 Point = Point3
 Point3.origin = Point3(0, 0, 0)
+generic.Point.origin = Point3.origin
 
 class Line3(Spatial):
     """

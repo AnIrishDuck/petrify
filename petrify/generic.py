@@ -1,29 +1,3 @@
-from . import plane, space
-from .plane import Line2, LineSegment2, Point2, Polygon2, Ray2, Vector2
-from .space import Line3, LineSegment3, Point3, Polygon3, Ray3, Vector3
-
-class Point:
-    """
-    A generic constructor that chooses the correct variant of
-    :py:`~petrify.plane.Point2` or :py:`~petrify.space.Point3` based on argument
-    count:
-
-    >>> Point(1, 2)
-    Point(1, 2)
-    >>> Point(1, 2, 3)
-    Point(1, 2, 3)
-
-    """
-
-    def __new__(cls, *args):
-        if len(args) == 2:
-            return Point2(*args)
-        elif len(args) == 3:
-            return Point3(*args)
-        else:
-            return NotImplemented
-Point.origin = Point3.origin
-
 class Vector:
     """
     A generic constructor that chooses the correct variant of
@@ -38,13 +12,37 @@ class Vector:
     """
 
     def __new__(cls, *args):
+        from .plane import Vector2
+        from .space import Vector3
         if len(args) == 2:
             return Vector2(*args)
         elif len(args) == 3:
             return Vector3(*args)
         else:
             return NotImplemented
-Vector.basis = Vector3.basis
+
+class Point(Vector):
+    """
+    A generic constructor that chooses the correct variant of
+    :py:`~petrify.plane.Point2` or :py:`~petrify.space.Point3` based on argument
+    count:
+
+    >>> Point(1, 2)
+    Point(1, 2)
+    >>> Point(1, 2, 3)
+    Point(1, 2, 3)
+
+    """
+
+    def __new__(cls, *args):
+        from .plane import Point2
+        from .space import Point3
+        if len(args) == 2:
+            return Point2(*args)
+        elif len(args) == 3:
+            return Point3(*args)
+        else:
+            return NotImplemented
 
 def embedding_from(args):
     embeds = list(set(a.embedding for a in args))
@@ -52,6 +50,7 @@ def embedding_from(args):
     return embeds[0]
 
 def create(Klass2, Klass3, e, args):
+    from . import plane, space
     if e == plane:
         return Klass2(*args)
     elif e == space:
@@ -77,6 +76,8 @@ class Polygon:
     """
 
     def __new__(cls, points):
+        from .plane import Polygon2
+        from .space import Polygon3
         return create(Polygon2, Polygon3, embedding_from(points), [points])
 
 class Line:
@@ -97,6 +98,8 @@ class Line:
     """
 
     def __new__(cls, *args):
+        from .plane import Line2
+        from .space import Line3
         return create(Line2, Line3, embedding_from(args), args)
 
 class Ray:
@@ -117,6 +120,8 @@ class Ray:
     """
 
     def __new__(cls, *args):
+        from .plane import Ray2
+        from .space import Ray3
         return create(Ray2, Ray3, embedding_from(args), args)
 
 class LineSegment:
@@ -137,4 +142,6 @@ class LineSegment:
     """
 
     def __new__(cls, *args):
+        from .plane import LineSegment2
+        from .space import LineSegment3
         return create(LineSegment2, LineSegment3, embedding_from(args), args)
