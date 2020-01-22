@@ -1,10 +1,11 @@
 import doctest, unittest
 
 from petrify import plane
-from petrify.plane import ComplexPolygon, Polygon, Point, Ray, Vector
+from petrify.plane import ComplexPolygon, Polygon, Point, Ray, Vector, line, point
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(plane))
+    tests.addTests(doctest.DocTestSuite(line))
     return tests
 
 class TestVector(unittest.TestCase):
