@@ -34,7 +34,14 @@ Big thanks to pyeuclid, the source of most of the code here.
 import math
 import types
 
-from .util import _intersect_line2_line2, _intersect_line2_circle, _connect_circle_line2, _connect_point2_line2
+from .util import (
+    _intersect_point2_circle,
+    _intersect_line2_line2,
+    _intersect_line2_circle,
+    _connect_circle_line2,
+    _connect_point2_circle,
+    _connect_point2_line2
+)
 
 from .planar import Planar
 from .point import Point, Point2, Vector, Vector2

@@ -6,6 +6,7 @@ from petrify.plane import ComplexPolygon, Polygon, Point, Ray, Vector, line, poi
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(plane))
     tests.addTests(doctest.DocTestSuite(line))
+    tests.addTests(doctest.DocTestSuite(point))
     return tests
 
 class TestVector(unittest.TestCase):

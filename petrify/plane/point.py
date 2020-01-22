@@ -282,6 +282,7 @@ class Point2(Vector2, Geometry):
         """
         Used to determine if this point is within a circle:
 
+        >>> from petrify.plane import Circle
         >>> Point(1, 1).intersect(Circle(Point(0, 0), 2))
         True
         >>> Point(3, 3).intersect(Circle(Point(0, 0), 2))
@@ -291,12 +292,14 @@ class Point2(Vector2, Geometry):
         return other._intersect_point2(self)
 
     def _intersect_circle(self, other):
+        from .util import _intersect_point2_circle
         return _intersect_point2_circle(self, other)
 
     def connect(self, other):
         """
         Connects this point to the other given geometry:
 
+        >>> from petrify.plane import Circle, Line
         >>> Point(1, 1).connect(Line(Point(0, 0), Vector(1, 0)))
         LineSegment(Point(1, 1), Point(1.0, 0.0))
         >>> Point(1, 1).connect(Point(0, 0))
@@ -308,7 +311,7 @@ class Point2(Vector2, Geometry):
         return other._connect_point2(self)
 
     def _connect_point2(self, other):
-        from . import LineSgment2
+        from . import LineSegment2
         return LineSegment2(other, self)
 
     def _connect_line2(self, other):
