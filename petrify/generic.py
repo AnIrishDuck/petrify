@@ -1,3 +1,7 @@
+class Concrete:
+    def __new__(cls, *args):
+        return object.__new__(cls)
+
 class Vector:
     """
     A generic constructor that chooses the correct variant of
