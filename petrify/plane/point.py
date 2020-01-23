@@ -14,8 +14,6 @@ def operate(op, self, other):
 def partial(v):
     return (isinstance(v, tuple) or isinstance(v, list)) and len(v) == 2
 
-# Fix class in arithmetic methods
-# Point + Point should either throw or be a point!
 class Vector2(generic.Concrete, generic.Vector, Planar):
     """
     A two-dimensional vector supporting all corresponding built-in math
