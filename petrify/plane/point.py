@@ -2,7 +2,7 @@ import math
 import operator
 
 from .planar import Planar
-from .. import units
+from .. import generic, units
 from ..geometry import AbstractPolygon, Geometry, tau, valid_scalar
 
 def operate(op, self, other):
@@ -16,7 +16,7 @@ def partial(v):
 
 # Fix class in arithmetic methods
 # Point + Point should either throw or be a point!
-class Vector2(Planar):
+class Vector2(generic.Concrete, generic.Vector, Planar):
     """
     A two-dimensional vector supporting all corresponding built-in math
     operators:
@@ -265,7 +265,7 @@ class Vector2(Planar):
         return self.__class__(snap(self.x), snap(self.y))
 Vector = Vector2
 
-class Point2(Vector2, Geometry):
+class Point2(Vector2, Geometry, generic.Point):
     """
     A close cousin of :py:class:`Vector2` used to represent points:
 

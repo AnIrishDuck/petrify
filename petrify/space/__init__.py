@@ -54,7 +54,7 @@ def operate(op, self, other):
     if valid_scalar(other):
         return self.__class__(op(self.x, other), op(self.y, other), op(self.z, other))
 
-class Vector3(Spatial):
+class Vector3(generic.Concrete, generic.Vector, Spatial):
     """
     A three-dimensional vector supporting all corresponding built-in math
     operators:
@@ -1247,7 +1247,7 @@ class Quaternion:
         Q.z = q1.z * ratio1 + q2.z * ratio2
         return Q
 
-class Point3(Vector3, Geometry):
+class Point3(Vector3, generic.Point, Geometry):
     """
     A close cousin of :py:class:`~petrify.space.Vector`, used to represent a
     point instead of a transform:

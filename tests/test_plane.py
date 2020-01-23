@@ -1,6 +1,6 @@
 import doctest, unittest
 
-from petrify import plane
+from petrify import generic, plane
 from petrify.plane import ComplexPolygon, Polygon, Point, Ray, Vector, line, point
 
 def load_tests(loader, tests, ignore):
@@ -10,6 +10,10 @@ def load_tests(loader, tests, ignore):
     return tests
 
 class TestVector(unittest.TestCase):
+    def test_generic_instance(self):
+        self.assertTrue(isinstance(Vector(1, 1), generic.Vector))
+        self.assertFalse(isinstance(Vector(1, 1), generic.Point))
+
     def test_angle(self):
         a = Vector(0.11176897466954505, 0.056949137058031396)
         b = Vector(0.016835599543175706, 0.008578166424744738)
@@ -29,6 +33,10 @@ class TestVector(unittest.TestCase):
             self.assertEqual(Vector(1, 1) * [1], Vector(2, 2))
         with self.assertRaises(TypeError):
             self.assertEqual(Vector(1, 1) / [1], Vector(2, 2))
+
+class TestPoint(unittest.TestCase):
+    def test_generic_instance(self):
+        self.assertTrue(isinstance(Point(1, 1), generic.Point))
 
 class TestPolygon(unittest.TestCase):
     def test_star_contain(self):
