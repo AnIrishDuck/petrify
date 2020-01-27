@@ -6,6 +6,7 @@ from petrify.space import Point, Vector
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(space))
+    tests.addTests(doctest.DocTestSuite(space.point))
     return tests
 
 class VectorTests(unittest.TestCase):
