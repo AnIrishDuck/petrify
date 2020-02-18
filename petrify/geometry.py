@@ -34,18 +34,18 @@ class AbstractPolygon:
             if p == point: return ix
 
     def inverted(self):
-        return self.embedding.Polygon(list(reversed(self.points)))
+        return self.PointsConstructor(list(reversed(self.points)))
 
     def __mul__(self, m):
         if valid_scalar(m):
-            return self.embedding.Polygon([p * m for p in self.points])
+            return self.PointsConstructor([p * m for p in self.points])
         if isinstance(m, self.embedding.Vector):
             m = self.embedding.Matrix.scale(*m)
-        return self.embedding.Polygon([p * m for p in self.points])
+        return self.PointsConstructor([p * m for p in self.points])
 
     def __add__(self, v):
         m = self.embedding.Matrix.translate(*v)
-        return self.embedding.Polygon([p * m for p in self.points])
+        return self.PointsConstructor([p * m for p in self.points])
 
     def __sub__(self, v):
         return self + (-v)
@@ -72,7 +72,7 @@ class AbstractPolygon:
             if snapped != prior:
                 points.append(point)
                 prior = snapped
-        return self.embedding.Polygon(points) if len(points) > 2 else None
+        return self.PointsConstructor(points) if len(points) > 2 else None
 
     def centered(self, point):
         return center(self, point)

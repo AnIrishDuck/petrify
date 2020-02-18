@@ -150,6 +150,7 @@ class Polygon3(AbstractPolygon, Spatial):
 
     def __len__(self):
         return len(self.points)
+Polygon3.PointsConstructor = Polygon3
 Polygon = Polygon3
 
 class Line3(Spatial):

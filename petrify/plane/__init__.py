@@ -615,6 +615,7 @@ class Polygon2(AbstractPolygon, Planar):
         ex = max(p.x for p in self.points)
         ey = max(p.y for p in self.points)
         return Rectangle(Point2(sx, sy), Vector2(ex-sx, ey-sy))
+Polygon2.PointsConstructor = Polygon2
 Polygon = Polygon2
 
 class ComplexPolygon2:
