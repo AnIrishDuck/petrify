@@ -762,4 +762,19 @@ class ComplexPolygon2:
         from ..shape import Rectangle
         rectangles = Polygon([p for polygon in self.polygons for p in polygon.envelope().points])
         return rectangles.envelope()
+
+    def centered(self, point):
+        """
+        Center this polygon at a given point:
+
+        >>> from petrify.shape import Rectangle
+        >>> ComplexPolygon([
+        ...   Rectangle(Point(0, 0), Vector(2, 2)),
+        ...   Rectangle(Point(1, 1), Vector(1, 1)),
+        ... ]).centered(Point(3, 3)).envelope()
+        Rectangle(Point(2.0, 2.0), Vector(2.0, 2.0))
+
+        """
+        from ..util import center
+        return center(self, point)
 ComplexPolygon = ComplexPolygon2
