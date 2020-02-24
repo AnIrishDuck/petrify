@@ -5,8 +5,8 @@ class Concrete:
 class Vector:
     """
     A generic constructor that chooses the correct variant of
-    :py:`~petrify.plane.Vector` or :py:`~petrify.space.Vector` based on argument
-    count:
+    :py:class:`~petrify.plane.Vector` or :py:class:`~petrify.space.Vector` based
+    on argument count:
 
     >>> Vector(1, 2)
     Vector(1, 2)
@@ -28,8 +28,8 @@ class Vector:
 class Point(Vector):
     """
     A generic constructor that chooses the correct variant of
-    :py:`~petrify.plane.Point2` or :py:`~petrify.space.Point3` based on argument
-    count:
+    :py:class:`~petrify.plane.Point2` or :py:class:`~petrify.space.Point3` based
+    on argument count:
 
     >>> Point(1, 2)
     Point(1, 2)
@@ -65,8 +65,8 @@ def create(Klass2, Klass3, e, args):
 class Polygon:
     """
     A generic constructor that chooses the correct variant of
-    :py:`~petrify.plane.Polygon2` or :py:`~petrify.space.Polygon3` based on
-    the embedding of the passed arguments:
+    :py:class:`~petrify.plane.Polygon2` or :py:class:`~petrify.space.Polygon3`
+    based on the embedding of the passed arguments:
 
     >>> Polygon([Point(0, 0), Point(1, 0), Point(1, 1)])
     Polygon([Point(0, 0), Point(1, 0), Point(1, 1)])
