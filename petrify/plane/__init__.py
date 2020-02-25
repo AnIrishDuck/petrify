@@ -778,3 +778,22 @@ class ComplexPolygon2:
         from ..util import center
         return center(self, point)
 ComplexPolygon = ComplexPolygon2
+
+class Polyline2:
+    def __init__(self, points):
+        self.points = points
+
+    def invert(self):
+        return Polyline(list(reversed(self.points)))
+
+    def __add__(self, v):
+        return Polyline([p + v for p in self.points])
+
+    def __mul__(self, v):
+        return Polyline([p * v for p in self.points])
+
+    def __iter__(self):
+        return iter(self.points)
+
+    def __repr__(self):
+        return "Polyline([{0!r}])".format(self.points)
