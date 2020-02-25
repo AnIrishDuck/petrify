@@ -261,8 +261,13 @@ class Collection(Node):
             return NotImplemented
 
     def __mul__(self, other):
-        nodes = [n * other for n in self.nodes]
-        return Collection([n for n in nodes if len(n.polygons) > 0])
+        if isinstance(other, Vector3) or isinstance(other, Node):
+            nodes = [n * other for n in self.nodes]
+            return Collection([n for n in nodes if len(n.polygons) > 0])
+        elif valid_scalar(other):
+            return self * Vector(other, other, other)
+        else:
+            return NotImplemented
 
     def view(self, **data):
         return Collection([n.view(**data) for n in self.nodes])

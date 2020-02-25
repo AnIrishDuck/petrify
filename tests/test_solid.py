@@ -1,5 +1,5 @@
 import doctest, unittest
-from petrify import plane, solid
+from petrify import u, plane, solid
 from petrify.solid import tau, Point, Vector, Basis, PlanarPolygon, Extrusion
 
 class TestUtilities(unittest.TestCase):
@@ -118,6 +118,9 @@ class TestCollection(unittest.TestCase):
         collection = solid.Collection([a, b])
         common = solid.Box(Point(0.25, 0.25, 0.25), Vector(0.5, 0.5, 0.5))
         self.assertTrue(len(collection.nodes), 1)
+
+        shift_units = (collection * u.cm).m_as(u.mm)
+        self.assertEqual(shift_units.envelope().size(), Vector(10, 10, 30))
 
     def test_view_recursion(self):
         a = solid.Box(Point(0, 0, 0), Vector(1, 1, 1))
