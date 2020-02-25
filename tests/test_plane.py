@@ -2,6 +2,7 @@ import doctest, unittest
 
 from petrify import generic, plane
 from petrify.plane import ComplexPolygon, Polygon, Point, Ray, Vector, line, point
+from petrify.shape import Circle
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(plane))
@@ -136,6 +137,10 @@ class TestPolygon(unittest.TestCase):
             Point(0.9, 0.9),
             Point(0.9, 0.1)
         ])
+
+    def test_circle_inset(self):
+        c = Circle(Point(0, 0), 53.975, segments=100).to_clockwise()
+        self.assertEqual(len(list(c.offset(-1.5875).points)), 100)
 
     def test_inset_local_merge(self):
         # the magic of 3-4-5 triangles...

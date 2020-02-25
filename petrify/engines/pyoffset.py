@@ -140,8 +140,8 @@ def find_first_split_event(rays):
     cut = polygon.points[cut_i]
     line = LineSegment(polygon.points[line_i], polygon.points[(line_i + 1) % len(polygon.points)])
     a, b = partition(rays, cut_i, line_i)
-    a = rebuild_polygon([*a, find_merge_ray(a[-1].p, cut, line, inwards)])
-    b = rebuild_polygon([find_merge_ray(cut, b[0].p, line, inwards), *b])
+    a = rebuild_polygon([*a, find_merge_ray(a[-1].p, cut, line, inwards) if len(a) > 0 else None])
+    b = rebuild_polygon([find_merge_ray(cut, b[0].p, line, inwards) if len(b) > 0 else None, *b])
 
     return (offset, [_rays for _rays in (a, b) if _rays])
 
