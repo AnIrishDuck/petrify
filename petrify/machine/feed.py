@@ -80,7 +80,9 @@ def batch_scanlines(scanlines):
             for ix, shape in enumerate(current_shapes):
                 ax0, ax1 = shape[-1][0].x, shape[-1][1].x
                 bx0, bx1 = line[0].x, line[1].x
-                if (bx0 >= ax0 and bx0 <= ax1) or (bx1 >= ax0 and bx1 <= ax1):
+                top = (bx0 >= ax0 and bx0 <= ax1) or (bx1 >= ax0 and bx1 <= ax1)
+                bot = (ax0 >= bx0 and ax0 <= bx1) or (ax1 >= bx0 and ax1 <= bx1)
+                if top or bot:
                     shape.append(line)
                     next_shapes.append(shape)
                     matched = True

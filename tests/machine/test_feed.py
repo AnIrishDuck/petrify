@@ -14,6 +14,7 @@ from petrify.machine import (
     Format
 )
 from petrify.machine.feed import batch_scanlines, Speed
+from petrify.shape import Circle
 
 gspeed = u.mm / u.minute
 mpcnc = Machine(clearance=2.0 * u.mm, format=Format(u.mm, v = u.mm / u.minute))
@@ -76,6 +77,12 @@ class TestLinearStepFeed(unittest.TestCase):
                 *y(2.75, (0.25, 2.75)),
             ]
         ])
+
+    def test_batching_from_bottom_overlap(self):
+        polygon = Circle(Point(0, 0), 2.0)
+        pocket = Pocket(polygon, 1.0)
+        batches = batch_scanlines(feed.scanlines(config, pocket))
+        self.assertEqual(len(batches), 1)
 
     def test_toolpath(self):
         passes = feed.pocket(config, self.pocket()).passes
