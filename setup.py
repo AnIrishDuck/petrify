@@ -19,7 +19,8 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=[
         "pycsg >= 0.3.3",
-        "svg.path==3.0",
-        "Pint==0.9.0"
+        "svg.path==7.0",
+        "Pint==0.9.0",
+        "pythreejs==2.4.2"
     ],
 )
